@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: 🎣 굴비잇기 API 서버
+  description: 굴비잇기 프로젝트의 API 서버입니다. 뭐 더 쓸게 있나?
+  termsOfService: http://localhost:8080/terms-of-service
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: 로컬호스트 서버
+paths:
+  /api/v1/users:
+    get:
+      summary: 유저 리스트 반환
+      tags:
+        - User
+      responses:
+        '200':
+          description: 성공적인 응답
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          required: true
+          description: 사용자 고유 ID값, 랜덤 생성
+        nickname:
+          type: string
+          minimum: 2
+          maximum: 6
+          required: true
+          description: 한글, 영문 대소문자만 입력 가능
+        birthday:
+          type: string
+          required: true
+          format: date
+          description: 생일
+        gender:
+          type: string
+          enum:
+            - 남성
+            - 여성
+          description: 성별
+          required: true
+        check1:
+          type: boolean
+          required: false
+          description: 체크리스트 1 체크 여부
+        check2:
+          type: boolean
+          required: true
+          description: 체크리스트 2 체크 여부
+        check3:
+          type: boolean
+          required: true
+          description: 체크리스트 3 체크 여부
+        check4:
+          type: boolean
+          required: true
+          description: 체크리스트 4 체크 여부
+        check5:
+          type: boolean
+          required: false
+          description: 체크리스트 5 체크 여부
+        check6:
+          type: boolean
+          required: false
+          description: 체크리스트 6 체크 여부
+        avgIncomePerMonth:
+          type: integer
+          required: false
+          description: 월간 평균 수입
+        avgSpendingPerMonth:
+          type: integer
+          required: false
+          description: 월간 평균 지출
+        primeUseDay:
+          type: string
+          format: day
+          required: false
+          description: 주 지출 요일
+        primeUseTime:
+          type: string
+          format: time
+          description: 주 지출 시간, 초로 계산됨
+          required: false
+        spendingType:
+          type: string
+          required: true
+          enum:
+            - 보릿고개 굴비
+            - 자린고비 굴비
+            - 저축왕 굴비
+            - YOLO 굴비
+            - 아가 굴비
+          description: 소비유형 분석결과
+        spendingHabitScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: 소비습관 점수 (0 ~ 100점)
+      example:
+        id: sjgkdjfks2392
+        nickname: 굴비왕
+        birthday: 1999-03-01
+        gender: male
+        check1: true
+        check2: true
+        check3: true
+        check4: true
+        check5: true
+        check6: true
+        avgIncomePerMonth: 3600000
+        avgSpendingPerMonth: 2000000
+        primeUseDay: 금요일
+        primeUseTime: 20:00:00
+        spendingType: 보릿고개 굴비
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+tags:
+  - name: User
