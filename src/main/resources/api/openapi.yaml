@@ -1,13 +1,112 @@
 openapi: 3.0.3
 info:
   title: 🎣 굴비잇기 API 서버
-  description: 굴비잇기 프로젝트의 API 서버입니다. 뭐 더 쓸게 있나?
+  description: >
+    굴비잇기 프로젝트의 API 서버입니다.
+
+    ## ⛔️ 에러코드
+
+    에러코드는 4자리 숫자로 구성되며, 앞 2자리는 그룹을, 뒷 2자리는 그룹 내 구분자
+    역할을 합니다. <br>
+    예를 들어, `1002`는 10번 그룹 2번째 에러를 의미합니다.<br><br>
+
+    자세한 에러코드 및 메시지 정보는 **아래 링크👇**에서 확인할 수 있습니다. <br>
+    [에러코드 목록](https://github.com/Central-MakeUs/goolbitg-server/docs/errors.md)
   termsOfService: http://localhost:8080/terms-of-service
   version: 1.0.0
 servers:
   - url: http://localhost:8080
     description: 로컬호스트 서버
 paths:
+  /api/v1/auth/register:
+    post:
+      summary: 회원가입
+      description: >
+        외부 인증서버로부터 얻은 id 토큰을 이용해 사용자를 등록합니다.
+
+        ### 인증 타입
+
+        - `KAKAO`: 카카오 로그인
+
+        - `APPLE`: 애플 로그인
+
+        ### 회원가입 절차
+
+        1. 회원가입 요청이 성공했다면, 같은 인증 정보로 로그인합니다.
+
+        2. 회원 정보 입력이 완료되지 않았기 때문에 로그인 요청은 
+          `registerComplete: false` 와 함께 다음 회원 정보 
+          입력을 위한 url을 반환합니다.
+
+        3. 로그인 시 반환된 엑세스 토큰과 함께 회원정보 입력 요청을 수행합니다.
+
+        4. 필수 정보들의 입력이 완료되면 다른 API 요청들이 정상적으로 반환됩니다.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthReq'
+      responses:
+        '201':
+          description: 회원가입 성공
+        '202':
+          $ref: '#/components/responses/RegisterFail'
+  /api/v1/auth/login:
+    post:
+      summary: 로그인
+      description: >
+        외부 인증서버로부터 얻은 id 토큰을 이용해 로그인합니다.
+
+        ### 인증 타입
+
+        - `KAKAO`: 카카오 로그인
+
+        - `APPLE`: 애플 로그인
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthReq'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginSuccess'
+        '202':
+          $ref: '#/components/responses/LoginFail'
+  /api/v1/auth/revalidate:
+    post:
+      summary: 엑세스 토큰 재발급
+      description: >
+        엑세스 토큰을 재발급합니다.
+
+        ### 토큰 기한
+        
+        - access token: 1일
+
+        - refresh token: 30일
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevalidationReq'
+      responses:
+        '200':
+          description: >
+            엑세스 토큰 재발급 성공<br><br>
+            NOTE: 리프레시 토큰의 기한이 10일 이내로 남았다면 리프레시 토큰 또한
+            재발급됩니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthRes'
   /api/v1/users/me:
     get:
       summary: 현재 로그인한 유저 정보 반환
@@ -20,21 +119,119 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '403':
-          description: 로그인되지 않았거나 잘못된 인증 정보
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/users/nickname/check:
+    post:
+      summary: 닉네임 중복 체크
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NicknameCheck'
+      responses:
+        '200':
+          description: 중복 여부 반환
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                인증 정보 없음:
-                  value:
-                    code: 1001
-                    message: 인증 정보 없음 (Authorization Header Empty)
-                잘못된 인증 정보:
-                  value:
-                    code: 1002
-                    message: 잘못된 인증 정보 (Token Not Valid)
+                type: boolean
+                description: 중복 여부
+  /api/v1/users/me/info:
+    post:
+      summary: 사용자 필수 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeInfoReq'
+      responses:
+        '200':
+          description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+                example:
+                  $ref: '#/components/examples/RegisterChecklistUrl/value'
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/users/me/checklist:
+    post:
+      summary: 소비중독 체크리스트 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeChecklistReq'
+      responses:
+        '200':
+          description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+                example:
+                  $ref: '#/components/examples/RegisterHabitUrl/value'
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/users/me/habit:
+    post:
+      summary: 사용자 필수 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeHabitReq'
+      responses:
+        '200':
+          description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+                example:
+                  $ref: '#/components/examples/RegisterPatternUrl/value'
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/users/me/pattern:
+    post:
+      summary: 사용자 필수 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeHabitReq'
+      responses:
+        '200':
+          description: 등록 성공
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 components:
   schemas:
     User:
@@ -432,6 +629,130 @@ components:
         totalPages: 24
         size: 10
         page: 3
+    AuthReq:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - KAKAO
+            - APPLE
+          description: 로그인 타입 (카카오 또는 애플)
+        idToken:
+          type: string
+          description: id_token
+      required:
+        - type
+        - idToken
+    AuthRes:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: false
+          description: 엑세스 토큰
+        refreshToken:
+          type: string
+          nullable: true
+          description: 리프레시 토큰
+      required:
+        - accessToken
+    LoginRes:
+      allOf:
+        - $ref: '#/components/schemas/AuthRes'
+        - type: object
+          properties:
+            registerComplete:
+              type: boolean
+              description: 정보등록 완료 여부
+            nextLink:
+              nullable: true
+              $ref: '#/components/schemas/Link'
+          required:
+            - registerComplete
+    NicknameCheck:
+      type: string
+      minimum: 2
+      maximum: 6
+      example: 굴비왕
+    MeInfoReq:
+      type: object
+      properties:
+        nickname:
+          type: string
+          minimum: 2
+          maximum: 6
+          example: 굴비왕
+        birthday:
+          type: string
+          format: date
+          example: 1999-03-01
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+    MeChecklistReq:
+      type: object
+      properties:
+        check1:
+          type: boolean
+        check2:
+          type: boolean
+        check3:
+          type: boolean
+        check4:
+          type: boolean
+        check5:
+          type: boolean
+        check6:
+          type: boolean
+    MeHabitReq:
+      type: object
+      properties:
+        avgIncomePerMonth:
+          type: integer
+        avgSpendingPerMonth:
+          type: integer
+    MePatternReq:
+      type: object
+      properties:
+        primeUseDay:
+          type: string
+          format: day
+        primeUseTime:
+          type: string
+          format: time
+    RevalidationReq:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: 리프레시 토큰
+      required:
+        - refreshToken
+    Link:
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: 필수 여부
+        method:
+          type: string
+          enum:
+            - get
+            - post
+            - put
+            - delete
+          description: 요청 메소드
+        url:
+          type: string
+          format: uri
+          description: 요청 주소
+      example:
+        required: true
+        method: post
+        url: 'http://localhost:8080/api/v1/users/me/info'
   examples:
     PrivateChallenge:
       value:
@@ -451,6 +772,121 @@ components:
         participantCount: 1539
         avgAchiveRatio: 39.6
         maxAchiveDays: 52
+    RegisterInfoUrl:
+      value:
+        required: true
+        method: post
+        url: http://localhost:8080/api/v1/users/me/info
+    RegisterChecklistUrl:
+      value:
+        required: true
+        method: post
+        url: http://localhost:8080/api/v1/users/me/checklist
+    RegisterHabitUrl:
+      value:
+        required: false
+        method: post
+        url: http://localhost:8080/api/v1/users/me/habit
+    RegisterPatternUrl:
+      value:
+        required: false
+        method: post
+        url: http://localhost:8080/api/v1/users/me/pattern
+  responses: # TODO: 공통된 에러 응답은 나중에 한꺼번에 path에 추가하기
+    NotFound:
+      description: 컨텐츠를 찾을 수 없음
+    BadRequest:
+      description: 잘못된 요청 형식
+    Unauthorized:
+      description: 로그인되지 않았거나 잘못된 인증 정보
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            인증 정보 없음:
+              value:
+                code: 1001
+                message: 인증 정보 없음 (Authorization Header Empty)
+            잘못된 인증 정보:
+              value:
+                code: 1002
+                message: 잘못된 인증 정보 (Token Not Valid)
+    InternalServerError:
+      description: 서버측 내부 오류
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 1000
+            message: 서버측 오류 메세지
+    RegisterFail:
+      description: 회원가입 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            이미 등록된 회원:
+              value:
+                code: 2001
+                message: 이미 등록된 회원입니다. (id value)
+            유효하지 않은 토큰:
+              value:
+                code: 2002
+                message: id 토큰이 유효하지 않습니다. (token value)
+    LoginSuccess:
+      description: 로그인 성공
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRes'
+          examples:
+            필수정보 입력 완료:
+              value:
+                accessToken: token
+                refreshToken: token
+                registerComplete: true
+            필수정보 입력 필요:
+              value:
+                accessToken: token
+                refreshToken: token
+                registerComplete: false
+                nextLink:
+                  required: true
+                  method: post
+                  url: http://localhost:8080/api/v1/users/me/info
+    LoginFail:
+      description: 로그인 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            유효하지 않은 토큰:
+              value:
+                code: 2002
+                message: id 토큰이 유효하지 않습니다. (token value)
+            등록되지 않은 회원:
+              value:
+                code: 2003
+                message: 등록되지 않은 회원입니다. (id value)
+            회원정보 입력이 완료되지 않은 회원:
+              value:
+                code: 2004
+                message: 회원정보 입력이 완료되지 않았습니다. (id value)
+    RegisterInfoFail:
+      description: 정보 등록 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            잘못된 입력 형식:
+              value:
+                code: 2010
+                message: 입력 형식이 잘못되었습니다. (error detail)
   securitySchemes:
     bearerAuth:
       type: http
@@ -459,4 +895,11 @@ components:
 security:
   - bearerAuth: []
 tags:
+  - name: Auth
+    description: 인증
   - name: User
+    description: 유저
+  - name: Challenge
+    description: 작심삼일 챌린지
+  - name: BuyOrNot
+    description: 살까말까
