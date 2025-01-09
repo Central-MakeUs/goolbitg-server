@@ -23,7 +23,7 @@ public class UserIntegrationTest {
 
     @Test
     void controllerShouldReturnContent() throws Exception {
-        mockMvc.perform(get("/api/v1/users/me").header("Accept", "application/json"))
+        mockMvc.perform(get("/users/me").header("Accept", "application/json"))
                .andExpect(status().isNotImplemented())
                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.isEmptyString())));
     }
