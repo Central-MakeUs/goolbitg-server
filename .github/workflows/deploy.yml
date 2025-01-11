@@ -18,7 +18,14 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17' # Adjust based on your project requirements
+          java-version: 17
+          distribution: temurin
+          java-package: jdk
+          check-latest: false
+          server-id: github
+          server-username: ${{ github.actor }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          overwrite-settings: true
 
       - name: Test Project
         run: |
