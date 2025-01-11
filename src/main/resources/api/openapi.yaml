@@ -15,8 +15,8 @@ info:
   termsOfService: http://localhost:8080/terms-of-service
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/api/v1
-    description: 로컬호스트 서버
+  - url: http://api.goolbitg.site/api/v1
+    description: 메인 서버
 paths:
   /auth/register:
     post:
