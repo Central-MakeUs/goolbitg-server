@@ -54,6 +54,6 @@ jobs:
           ssh -i ec2_key.pem -o StrictHostKeyChecking=no \
           $EC2_USER@$EC2_HOST << EOF
             pkill -f api-0.0.1-SNAPSHOT.jar || true
-            nohup java -jar /home/$EC2_USER/your-application.jar > app.log 2>&1 &
+            nohup java -jar /home/$EC2_USER/api-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
           EOF
 
