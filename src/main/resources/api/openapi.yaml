@@ -1,125 +1,1449 @@
 openapi: 3.0.3
 info:
   title: 🎣 굴비잇기 API 서버
-  description: 굴비잇기 프로젝트의 API 서버입니다. 뭐 더 쓸게 있나?
+  description: >
+    굴비잇기 프로젝트의 API 서버입니다.
+
+    ## ⛔️ 에러코드
+
+    에러코드는 4자리 숫자로 구성되며, 앞 2자리는 그룹을, 뒷 2자리는 그룹 내 구분자
+    역할을 합니다. <br>
+    예를 들어, `1002`는 10번 그룹 2번째 에러를 의미합니다.<br><br>
+
+    자세한 에러코드 및 메시지 정보는 **아래 링크👇**에서 확인할 수 있습니다. <br>
+    [에러코드 목록](https://github.com/Central-MakeUs/goolbitg-server/docs/errors.md)
   termsOfService: http://localhost:8080/terms-of-service
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
-    description: 로컬호스트 서버
+  - url: http://api.goolbitg.site/api/v1
+    description: 메인 서버
 paths:
-  /api/v1/users:
+  /auth/register:
+    post:
+      summary: 회원가입
+      description: >
+        외부 인증서버로부터 얻은 id 토큰을 이용해 사용자를 등록합니다.
+
+        ### 인증 타입
+
+        - `KAKAO`: 카카오 로그인
+
+        - `APPLE`: 애플 로그인
+
+        ### 회원가입 절차
+
+        1. 회원가입 요청이 성공했다면, 같은 인증 정보로 로그인합니다.
+
+        2. 회원 정보 입력이 완료되지 않았기 때문에 로그인 요청은 
+          `registerComplete: false` 와 함께 다음 회원 정보 
+          입력을 위한 url을 반환합니다.
+
+        3. 로그인 시 반환된 엑세스 토큰과 함께 회원정보 입력 요청을 수행합니다.
+
+        4. 필수 정보들의 입력이 완료되면 다른 API 요청들이 정상적으로 반환됩니다.
+      tags:
+        - Auth
+      requestBody:
+        $ref: '#/components/requestBodies/RegisterReq'
+      responses:
+        '201':
+          $ref: '#/components/responses/RegisterSuccess'
+        '409':
+          $ref: '#/components/responses/RegisterFail'
+  /auth/login:
+    post:
+      summary: 로그인
+      description: >
+        외부 인증서버로부터 얻은 id 토큰을 이용해 로그인합니다.
+
+        ### 인증 타입
+
+        - `KAKAO`: 카카오 로그인
+
+        - `APPLE`: 애플 로그인
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequestDto'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginSuccess'
+        '202':
+          $ref: '#/components/responses/LoginFail'
+  /auth/revalidate:
+    post:
+      summary: 엑세스 토큰 재발급
+      description: >
+        엑세스 토큰을 재발급합니다.
+
+        ### 토큰 기한
+        
+        - access token: 1일
+
+        - refresh token: 30일
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevalidationRequestDto'
+      responses:
+        '200':
+          description: >
+            엑세스 토큰 재발급 성공<br><br>
+            NOTE: 리프레시 토큰의 기한이 10일 이내로 남았다면 리프레시 토큰 또한
+            재발급됩니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseDto'
+  /auth/logout:
+    post:
+      summary: 로그아웃
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: 로그아웃 성공
+  /users/me:
     get:
-      summary: 유저 리스트 반환
+      summary: 현재 로그인한 유저 정보 반환
       tags:
         - User
       responses:
         '200':
-          description: 성공적인 응답
+          description: 현재 로그인한 유저 정보
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /users/nickname/check:
+    post:
+      summary: 닉네임 중복 체크
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NicknameCheckRequestDto'
+      responses:
+        '200':
+          description: 중복 여부 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NicknameCheckResponseDto'
+  /users/me/info:
+    post:
+      summary: 사용자 필수 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoDto'
+      responses:
+        '200':
+          description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkDto'
+                example:
+                  $ref: '#/components/examples/RegisterChecklistUrl/value'
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users/me/checklist:
+    post:
+      summary: 소비중독 체크리스트 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChekclistDto'
+      responses:
+        '200':
+          description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkDto'
+                example:
+                  $ref: '#/components/examples/RegisterHabitUrl/value'
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users/me/habit:
+    post:
+      summary: 사용자 필수 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserHabitDto'
+      responses:
+        '200':
+          description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkDto'
+                example:
+                  $ref: '#/components/examples/RegisterPatternUrl/value'
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users/me/pattern:
+    post:
+      summary: 사용자 필수 정보 등록
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserHabitDto'
+      responses:
+        '200':
+          description: 등록 성공
+        '202':
+          $ref: '#/components/responses/RegisterInfoFail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /challenges:
+    get:
+      summary: 챌린지 목록 가져오기
+      tags:
+        - Challenge
+      parameters:
+        - name: spendingTypeId
+          in: query
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: 챌린지 목록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeDto'
+  /challengeRecords:
+    get:
+      summary: 챌린지 기록 목록 가져오기
+      tags:
+        - ChallengeRecord
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+            nullable: true
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ChallengeRecordStatus'
+      responses:
+        '200':
+          description: 챌린지 기록 리스트
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeRecordDto'
+    post:
+      summary: 챌린지 기록 생성
+      description: >
+        **NOTE**: 만약 오늘 혹은 전날 완료된 같은 챌린지 기록이 있다면,
+        `continueCount`가 이어지는 새로운 챌린지 기록이 생성됩니다.
+      tags:
+        - ChallengeRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeRecordCreationDto'
+      responses:
+        '201':
+          description: 챌린지 기록 생성 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeRecordDto'
+  /challengeRecords/{challengeId}:
+    get:
+      summary: 챌린지 기록 확인
+      tags:
+        - ChallengeRecord
+      parameters:
+        - name: challengeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeRecordDto'
+    delete:
+      summary: 챌린지 기록 삭제
+      tags:
+        - ChallengeRecord
+      parameters:
+        - name: challengeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 삭제 성공
+  /challengeRecords/{challengeId}/check:
+    post:
+      summary: 챌린지 체크
+      tags:
+        - ChallengeRecord
+      parameters:
+        - name: challengeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 체크 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeRecordDto'
+  /challengeGroups:
+    get:
+      summary: 챌린지 그룹 목록 가져오기
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: 챌린지 그룹 목록
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeGroupDto'
+    post:
+      summary: 챌린지 그룹 생성
+      tags:
+        - ChallengeGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeGroupDto'
+      responses:
+        '201':
+          description: 챌린지 그룹 생성 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+  /challengeGroups/{groupId}:
+    get:
+      summary: 특정 챌린지 그룹 정보 가져오기
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 그룹 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+    delete:
+      summary: 특정 챌린지 그룹 삭제
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 그룹 삭제 성공
+  /challengeGroupRecords:
+    get:
+      summary: 내 챌린지 그룹 기록 가져오기
+      tags:
+        - ChallengeGroupRecord
+      parameters:
+        - name: owning
+          description: 내가 만든 챌린지인가?
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 챌린지 그룹 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeGroupRecordDto'
+    post:
+      summary: 내 챌린지 기록 생성
+      description: >
+        챌린지 기록과 마찬가지로 어제 혹은 오늘 완료된 챌린지 기록이 있다면
+        연속 수행 회수가 유지됨.
+      tags:
+        - ChallengeGroupRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeGroupRecordCreationDto'
+      responses:
+        '201':
+          description: 챌린지 그룹 기록 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupRecordDto'
+  /challengeGroupRecords/{groupId}:
+    get:
+      summary: 챌린지 그룹 기록 확인
+      tags:
+        - ChallengeGroupRecord
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 그룹 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupRecordDto'
+    delete:
+      summary: 챌린지 그룹 기록 삭제
+      tags:
+        - ChallengeGroupRecord
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 그룹 기록 삭제 성공
+  /challengeGroupRecords/{groupId}/check:
+    post:
+      summary: 챌린지 그룹 기록 체크
+      tags:
+        - ChallengeGroupRecord
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 그룹 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupRecordDto'
+  /buyOrNots:
+    get:
+      summary: 살까말까 목록 가져오기
+      tags:
+        - BuyOrNot
+      responses:
+        '200':
+          description: 살까말까 최신순 목록 가져오기
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBuyOrNotDto'
+    post:
+      summary: 살까말까 등록
+      tags:
+        - BuyOrNot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyOrNotDto'
+      responses:
+        '201':
+          description: 살까말까 등록 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyOrNotDto'
+    put:
+      summary: 살까말까 수정
+      tags:
+        - BuyOrNot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyOrNotDto'
+      responses:
+        '200':
+          description: 살까말까 수정 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyOrNotDto'
+  /buyOrNots/{postId}:
+    get:
+      summary: 특정 살까말까 정보 확인
+      tags:
+        - BuyOrNot
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 특정 살까말까 정보 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyOrNotDto'
+    delete:
+      summary: 살까말까 제거
+      tags:
+        - BuyOrNot
+      parameters:
+        - name: postId 
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 살까말까 제거 완료
+  /buyOrNots/my:
+    get:
+      summary: 내가 작성한 살까말까 목록 가져오기
+      tags:
+        - BuyOrNot
+      responses:
+        '200':
+          description: 내가 작성한 살까말까 목록
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBuyOrNotDto'
+  /images:
+    post:
+      summary: 이미지 업로드
+      tags:
+        - Image
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+                - image
+            encoding:
+              image:
+                contentType: image/*
+      responses:
+        '201':
+          description: 업로드 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: 업로드한 이미지 url
 components:
   schemas:
-    User:
+    ChallengeGroupRecordCreationDto:
+      type: object
+      properties:
+        groupId:
+          type: integer
+          format: int64
+    PaginatedChallengeGroupRecordDto:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseDto'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+    PaginatedChallengeGroupDto:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseDto'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+    ChallengeRecordCreationDto:
+      type: object
+      properties:
+        challengeId:
+          type: integer
+          format: int64
+    PaginatedChallengeRecordDto:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseDto'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChallengeRecordDto'
+    PaginatedBuyOrNotDto:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseDto'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/BuyOrNotDto'
+    PaginatedChallengeDto:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseDto'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChallengeDto'
+    UserDto:
       type: object
       properties:
         id:
           type: string
-          required: true
           description: 사용자 고유 ID값, 랜덤 생성
         nickname:
           type: string
           minimum: 2
           maximum: 6
-          required: true
           description: 한글, 영문 대소문자만 입력 가능
         birthday:
           type: string
-          required: true
           format: date
           description: 생일
         gender:
           type: string
           enum:
-            - 남성
-            - 여성
+            - male
+            - female
           description: 성별
-          required: true
         check1:
           type: boolean
-          required: false
           description: 체크리스트 1 체크 여부
         check2:
           type: boolean
-          required: true
           description: 체크리스트 2 체크 여부
         check3:
           type: boolean
-          required: true
           description: 체크리스트 3 체크 여부
         check4:
           type: boolean
-          required: true
           description: 체크리스트 4 체크 여부
         check5:
           type: boolean
-          required: false
           description: 체크리스트 5 체크 여부
         check6:
           type: boolean
-          required: false
           description: 체크리스트 6 체크 여부
         avgIncomePerMonth:
           type: integer
-          required: false
           description: 월간 평균 수입
         avgSpendingPerMonth:
           type: integer
-          required: false
           description: 월간 평균 지출
         primeUseDay:
           type: string
           format: day
-          required: false
           description: 주 지출 요일
         primeUseTime:
           type: string
           format: time
           description: 주 지출 시간, 초로 계산됨
-          required: false
         spendingType:
-          type: string
-          required: true
-          enum:
-            - 보릿고개 굴비
-            - 자린고비 굴비
-            - 저축왕 굴비
-            - YOLO 굴비
-            - 아가 굴비
-          description: 소비유형 분석결과
+          $ref: '#/components/schemas/SpendingTypeDto'
         spendingHabitScore:
           type: integer
           minimum: 0
           maximum: 100
           description: 소비습관 점수 (0 ~ 100점)
+        challengeCount:
+          type: integer
+          description: 총 챌린지 참여 개수
+        postCount:
+          type: integer
+          description: 총 작성글 수
+        achivementGuage:
+          type: number
+          format: float
+          description: 달성 게이지
+      required:
+        - id
+        - nickname
+        - birthday
+        - gender
+        - check1
+        - check2
+        - check3
+        - check4
+        - check5
+        - check6
+        - spendingType
+        - spendingHabitScore
       example:
-        id: sjgkdjfks2392
+        id: id2003952
         nickname: 굴비왕
         birthday: 1999-03-01
         gender: male
-        check1: true
+        check1: false
         check2: true
         check3: true
-        check4: true
+        check4: false
         check5: true
         check6: true
         avgIncomePerMonth: 3600000
         avgSpendingPerMonth: 2000000
         primeUseDay: 금요일
         primeUseTime: 20:00:00
-        spendingType: 보릿고개 굴비
+        spendingHabitScore: 62
+        spendingType:
+          id: 1
+          title: 자린고비 굴비
+          imageUrl: http://localhost:8080/image/st1
+        challengeCount: 14
+        postCount: 4
+        achivementGuage: 37.2
+    SpendingTypeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 소비유형 ID
+        title:
+          type: string
+          description: 소비유형 이름
+        imageUrl:
+          type: string
+          format: uri
+          description: 소비유형 대표 이미지
+      example:
+        id: st1
+        title: 자린고비 굴비
+        imageUrl: http://localhost:8080/image/st1
+    ChallengeGroupRecordDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 챌린지 기록 ID
+        challengeGroupId:
+          type: integer
+          format: int64
+          description: 챌린지 그룹 ID
+        userId:
+          type: string
+          description: 유저 ID
+        startDate:
+          type: string
+          format: date
+          description: 시작일
+        continueCount:
+          type: integer
+          description: 연속 달성 일수
+        day1Status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        day2Status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        day3Status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+    ChallengeGroupDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 챌린지 그룹 ID
+        challengeId:
+          type: integer
+          format: int64
+          description: 챌린지 ID
+        ownerId:
+          type: string
+          description: 챌린지 생성자
+        hashtags:
+          type: array
+          items:
+            type: string
+          description: 해시태그 목록
+        maxSize:
+          type: integer
+          minimum: 2
+          maximum: 10
+          description: 최대 인원
+        peopleCount:
+          type: integer
+          description: 참여 인원수
+        imageUrl:
+          type: string
+          format: uri
+          description: 그룹 대표 이미지 URL
+        isHidden:
+          type: boolean
+          description: 비밀방 여부
+          default: false
+        password:
+          type: string
+          minimum: 4
+          maximum: 4
+          description: 비밀번호
+    ChallengeRecordDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 챌린지 기록 ID
+        challengeId:
+          type: integer
+          format: int64
+          description: 챌린지 ID
+        userId:
+          type: string
+          description: 유저 ID
+        startDate:
+          type: string
+          format: date
+          description: 시작일
+        continueCount:
+          type: integer
+          description: 연속 달성 일수
+        day1Status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        day2Status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        day3Status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+    ChallengeRecordStatus:
+      type: string
+      enum:
+        - wait
+        - success
+        - fail
+      default: wait
+    ChallengeDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 챌린지 ID
+        title:
+          type: string
+          minimum: 1
+          maximum: 100 # TODO: Set maximum title length
+          description: 챌린지 이름
+        imageUrl:
+          type: string
+          format: uri
+          description: 챌린지 대표 이미지 URL
+        participantCount:
+          type: integer
+          description: 챌린지 참여인원
+        avgAchiveRatio:
+          type: number
+          format: float
+          description: 챌린지 평균 달성률
+        maxAchiveDays:
+          type: integer
+          description: 가장 오래 진행된 챌린지 일수
+      required:
+        - id
+        - title
+        - imageUrl
+        - isPrivate
+        - participantCount
+        - avgAchiveRatio
+        - maxAchiveDays
+    ChallengeProgressDto:
+      type: object
+      properties:
+        challengeId:
+          type: string
+          description: 진행중인 챌린지 ID
+        participantId:
+          type: string
+          description: 챌린지 참여자 ID
+        startDateTime:
+          type: string
+          format: date-time
+          description: 챌린지 시작일
+        endDateTime:
+          type: string
+          format: date-time
+          description: 챌린지 종료일. 아직 종료되지 않은 경우 null
+        inProgress:
+          type: boolean
+          description: 챌린지가 진행중인지 여부
+        achiveDays:
+          type: integer
+          minimum: 0
+          maximum: 3
+          description: 챌린지 진행 일수
+      required:
+        - challengeId
+        - participantId
+        - startDateTime
+        - inProgress
+        - achiveDays
+      example:
+        challengeId: ch10001
+        participantId: id2003952
+        startDateTime: 2024-01-07
+        inProgress: true
+        achiveDays: 2
+    NoticeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 알림 ID
+        receiverId:
+          type: string
+          description: 수신자 ID
+        message:
+          type: string
+          minimum: 10
+          maximum: 100 # TODO: Determine min, max
+          description: 메세지 내용
+        publishDateTime:
+          type: string
+          format: date-time
+          description: 알림 발송 날짜
+        type:
+          type: string
+          enum:
+            - challenge
+            - vote
+            - chat
+          description: 메시지 타입
+      required:
+        - id
+        - receiverId
+        - message
+        - publishDateTime
+        - type
+      example:
+        id: nt10001
+        receiverId: id2003952
+        message: 오늘 아직 챌린지를 달성하지 못했어요.
+        publishDateTime: 2024-01-07T14:26:32
+        type: challenge
+    BuyOrNotDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 살까말까 등록 ID
+        writerId:
+          type: string
+          description: 작성자 ID
+        productName:
+          type: string
+          description: 상품 이름
+        productPrice:
+          type: integer
+          minimum: 1
+          maximum: 10000000
+          description: 상품 금액
+        productImageUrl:
+          type: string
+          format: uri
+          description: 상품 사진 URL
+        goodReason:
+          type: string
+          minimum: 2
+          maximum: 25 # TODO: Determine min, max
+          description: 사야하는 이유
+        badReason:
+          type: string
+          minimum: 2
+          maximum: 25 # TODO: Determine min, max
+          description: 사지 말아야 하는 이유
+      required:
+        - id
+        - writerId
+        - productName
+        - productPrice
+        - productImageUrl
+        - goodReason
+        - badReason
+      example:
+        id: bn10001
+        writerId: id2003952
+        productName: Tecket 후드티
+        productPrice: 97000
+        productImageUrl: http://localhost:8080/image/bn1
+        goodReason: 후드티 안산지 벌써 2년 다됨
+        badReason: 집에 후드티만 10장 있긴함
+    HabitPatternAnalysisDto:
+      type: object
+      properties:
+        typeRatio:
+          type: array
+          description: 타입별 비율 모음
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 타입 ID
+              value:
+                type: number
+                format: float
+                description: 타입 비율
+        avgChallengeCounts:
+          type: array
+          description: 타입별 평군 챌린지 개수
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 타입 ID
+              value:
+                type: integer
+                description: 참여 개수
+      example:
+        typeRatio:
+          - id: 1
+            value: 5.0
+          - id: 2
+            value: 12.0
+          - id: 3
+            value: 18.0
+          - id: 4
+            value: 25.0
+          - id: 5
+            value: 40.0
+        avgChallengeCounts:
+          - id: 1
+            value: 3
+          - id: 2
+            value: 5
+          - id: 3
+            value: 6
+          - id: 4
+            value: 4
+          - id: 5
+            value: 2
+    ErrorResponseDto:
+      type: object
+      properties:
+        code:
+          type: integer
+          minimum: 1000
+          maximum: 9000
+          description: 오류 코드
+        message:
+          type: string
+          minimum: 1
+          maximum: 100
+          description: 오류 메세지
+      required:
+        - code
+        - message
+      example:
+        code: 1000
+        message: 알 수 없는 서버 오류
+    PaginatedResponseDto:
+      type: object
+      properties:
+        totalSize:
+          type: integer
+          description: 총 아이템 수
+        totalPages:
+          type: integer
+          description: 총 페이지 수
+        size:
+          type: integer
+          default: 10
+          description: 아이템 개수
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: 페이지 번호 (1부터 시작)
+        items: {}
+        nextPageUrl:
+          type: string
+          format: uri
+          description: 다음 페이지 URL
+        prevPageUrl:
+          type: string
+          format: uri
+          description: 이전 페이지 URL
+      required:
+        - totalSize
+        - totalPages
+        - size
+        - page
+        - items
+    AuthRequestDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - KAKAO
+            - APPLE
+          description: 로그인 타입 (카카오 또는 애플)
+        idToken:
+          type: string
+          description: id_token
+      required:
+        - type
+        - idToken
+    AuthResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: false
+          description: 엑세스 토큰
+        refreshToken:
+          type: string
+          nullable: true
+          description: 리프레시 토큰
+      required:
+        - accessToken
+    RevalidationRequestDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: 리프레시 토큰
+      required:
+        - refreshToken
+    LoginResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/AuthResponseDto'
+        - type: object
+          properties:
+            registerComplete:
+              type: boolean
+              description: 정보등록 완료 여부
+            nextLinkDto:
+              nullable: true
+              $ref: '#/components/schemas/LinkDto'
+          required:
+            - registerComplete
+    UserInfoDto:
+      type: object
+      properties:
+        nickname:
+          type: string
+          minimum: 2
+          maximum: 6
+          example: 굴비왕
+        birthday:
+          type: string
+          format: date
+          example: 1999-03-01
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+    UserChekclistDto:
+      type: object
+      properties:
+        check1:
+          type: boolean
+        check2:
+          type: boolean
+        check3:
+          type: boolean
+        check4:
+          type: boolean
+        check5:
+          type: boolean
+        check6:
+          type: boolean
+    UserHabitDto:
+      type: object
+      properties:
+        avgIncomePerMonth:
+          type: integer
+        avgSpendingPerMonth:
+          type: integer
+    UserPatternDto:
+      type: object
+      properties:
+        primeUseDay:
+          type: string
+          format: day
+        primeUseTime:
+          type: string
+          format: time
+    NicknameCheckRequestDto:
+      type: object
+      properties:
+        nickname:
+          type: string
+          example: 굴비킹
+    NicknameCheckResponseDto:
+      type: object
+      properties:
+        duplicated:
+          type: boolean
+    LinkDto:
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: 필수 여부
+        method:
+          type: string
+          enum:
+            - get
+            - post
+            - put
+            - delete
+          description: 요청 메소드
+        url:
+          type: string
+          format: uri
+          description: 요청 주소
+      example:
+        required: true
+        method: post
+        url: 'http://localhost:8080/api/v1/users/me/info'
+  examples:
+    PrivateChallenge:
+      value:
+        id: ch10001
+        title: 택시타지 않기
+        imageUrl: http://localhost:8080/image/ch1
+        isPrivate: false
+        participantCount: 124
+        avgAchiveRatio: 58.6
+        maxAchiveDays: 24
+    GroupChallenge:
+      value:
+        id: ch10002
+        title: 배달음식 먹지 않기
+        imageUrl: http://localhost:8080/image/ch2
+        isPrivate: true
+        participantCount: 1539
+        avgAchiveRatio: 39.6
+        maxAchiveDays: 52
+    RegisterInfoUrl:
+      value:
+        required: true
+        method: post
+        url: http://localhost:8080/api/v1/users/me/info
+    RegisterChecklistUrl:
+      value:
+        required: true
+        method: post
+        url: http://localhost:8080/api/v1/users/me/checklist
+    RegisterHabitUrl:
+      value:
+        required: false
+        method: post
+        url: http://localhost:8080/api/v1/users/me/habit
+    RegisterPatternUrl:
+      value:
+        required: false
+        method: post
+        url: http://localhost:8080/api/v1/users/me/pattern
+  requestBodies:
+    RegisterReq:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthRequestDto'
+  responses:
+    NotFound:
+      description: 컨텐츠를 찾을 수 없음
+    BadRequest:
+      description: 잘못된 요청 형식
+    Unauthorized:
+      description: 로그인되지 않았거나 잘못된 인증 정보
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponseDto'
+          examples:
+            인증 정보 없음:
+              value:
+                code: 1001
+                message: 인증 정보 없음 (Authorization Header Empty)
+            잘못된 인증 정보:
+              value:
+                code: 1002
+                message: 잘못된 인증 정보 (Token Not Valid)
+    Forbidden:
+      description: 요청 권한이 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponseDto'
+          examples:
+            사용자 정보 입력 미완료:
+              value:
+                code: 2005
+                message: 사용자 정보 입력 미완료
+            권한 없음:
+              value:
+                code: 2006
+                message: 접근 권안 없음
+    RegisterSuccess:
+      description: 회원가입 성공
+    RegisterFail:
+      description: 회원가입 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponseDto'
+          examples:
+            이미 등록된 회원:
+              value:
+                code: 2001
+                message: 이미 등록된 회원입니다. (id value)
+            유효하지 않은 토큰:
+              value:
+                code: 2002
+                message: id 토큰이 유효하지 않습니다. (token value)
+    LoginSuccess:
+      description: 로그인 성공
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponseDto'
+          examples:
+            필수정보 입력 완료:
+              value:
+                accessToken: token
+                refreshToken: token
+                registerComplete: true
+            필수정보 입력 필요:
+              value:
+                accessToken: token
+                refreshToken: token
+                registerComplete: false
+                nextLinkDto:
+                  required: true
+                  method: post
+                  url: http://localhost:8080/api/v1/users/me/info
+    LoginFail:
+      description: 로그인 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponseDto'
+          examples:
+            유효하지 않은 토큰:
+              value:
+                code: 2002
+                message: id 토큰이 유효하지 않습니다. (token value)
+            등록되지 않은 회원:
+              value:
+                code: 2003
+                message: 등록되지 않은 회원입니다. (id value)
+            회원정보 입력이 완료되지 않은 회원:
+              value:
+                code: 2004
+                message: 회원정보 입력이 완료되지 않았습니다. (id value)
+    RegisterInfoFail:
+      description: 정보 등록 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponseDto'
+          examples:
+            잘못된 입력 형식:
+              value:
+                code: 2010
+                message: 입력 형식이 잘못되었습니다. (error detail)
   securitySchemes:
     bearerAuth:
       type: http
@@ -128,4 +1452,19 @@ components:
 security:
   - bearerAuth: []
 tags:
+  - name: Auth
+    description: 인증
   - name: User
+    description: 유저
+  - name: Challenge
+    description: 작심삼일 챌린지
+  - name: ChallengeRecord
+    description: 작심삼일 챌린지 기록
+  - name: ChallengeGroup
+    description: 작심삼일 챌린지 그룹
+  - name: ChallengeGroupRecord
+    description: 작심삼일 챌린지 그룹 기록
+  - name: BuyOrNot
+    description: 살까말까
+  - name: Image
+    description: 이미지
