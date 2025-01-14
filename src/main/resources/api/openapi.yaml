@@ -708,8 +708,6 @@ paths:
               examples:
                 챌린지 그룹이 존재하지 않음:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
-                내가 만든 챌리지가 이님:
-                  $ref: '#/components/examples/Error_NotMyChallenge'
     delete:
       summary: 특정 챌린지 그룹 삭제
       operationId: deleteChallengeGroup
@@ -746,8 +744,6 @@ paths:
               examples:
                 챌린지 그룹이 존재하지 않음:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
-                내가 만든 챌리지가 이님:
-                  $ref: '#/components/examples/Error_NotMyChallenge'
   /challengeGroups/{groupId}/enroll:
     post:
       summary: 챌린지 그룹 참여하기
@@ -1241,8 +1237,7 @@ components:
           description: 주 지출 요일
         primeUseTime:
           type: string
-          format: time
-          description: 주 지출 시간, 초로 계산됨
+          description: 주 지출 시간
         spendingType:
           $ref: '#/components/schemas/SpendingTypeDto'
         spendingHabitScore:
@@ -1274,7 +1269,7 @@ components:
         - spendingType
         - spendingHabitScore
       example:
-        id: id2003952
+        id: "id0001"
         nickname: 굴비왕
         birthday: "1999-03-01"
         gender: male
@@ -1287,7 +1282,7 @@ components:
         avgIncomePerMonth: 3600000
         avgSpendingPerMonth: 2000000
         primeUseDay: 금요일
-        primeUseTime: 20:00:00
+        primeUseTime: "20:00:00"
         spendingHabitScore: 62
         spendingType:
           id: 1
@@ -1316,7 +1311,7 @@ components:
     ChallengeGroupStatDto:
       type: object
       properties:
-        challengeGroupId:
+        groupId:
           type: integer
           format: int64
           description: 챌린지 그룹 ID
@@ -1329,6 +1324,15 @@ components:
         totalCount:
           type: integer
           description: 총 달성 일수
+        enrollCount:
+          type: integer
+          description: 참여 회수
+      example:
+        groupId: 0
+        userId: "id0001"
+        continueCount: 12
+        totalCount: 15
+        enrollCount: 6
     ChallengeGroupRecordDto:
       type: object
       properties:
@@ -1424,6 +1428,15 @@ components:
         totalCount:
           type: integer
           description: 총 달성 일수
+        enrollCount:
+          type: integer
+          description: 참여 회수
+      example:
+        challengeId: 0
+        userId: "id0001"
+        continueCount: 12
+        totalCount: 15
+        enrollCount: 6
     ChallengeRecordStatus:
       type: string
       enum:
@@ -1465,6 +1478,13 @@ components:
         - participantCount
         - avgAchiveRatio
         - maxAchiveDays
+      example:
+        id: 0
+        title: 커피 안마시기
+        imageUrl: "http://localhost/images/ch01"
+        participantCount: 23
+        avgAchiveRatio: 50.0
+        maxAchiveDays: 63
     ChallengeProgressDto:
       type: object
       properties:
@@ -1671,9 +1691,11 @@ components:
         totalSize:
           type: integer
           description: 총 아이템 수
+          example: 31
         totalPages:
           type: integer
           description: 총 페이지 수
+          example: 4
         size:
           type: integer
           default: 10
@@ -1684,14 +1706,6 @@ components:
           default: 1
           description: 페이지 번호 (1부터 시작)
         items: {}
-        nextPageUrl:
-          type: string
-          format: uri
-          description: 다음 페이지 URL
-        prevPageUrl:
-          type: string
-          format: uri
-          description: 이전 페이지 URL
       required:
         - totalSize
         - totalPages
@@ -1908,36 +1922,32 @@ components:
         message: 접근 권한이 없습니다.
     Error_AlreadyRegistered:
       value:
-        code: 3000
+        code: 3001
         message: 이미 등록된 회원입니다. (id value)
     Error_NotRegistered:
       value:
-        code: 3001
+        code: 3002
         message: 등록되지 않은 회원입니다. (id value)
     Error_RegisterNotComplete:
       value:
-        code: 3002
+        code: 3003
         message: 회원정보 입력이 완료되지 않았습니다. (id value)
     Error_AlreadyEnrolled:
       value:
-        code: 4000
+        code: 4001
         message: 이미 해당 챌린지에 참여중입니다. (challenge id)
     Error_NotEnrolled:
       value:
-        code: 4001
+        code: 4002
         message: 해당 챌린지를 참여하고 있지 않습니다. (challenge id)
     Error_ChallengeAlreadyExist:
       value:
-        code: 4002
+        code: 4003
         message: 같은 이름의 챌린지가 이미 존재합니다. (challenge title)
     Error_ChallengeNotExist:
       value:
-        code: 4003
-        message: 챌린지가 존재하지 않습니다. (challenge id)
-    Error_NotMyChallenge:
-      value:
         code: 4004
-        message: 내가 만든 챌린지가 아닙니다. (challenge id)
+        message: 챌린지가 존재하지 않습니다. (challenge id)
     Error_ChallengeAlreadyChecked:
       value:
         code: 4005
