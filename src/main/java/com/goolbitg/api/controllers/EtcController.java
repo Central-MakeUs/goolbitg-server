@@ -5,13 +5,13 @@ import java.util.Optional;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import com.goolbitg.api.ChallengeRecordApi;
+import com.goolbitg.api.EtcApi;
 
 /**
- * ChallengeRecordController
+ * ImageController
  */
 @RestController
-public class ChallengeRecordController implements ChallengeRecordApi {
+public class EtcController implements EtcApi {
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
