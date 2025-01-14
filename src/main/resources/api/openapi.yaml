@@ -385,6 +385,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '201':
           description: >
@@ -452,6 +453,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
         - name: date
           description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
           in: query
@@ -493,6 +495,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: >
@@ -522,6 +525,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: 오늘의 챌린지 체크 성공. 체크된 챌린지 기록이 반환됩니다.
@@ -557,6 +561,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: 챌린지 통계 반환 성공.
@@ -652,6 +657,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: 챌린지 그룹 정보
@@ -684,6 +690,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       requestBody:
         content:
           application/json:
@@ -731,6 +738,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: >
@@ -761,6 +769,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '201':
           description: 챌린지 그룹 기록 생성 성공
@@ -826,6 +835,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
         - name: date
           description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 확인합니다.
           in: query
@@ -866,6 +876,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: 체크 성공. 기록을 반환합니다.
@@ -901,6 +912,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: 챌린지 통계 반환 성공.
@@ -987,6 +999,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       requestBody:
         content:
           application/json:
@@ -1024,6 +1037,8 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
+            default: 0
       responses:
         '200':
           description: 특정 살까말까 정보 반환
@@ -1053,6 +1068,8 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
+            default: 0
       responses:
         '200':
           description: 살까말까 제거 완료
@@ -1104,6 +1121,7 @@ paths:
           schema:
             type: integer
             format: int64
+            default: 0
       responses:
         '200':
           description: 읽음 표시 완료
@@ -1281,7 +1299,7 @@ components:
         check6: true
         avgIncomePerMonth: 3600000
         avgSpendingPerMonth: 2000000
-        primeUseDay: 금요일
+        primeUseDay: "friday"
         primeUseTime: "20:00:00"
         spendingHabitScore: 62
         spendingType:
