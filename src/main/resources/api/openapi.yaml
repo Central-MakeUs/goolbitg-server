@@ -4,6 +4,16 @@ info:
   description: >
     굴비잇기 프로젝트의 API 서버입니다.
 
+    ## 📣 응답
+
+    `200`번대 응답은 성공했을 때의 응답으로, 엔드포인트에 따라 바디가 있을 수도,
+    없을 수도 있습니다.
+    <br><br>
+    `400`번대 응답은 `422 Unprocessable Entity`를 제외하고는 모든 엔드포인트에
+    적용되는 공통 에러 응답입니다. <br>따라서 중복을 막기 위해 `/health` 엔드포인트를
+    제외하고는 응답란에서 제외시켰습니다.
+
+
     ## ⛔️ 에러코드
 
     에러코드는 4자리 숫자로 구성되며, 앞 2자리는 그룹을, 뒷 2자리는 그룹 내 구분자
@@ -11,594 +21,39 @@ info:
     예를 들어, `1002`는 10번 그룹 2번째 에러를 의미합니다.<br><br>
 
     자세한 에러코드 및 메시지 정보는 **아래 링크👇**에서 확인할 수 있습니다. <br>
-    [에러코드 목록](https://github.com/Central-MakeUs/goolbitg-server/docs/errors.md)
+    [에러코드 목록](https://github.com/Central-MakeUs/goolbitg-server/blob/spec/v1/docs/errors.md)
   termsOfService: http://localhost:8080/terms-of-service
-  version: 1.0.0
+  version: 1.0.1
 servers:
   - url: http://api.goolbitg.site/v1
     description: 메인 서버
 paths:
-  /auth/register:
-    post:
-      summary: 회원가입
-      description: >
-        외부 인증서버로부터 얻은 id 토큰을 이용해 사용자를 등록합니다.
-
-        ### 인증 타입
-
-        - `KAKAO`: 카카오 로그인
-
-        - `APPLE`: 애플 로그인
-
-        ### 회원가입 절차
-
-        1. 회원가입 요청이 성공했다면, 같은 인증 정보로 로그인합니다.
-
-        2. 회원 정보 입력이 완료되지 않았기 때문에 로그인 요청은 
-          `registerComplete: false` 와 함께 다음 회원 정보 
-          입력을 위한 url을 반환합니다.
-
-        3. 로그인 시 반환된 엑세스 토큰과 함께 회원정보 입력 요청을 수행합니다.
-
-        4. 필수 정보들의 입력이 완료되면 다른 API 요청들이 정상적으로 반환됩니다.
-      tags:
-        - Auth
-      requestBody:
-        $ref: '#/components/requestBodies/RegisterReq'
-      responses:
-        '201':
-          $ref: '#/components/responses/RegisterSuccess'
-        '409':
-          $ref: '#/components/responses/RegisterFail'
-  /auth/login:
-    post:
-      summary: 로그인
-      description: >
-        외부 인증서버로부터 얻은 id 토큰을 이용해 로그인합니다.
-
-        ### 인증 타입
-
-        - `KAKAO`: 카카오 로그인
-
-        - `APPLE`: 애플 로그인
-      tags:
-        - Auth
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthRequestDto'
-      responses:
-        '200':
-          $ref: '#/components/responses/LoginSuccess'
-        '202':
-          $ref: '#/components/responses/LoginFail'
-  /auth/revalidate:
-    post:
-      summary: 엑세스 토큰 재발급
-      description: >
-        엑세스 토큰을 재발급합니다.
-
-        ### 토큰 기한
-        
-        - access token: 1일
-
-        - refresh token: 30일
-      tags:
-        - Auth
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RevalidationRequestDto'
-      responses:
-        '200':
-          description: >
-            엑세스 토큰 재발급 성공<br><br>
-            NOTE: 리프레시 토큰의 기한이 10일 이내로 남았다면 리프레시 토큰 또한
-            재발급됩니다.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthResponseDto'
-  /auth/logout:
-    post:
-      summary: 로그아웃
-      tags:
-        - Auth
-      responses:
-        '200':
-          description: 로그아웃 성공
-  /users/me:
+  /health:
     get:
-      summary: 현재 로그인한 유저 정보 반환
+      summary: 서버 상태 체크
+      operationId: checkHealth
+      description: 서버의 상태를 체크합니다.
       tags:
-        - User
+        - ETC
       responses:
         '200':
-          description: 현재 로그인한 유저 정보
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserDto'
+          description: 서버 상태 좋음
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /users/nickname/check:
-    post:
-      summary: 닉네임 중복 체크
-      tags:
-        - User
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NicknameCheckRequestDto'
-      responses:
-        '200':
-          description: 중복 여부 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NicknameCheckResponseDto'
-  /users/me/info:
-    post:
-      summary: 사용자 필수 정보 등록
-      tags:
-        - User
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserInfoDto'
-      responses:
-        '200':
-          description: 등록 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LinkDto'
-                example:
-                  $ref: '#/components/examples/RegisterChecklistUrl/value'
-        '202':
-          $ref: '#/components/responses/RegisterInfoFail'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-  /users/me/checklist:
-    post:
-      summary: 소비중독 체크리스트 정보 등록
-      tags:
-        - User
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserChekclistDto'
-      responses:
-        '200':
-          description: 등록 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LinkDto'
-                example:
-                  $ref: '#/components/examples/RegisterHabitUrl/value'
-        '202':
-          $ref: '#/components/responses/RegisterInfoFail'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-  /users/me/habit:
-    post:
-      summary: 사용자 필수 정보 등록
-      tags:
-        - User
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserHabitDto'
-      responses:
-        '200':
-          description: 등록 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LinkDto'
-                example:
-                  $ref: '#/components/examples/RegisterPatternUrl/value'
-        '202':
-          $ref: '#/components/responses/RegisterInfoFail'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-  /users/me/pattern:
-    post:
-      summary: 사용자 필수 정보 등록
-      tags:
-        - User
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserHabitDto'
-      responses:
-        '200':
-          description: 등록 성공
-        '202':
-          $ref: '#/components/responses/RegisterInfoFail'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-  /challenges:
-    get:
-      summary: 챌린지 목록 가져오기
-      tags:
-        - Challenge
-      parameters:
-        - name: spendingTypeId
-          in: query
-          schema:
-            type: string
-            nullable: true
-      responses:
-        '200':
-          description: 챌린지 목록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChallengeDto'
-  /challengeRecords:
-    get:
-      summary: 챌린지 기록 목록 가져오기
-      tags:
-        - ChallengeRecord
-      parameters:
-        - name: date
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-            nullable: true
-        - name: status
-          in: query
-          schema:
-            $ref: '#/components/schemas/ChallengeRecordStatus'
-      responses:
-        '200':
-          description: 챌린지 기록 리스트
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChallengeRecordDto'
-    post:
-      summary: 챌린지 기록 생성
-      description: >
-        **NOTE**: 만약 오늘 혹은 전날 완료된 같은 챌린지 기록이 있다면,
-        `continueCount`가 이어지는 새로운 챌린지 기록이 생성됩니다.
-      tags:
-        - ChallengeRecord
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChallengeRecordCreationDto'
-      responses:
-        '201':
-          description: 챌린지 기록 생성 완료
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeRecordDto'
-  /challengeRecords/{challengeId}:
-    get:
-      summary: 챌린지 기록 확인
-      tags:
-        - ChallengeRecord
-      parameters:
-        - name: challengeId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 기록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeRecordDto'
-    delete:
-      summary: 챌린지 기록 삭제
-      tags:
-        - ChallengeRecord
-      parameters:
-        - name: challengeId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 삭제 성공
-  /challengeRecords/{challengeId}/check:
-    post:
-      summary: 챌린지 체크
-      tags:
-        - ChallengeRecord
-      parameters:
-        - name: challengeId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 체크 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeRecordDto'
-  /challengeGroups:
-    get:
-      summary: 챌린지 그룹 목록 가져오기
-      tags:
-        - ChallengeGroup
-      parameters:
-        - name: search
-          in: query
-          schema:
-            type: string
-            minimum: 1
-            maximum: 100
-      responses:
-        '200':
-          description: 챌린지 그룹 목록
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChallengeGroupDto'
-    post:
-      summary: 챌린지 그룹 생성
-      tags:
-        - ChallengeGroup
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChallengeGroupDto'
-      responses:
-        '201':
-          description: 챌린지 그룹 생성 완료
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeGroupDto'
-  /challengeGroups/{groupId}:
-    get:
-      summary: 특정 챌린지 그룹 정보 가져오기
-      tags:
-        - ChallengeGroup
-      parameters:
-        - name: groupId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 그룹 정보
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeGroupDto'
-    delete:
-      summary: 특정 챌린지 그룹 삭제
-      tags:
-        - ChallengeGroup
-      parameters:
-        - name: groupId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 그룹 삭제 성공
-  /challengeGroupRecords:
-    get:
-      summary: 내 챌린지 그룹 기록 가져오기
-      tags:
-        - ChallengeGroupRecord
-      parameters:
-        - name: owning
-          description: 내가 만든 챌린지인가?
-          in: query
-          schema:
-            type: boolean
-      responses:
-        '200':
-          description: 챌린지 그룹 기록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChallengeGroupRecordDto'
-    post:
-      summary: 내 챌린지 기록 생성
-      description: >
-        챌린지 기록과 마찬가지로 어제 혹은 오늘 완료된 챌린지 기록이 있다면
-        연속 수행 회수가 유지됨.
-      tags:
-        - ChallengeGroupRecord
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChallengeGroupRecordCreationDto'
-      responses:
-        '201':
-          description: 챌린지 그룹 기록 생성 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeGroupRecordDto'
-  /challengeGroupRecords/{groupId}:
-    get:
-      summary: 챌린지 그룹 기록 확인
-      tags:
-        - ChallengeGroupRecord
-      parameters:
-        - name: groupId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 그룹 기록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeGroupRecordDto'
-    delete:
-      summary: 챌린지 그룹 기록 삭제
-      tags:
-        - ChallengeGroupRecord
-      parameters:
-        - name: groupId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 그룹 기록 삭제 성공
-  /challengeGroupRecords/{groupId}/check:
-    post:
-      summary: 챌린지 그룹 기록 체크
-      tags:
-        - ChallengeGroupRecord
-      parameters:
-        - name: groupId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 챌린지 그룹 기록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeGroupRecordDto'
-  /buyOrNots:
-    get:
-      summary: 살까말까 목록 가져오기
-      tags:
-        - BuyOrNot
-      responses:
-        '200':
-          description: 살까말까 최신순 목록 가져오기
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedBuyOrNotDto'
-    post:
-      summary: 살까말까 등록
-      tags:
-        - BuyOrNot
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuyOrNotDto'
-      responses:
-        '201':
-          description: 살까말까 등록 완료
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BuyOrNotDto'
-    put:
-      summary: 살까말까 수정
-      tags:
-        - BuyOrNot
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuyOrNotDto'
-      responses:
-        '200':
-          description: 살까말까 수정 완료
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BuyOrNotDto'
-  /buyOrNots/{postId}:
-    get:
-      summary: 특정 살까말까 정보 확인
-      tags:
-        - BuyOrNot
-      parameters:
-        - name: postId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: 특정 살까말까 정보 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BuyOrNotDto'
-    delete:
-      summary: 살까말까 제거
-      tags:
-        - BuyOrNot
-      parameters:
-        - name: postId 
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: 살까말까 제거 완료
-  /buyOrNots/my:
-    get:
-      summary: 내가 작성한 살까말까 목록 가져오기
-      tags:
-        - BuyOrNot
-      responses:
-        '200':
-          description: 내가 작성한 살까말까 목록
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedBuyOrNotDto'
   /images:
     post:
       summary: 이미지 업로드
+      operationId: uploadImage
+      description: 이미지를 업로드합니다.
       tags:
-        - Image
+        - ETC
       requestBody:
         required: true
+        description: 업로드할 이미지입니다.
         content:
           multipart/form-data:
             schema:
@@ -624,8 +79,1060 @@ paths:
                     type: string
                     format: uri
                     description: 업로드한 이미지 url
+  /auth/register:
+    post:
+      summary: 회원가입
+      operationId: register
+      description: >
+        외부 인증서버로부터 얻은 id 토큰을 이용해 사용자를 등록합니다.
+
+        ### 인증 타입
+
+        - `KAKAO`: 카카오 로그인
+
+        - `APPLE`: 애플 로그인
+
+        ### 회원가입 절차
+
+        1. 회원가입 요청이 성공했다면, 같은 인증 정보로 로그인합니다.
+
+        2. 회원 정보 입력이 완료되지 않았기 때문에 로그인 요청은 
+          `registerComplete: false` 와 함께 다음 회원 정보 
+          입력을 위한 url을 반환합니다.
+
+        3. 로그인 시 반환된 엑세스 토큰과 함께 회원정보 입력 요청을 수행합니다.
+
+        4. 필수 정보들의 입력이 완료되면 다른 API 요청들이 정상적으로 반환됩니다.
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequestDto'
+      responses:
+        '201':
+          description: 회원가입 성공
+        '422':
+          description: 회원가입 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이미 등록된 회원:
+                  $ref: '#/components/examples/Error_AlreadyRegistered'
+                유효하지 않은 토큰:
+                  $ref: '#/components/examples/Error_TokenNotValid'
+  /auth/login:
+    post:
+      summary: 로그인
+      operationId: login
+      description: >
+        외부 인증서버로부터 얻은 id 토큰을 이용해 로그인합니다.
+
+        ### 인증 타입
+
+        - `KAKAO`: 카카오 로그인
+
+        - `APPLE`: 애플 로그인
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequestDto'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDto'
+              examples:
+                필수정보 입력 완료:
+                  $ref: '#/components/examples/LoginResponse_Complete'
+                필수정보 입력 필요:
+                  $ref: '#/components/examples/LoginResponse_InProgress'
+        '422':
+          description: 로그인 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                유효하지 않은 토큰:
+                  $ref: '#/components/examples/Error_TokenNotValid'
+                등록되지 않은 회원:
+                  $ref: '#/components/examples/Error_NotRegistered'
+  /auth/refresh:
+    post:
+      summary: 엑세스 토큰 재발급
+      operationId: refresh
+      description: >
+        엑세스 토큰을 재발급합니다.
+
+        ### 토큰 기한
+        
+        - access token: 1일
+
+        - refresh token: 30일
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequestDto'
+      responses:
+        '200':
+          description: >
+            엑세스 토큰 재발급 성공<br><br>
+            NOTE: 리프레시 토큰의 기한이 10일 이내로 남았다면 리프레시 토큰 또한
+            재발급됩니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseDto'
+        '422':
+          description: 토큰 재발급 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                유효하지 않은 토큰:
+                  $ref: '#/components/examples/Error_TokenNotValid'
+                토큰 기한 만료:
+                  $ref: '#/components/examples/Error_TokenExpired'
+  /auth/logout:
+    post:
+      summary: 로그아웃
+      operationId: logout
+      description: 현재 로그인한 유저를 로그아웃 합니다.
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: 로그아웃 성공
+        '422':
+          description: 로그아웃 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                유효하지 않은 토큰:
+                  $ref: '#/components/examples/Error_TokenNotValid'
+                토큰 기한 만료:
+                  $ref: '#/components/examples/Error_TokenExpired'
+  /users/me:
+    get:
+      summary: 현재 로그인한 유저 정보 반환
+      operationId: getMyInfo
+      description: 현재 로그인한 유저 정보를 반환합니다.
+      tags:
+        - User
+      responses:
+        '200':
+          description: 현재 로그인한 유저 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+  /users/nickname/check:
+    post:
+      summary: 닉네임 중복 체크
+      operationId: checkNickname
+      description: 닉네임 중복 여부를 체크합니다.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NicknameCheckRequestDto'
+      responses:
+        '200':
+          description: 중복 여부 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NicknameCheckResponseDto'
+  /users/me/info:
+    post:
+      summary: 사용자 개인정보 등록
+      operationId: postUserInfo
+      description: 사용자의 개인정보를 등록합니다. 필수 등록 정보입니다.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoDto'
+      responses:
+        '200':
+          description: 등록 성공
+  /users/me/checklist:
+    post:
+      summary: 소비중독 체크리스트 정보 등록
+      operationId: postChecklistInfo
+      description: 소비중독 체크리스트 정보를 등록합니다. 필수 등록 정보입니다.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChecklistDto'
+      responses:
+        '200':
+          description: 등록 성공
+  /users/me/habit:
+    post:
+      summary: 소비습관 정보 등록
+      operationId: postHabitInfo
+      description: 소비습관 정보를 등록합니니다. 필수 등록 정보입니다.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserHabitDto'
+      responses:
+        '200':
+          description: 등록 성공
+  /users/me/pattern:
+    post:
+      summary: 사용자 소비습관 패턴 등록
+      operationId: postPatternInfo
+      description: 사용자의 소비습관 패턴을 등록합니다. 필수 등록 요소가 아닙니다.
+      tags:
+        - User
+      requestBody:
+        required: true
+        description: >
+          입력 형식은 다음과 같습니다.<br><br>
+          **primeUseDay**<br>
+          다음 요소중 하나:
+            - `monday`
+            - `tuesday`
+            - `wednesday`
+            - `thursday`
+            - `friday`
+            - `saturday`
+            - `sunday`
+
+          **primeUseTime**<br>
+          `hh:mm:ss` 형식의 스트링. 초 부분은 무시됩니다.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPatternDto'
+      responses:
+        '200':
+          description: 등록 성공
+  /challenges:
+    get:
+      summary: 챌린지 목록 가져오기
+      operationId: getChallenges
+      description: >
+        작심삼일 챌린지 목록을 가져옵니다.<br><br>
+        정렬 순서는 개인화가 적용될 수 있습니다.
+      tags:
+        - Challenge
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/sizeParam'
+        - name: spendingTypeId
+          description: 소비유형 ID입니다. 제공되지 않으면 모든 소비유형을 대상으로 합니다.
+          in: query
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: 챌린지 목록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeDto'
+  /challenges/{challengeId}/enroll:
+    post:
+      summary: 챌린지 참여하기
+      operationId: enrollChallenge
+      description: >
+        특정 ID의 챌린지에 참여합니다.<br><br>
+        현재 챌린지 참여중이 아닐 경우, 3일간의 챌린지 기록(`ChallengeRecord`)가
+        생성됩니다.<br><br>
+        만약 오늘 성공한 챌린지 기록을 가지고 있을 경우(3일 챌린지가 종료되었을
+        경우), 오늘부터가 아닌 내일부터 3일간 기록을 생성합니다.
+      tags:
+        - Challenge
+      parameters:
+        - name: challengeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: >
+            챌린지 등록 완료<br><br>
+            오늘 날짜부터 3일간 챌린지 기록이 생성됩니다.
+        '422':
+          description: 챌린지 등록 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이미 참여중인 챌린지:
+                  $ref: '#/components/examples/Error_AlreadyEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+  /challengeRecords:
+    get:
+      summary: 참여중인 챌린지 기록 목록 가져오기
+      operationId: getChallengeRecords
+      description: >
+        내가 참여중인 챌린지의 특정 날의 기록들을 가져옵니다.<br><br>
+
+        ### 챌린지 기록
+
+        챌린지 기록은 처음 생성되면 wait 상태입니다.<br><br>
+        오늘의 챌린지를 수행하거나 챌린지 수행 기간이 지나면 
+        success 또는 fail 상태로 바뀌게 됩니다.
+      tags:
+        - Challenge
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/sizeParam'
+        - name: date
+          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
+          in: query
+          schema:
+            type: string
+            format: date
+            nullable: true
+        - name: status
+          description: 필터링할 챌린지 상태입니다. 제공되지 않으면 모든 챌린지를 가져옵니다.
+          in: query
+          schema:
+            $ref: '#/components/schemas/ChallengeRecordStatus'
+      responses:
+        '200':
+          description: 챌린지 기록 리스트
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeRecordDto'
+  /challengeRecords/{challengeId}:
+    get:
+      summary: 참여중인 챌린지 기록 확인
+      operationId: getChallengeRecord
+      description: 참여중인 특정 챌린지의 특정 날짜의 기록을 가져옵니다.
+      tags:
+        - Challenge
+      parameters:
+        - name: challengeId
+          description: 기록을 확인할 챌린지 ID 입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: date
+          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 챌린지 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeRecordDto'
+        '422':
+          description: 챌린지 기록 확인 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+    delete:
+      summary: 챌린지 취소하기
+      operationId: cancelChallenge
+      description: >
+        참여중인 챌린지를 취소합니다.<br><br>
+        챌린지를 취소할 경우 오늘을 포함한 미완료된 챌린지 기록들이 삭제됩니다.<br>
+        이미 성공하거나 실패한 기록들은 삭제되지 않습니다.
+      tags:
+        - Challenge
+      parameters:
+        - name: challengeId
+          description: 취소할 챌린지의 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >
+            챌린지 취소 성공<br><br>
+            오늘과 오늘 이후 남은 챌린지 기록들을 삭제합니다.
+        '422':
+          description: 챌린지 기록 삭제 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+  /challengeRecords/{challengeId}/check:
+    post:
+      summary: 오늘의 챌린지 기록 챌린지 체크
+      operationId: checkChallenge
+      description: 참여중인 챌린지의 오늘 기록을 완료로 체크합니다.
+      tags:
+        - Challenge
+      parameters:
+        - name: challengeId
+          description: 체크할 챌린지 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 오늘의 챌린지 체크 성공. 체크된 챌린지 기록이 반환됩니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeRecordDto'
+        '422':
+          description: 챌린지 체크 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+                이미 완료한 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeAlreadyChecked'
+  /challengeStat/{challengeId}:
+    get:
+      summary: 특정 챌린지 참여 통계 확인
+      operationId: getChallengeStat
+      description: 특정 챌린지에 대한 내 참여 통계를 확인합니다.
+      tags:
+        - Challenge
+      parameters:
+        - name: challengeId
+          description: 통계를 확인할 챌린지 ID입니다.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 통계 반환 성공.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeStatDto'
+        '422':
+          description: 챌린지 통계 반환 실패.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+  /challengeGroups:
+    get:
+      summary: 챌린지 그룹 목록 가져오기
+      operationId: getChallengeGroups
+      description: 챌린지 그룹 목록을 가져옵니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/sizeParam'
+        - name: search
+          description: 검색할 챌린지의 제목 또는 해시태그입니다.
+          in: query
+          schema:
+            type: string
+            minimum: 1
+            maximum: 100
+        - name: created
+          description: 내가 생성한 챌린지 그룹만 가져올지 여부입니다.
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 챌린지 그룹 목록
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeGroupDto'
+    post:
+      summary: 챌린지 그룹 생성
+      operationId: createChallengeGroup
+      description: >
+        새로운 챌린지 그룹을 생성합니다.<br><br>
+        비밀방일 경우 패스워드가 필수입니다. 아닐 경우 패스워드는 무시됩니다.
+      tags:
+        - ChallengeGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeGroupDto'
+            examples:
+              일반:
+                $ref: '#/components/examples/ChallengeGroup_Form_Normal'
+              비밀방:
+                $ref: '#/components/examples/ChallengeGroup_Form_Hidden'
+      responses:
+        '201':
+          description: 챌린지 그룹 생성 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+        '422':
+          description: 챌린지 그룹 생성 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                챌린지 이름 중복:
+                  $ref: '#/components/examples/Error_ChallengeAlreadyExist'
+  /challengeGroups/{groupId}:
+    get:
+      summary: 특정 챌린지 그룹 정보 가져오기
+      operationId: getChallengeGroup
+      description: 특정 챌린지 그룹의 정보를 가져옵니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 가져올 챌린지 그룹의 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 그룹 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+        '422':
+          description: 챌린지 그룹 정보 확인 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                챌린지 그룹이 존재하지 않음:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+    put:
+      summary: 특정 챌린지 그룹 정보 수정
+      operationId: updateChallengeGroup
+      description: >
+        특정 챌린지 그룹 정보를 수정합니다. 내가 만든 챌린지
+        정보만 수정할 수 있습니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 수정할 챌린지 그룹의 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeGroupDto'
+            examples:
+              일반:
+                $ref: '#/components/examples/ChallengeGroup_Form_Modify'
+      responses:
+        '200':
+          description: 챌린지 그룹 정보 수정 성공. 수정된 정보가 반환됩니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupDto'
+        '422':
+          description: 챌린지 그룹 정보 삭제 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                챌린지 그룹이 존재하지 않음:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+                내가 만든 챌리지가 이님:
+                  $ref: '#/components/examples/Error_NotMyChallenge'
+    delete:
+      summary: 특정 챌린지 그룹 삭제
+      operationId: deleteChallengeGroup
+      description: >
+        특정 챌린지 그룹을 삭제합니다. 내가 만든 챌린지만 삭제할
+        수 있습니다.<br><br>
+
+        **NOTE**: 내부적으로는 완전히 삭제되지 않고 삭제되었다고 표시만 됩니다.<br>
+        그래서 챌린지 그룹 목록 조회에서는 등장하지 않지만, ID를 이용한 직접 조회는
+        가능합니다.<br><br>
+
+        **WARNNING**: 아직 챌린지 삭제 로직에 대한 논의가 더 필요해 보입니다.<br>
+        추후에 얼마든지 로직이 바뀔 수 있습니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 삭제할 챌린지 그룹의 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >
+            챌린지 그룹 삭제 성공
+        '422':
+          description: 챌린지 그룹 정보 삭제 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                챌린지 그룹이 존재하지 않음:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+                내가 만든 챌리지가 이님:
+                  $ref: '#/components/examples/Error_NotMyChallenge'
+  /challengeGroups/{groupId}/enroll:
+    post:
+      summary: 챌린지 그룹 참여하기
+      operationId: enrollChallengeGroup
+      description: >
+        특정 챌린지 그룹에 참여합니다.<br><br>
+        챌린지 참여 로직과 동일합니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 참여할 챌린지 그룹 ID입니다.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: 챌린지 그룹 기록 생성 성공
+        '422':
+          description: 챌린지 그룹 참여 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이미 참여중인 챌린지:
+                  $ref: '#/components/examples/Error_AlreadyEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+  /challengeGroupRecords:
+    get:
+      summary: 참여중인 챌린지 그룹 기록 가져오기
+      operationId: getChallengeGroupRecords
+      description: 참여중인 챌린지 그룹의 특정 날짜의 기록들을 가져옵니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/sizeParam'
+        - name: date
+          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
+          in: query
+          schema:
+            type: string
+            format: date
+            example: '2025-01-14'
+        - name: status
+          description: 필터링할 챌린지 상태입니다. 제공되지 않으면 모든 상태를 가져옵니다.
+          in: query
+          schema:
+            $ref: '#/components/schemas/ChallengeRecordStatus'
+        - name: created
+          description: 내가 생성한 챌린지인지 여부입니다.
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 챌린지 그룹 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChallengeGroupRecordDto'
+                # TODO: 챌린지 기록 전용 뷰 생성
+  /challengeGroupRecords/{groupId}:
+    get:
+      summary: 특정 챌린지 그룹의 기록을 확인
+      operationId: getChallengeGroupRecord
+      description: 내가 참여중인 챌린지 그룹의 특정 날짜의 기록을 가져옵니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 기록을 확인할 챌린지 그룹 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: date
+          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 확인합니다.
+          in: query
+          schema:
+            type: string
+            format: date
+            example: '2025-01-14'
+      responses:
+        '200':
+          description: 챌린지 그룹 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupRecordDto'
+        '422':
+          description: 챌린지 그룹 기록 확인 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+  /challengeGroupRecords/{groupId}/check:
+    post:
+      summary: 챌린지 그룹 기록 체크
+      operationId: checkChallengeGroup
+      description: 현재 로그인한 사용자의 특정 그룹의 오늘 기록을 체크합니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 체크할 챌린지 그룹 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 체크 성공. 기록을 반환합니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupRecordDto'
+        '422':
+          description: 챌린지 그룹 체크 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+                이미 완료한 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeAlreadyChecked'
+  /challengeGroupStat/{groupId}:
+    get:
+      summary: 특정 챌린지 그룹 참여 통계 확인
+      operationId: getChallengeGroupStat
+      description: 특정 챌린지 그룹에 대한 내 참여 통계를 확인합니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - name: groupId
+          description: 통계를 확인할 챌린지 그룹 ID입니다.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 챌린지 통계 반환 성공.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeGroupStatDto'
+        '422':
+          description: 챌린지 그룹 통계 반환 실패.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+  /buyOrNots:
+    get:
+      summary: 살까말까 포스트 목록 가져오기
+      operationId: getBuyOrNots
+      description: >
+        살까말까 포스트 목록을 최신순으로 가져옵니다.<br><br>
+        목록에는 개인화가 적용될 수 있습니다.
+      tags:
+        - BuyOrNot
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/sizeParam'
+        - name: created
+          description: 내가 작성한 포스트만 가져올지 여부입니다.
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 살까말까 포스트 최신순 목록 가져오기
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBuyOrNotDto'
+    post:
+      summary: 살까말까 포스트 등록하기
+      operationId: createBuyOrNot
+      description: 살까말까 포스트를 등록합니다.
+      tags:
+        - BuyOrNot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyOrNotDto'
+            examples:
+              일반:
+                $ref: '#/components/examples/BuyOrNot_Form_Normal'
+      responses:
+        '201':
+          description: 살까말까 포스트 등록 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyOrNotDto'
+        '422':
+          description: 살까말까 등록 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                등록 한도 초과:
+                  $ref: '#/components/examples/Error_PostLimitExceed'
+  /buyOrNots/{postId}:
+    put:
+      summary: 살까말까 포스트 수정하기
+      operationId: updateBuyOrNot
+      description: 살까말까 포스트를 수정합니다.
+      tags:
+        - BuyOrNot
+      parameters:
+        - name: postId
+          description: 수정할 포스트 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyOrNotDto'
+            examples:
+              일반:
+                $ref: '#/components/examples/BuyOrNot_Form_Modify'
+      responses:
+        '200':
+          description: 살까말까 수정 완료. 수정된 정보를 반환합니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyOrNotDto'
+        '422':
+          description: 살까말까 수정 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 포스트:
+                  $ref: '#/components/examples/Error_PostNotExist'
+    get:
+      summary: 특정 살까말까 포스트 정보 확인
+      operationId: getBuyOrNot
+      description: 특정 살까말까 포스트의 정보를 확인합니다.
+      tags:
+        - BuyOrNot
+      parameters:
+        - name: postId
+          description: 정보를 확인할 포스트 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 특정 살까말까 정보 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyOrNotDto'
+        '422':
+          description: 살까말까 수정 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 포스트:
+                  $ref: '#/components/examples/Error_PostNotExist'
+    delete:
+      summary: 살까말까 포스트 삭제
+      operationId: deleteBuyOrNot
+      description: 특정 살까말까 포스트를 삭제합니다.
+      tags:
+        - BuyOrNot
+      parameters:
+        - name: postId 
+          description: 삭제할 포스트의 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 살까말까 제거 완료
+        '422':
+          description: 살까말까 수정 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 포스트:
+                  $ref: '#/components/examples/Error_PostNotExist'
+  /notices:
+    get:
+      summary: 내 알림 목록 가져오기
+      operationId: getNotices
+      description: >
+        내 알림 목록을 가져옵니다.<br><br>
+        알림은 첫 생성 이후 30일이 지나면 자동으로 삭제됩니다.
+      tags:
+        - Notice
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/sizeParam'
+        - name: type
+          description: 필터링할 알림의 타입입니다. 제공되지 않으면 모든 타입을 가져옵니다.
+          in: query
+          schema:
+            $ref: '#/components/schemas/NoticeType'
+      responses:
+        '200':
+          description: 내 알림 목록
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNoticeDto'
+  /notices/{noticeId}:
+    post:
+      summary: 알림 읽음표시하기
+      operationId: readNotice
+      description: 특정 알림을 읽음표시합니다.
+      tags:
+        - Notice
+      parameters:
+        - name: noticeId
+          description: 읽음표시할 알림 ID입니다.
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 읽음 표시 완료
+        '422':
+          description: 알림 읽음표시 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 알림:
+                  $ref: '#/components/examples/Error_NoticeNotExist'
+                이미 읽음표시 됨:
+                  $ref: '#/components/examples/Error_AlreadyRead'
 components:
   schemas:
+    PaginatedNoticeDto:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseDto'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/NoticeDto'
     ChallengeGroupRecordCreationDto:
       type: object
       properties:
@@ -769,7 +1276,7 @@ components:
       example:
         id: id2003952
         nickname: 굴비왕
-        birthday: 1999-03-01
+        birthday: "1999-03-01"
         gender: male
         check1: false
         check2: true
@@ -806,13 +1313,9 @@ components:
         id: st1
         title: 자린고비 굴비
         imageUrl: http://localhost:8080/image/st1
-    ChallengeGroupRecordDto:
+    ChallengeGroupStatDto:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          description: 챌린지 기록 ID
         challengeGroupId:
           type: integer
           format: int64
@@ -820,18 +1323,27 @@ components:
         userId:
           type: string
           description: 유저 ID
-        startDate:
-          type: string
-          format: date
-          description: 시작일
         continueCount:
           type: integer
           description: 연속 달성 일수
-        day1Status:
-          $ref: '#/components/schemas/ChallengeRecordStatus'
-        day2Status:
-          $ref: '#/components/schemas/ChallengeRecordStatus'
-        day3Status:
+        totalCount:
+          type: integer
+          description: 총 달성 일수
+    ChallengeGroupRecordDto:
+      type: object
+      properties:
+        challengeGroupId:
+          type: integer
+          format: int64
+          description: 챌린지 그룹 ID
+        userId:
+          type: string
+          description: 유저 ID
+        date:
+          type: string
+          format: date
+          description: 기록 날짜
+        status:
           $ref: '#/components/schemas/ChallengeRecordStatus'
     ChallengeGroupDto:
       type: object
@@ -840,13 +1352,12 @@ components:
           type: integer
           format: int64
           description: 챌린지 그룹 ID
-        challengeId:
-          type: integer
-          format: int64
-          description: 챌린지 ID
         ownerId:
           type: string
           description: 챌린지 생성자
+        title:
+          type: string
+          description: 챌린지 제목
         hashtags:
           type: array
           items:
@@ -873,13 +1384,17 @@ components:
           minimum: 4
           maximum: 4
           description: 비밀번호
+      example:
+        id: 0
+        ownerId: id0001
+        title: 배달음식 안시켜먹기
+        hashtags: [ "배달", "음식" ]
+        maxSize: 6
+        peopleCount: 1
+        imageUrl: "http://localhost/images/ch01"
     ChallengeRecordDto:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          description: 챌린지 기록 ID
         challengeId:
           type: integer
           format: int64
@@ -887,19 +1402,28 @@ components:
         userId:
           type: string
           description: 유저 ID
-        startDate:
+        date:
           type: string
           format: date
-          description: 시작일
+          description: 기록일
+        status:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+    ChallengeStatDto:
+      type: object
+      properties:
+        challengeId:
+          type: integer
+          format: int64
+          description: 챌린지 ID
+        userId:
+          type: string
+          description: 유저 ID
         continueCount:
           type: integer
           description: 연속 달성 일수
-        day1Status:
-          $ref: '#/components/schemas/ChallengeRecordStatus'
-        day2Status:
-          $ref: '#/components/schemas/ChallengeRecordStatus'
-        day3Status:
-          $ref: '#/components/schemas/ChallengeRecordStatus'
+        totalCount:
+          type: integer
+          description: 총 달성 일수
     ChallengeRecordStatus:
       type: string
       enum:
@@ -982,7 +1506,8 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           description: 알림 ID
         receiverId:
           type: string
@@ -997,29 +1522,37 @@ components:
           format: date-time
           description: 알림 발송 날짜
         type:
-          type: string
-          enum:
-            - challenge
-            - vote
-            - chat
-          description: 메시지 타입
+          $ref: '#/components/schemas/NoticeType'
+        read:
+          type: boolean
+          description: 메시지를 읽었는지 여부
       required:
         - id
         - receiverId
         - message
         - publishDateTime
         - type
+        - read
       example:
-        id: nt10001
+        id: 0
         receiverId: id2003952
         message: 오늘 아직 챌린지를 달성하지 못했어요.
         publishDateTime: 2024-01-07T14:26:32
         type: challenge
+        read: false
+    NoticeType:
+      type: string
+      enum:
+        - challenge
+        - vote
+        - chat
+      description: 메시지 타입
     BuyOrNotDto:
       type: object
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           description: 살까말까 등록 ID
         writerId:
           type: string
@@ -1055,8 +1588,8 @@ components:
         - goodReason
         - badReason
       example:
-        id: bn10001
-        writerId: id2003952
+        id: 0
+        writerId: id0001
         productName: Tecket 후드티
         productPrice: 97000
         productImageUrl: http://localhost:8080/image/bn1
@@ -1113,7 +1646,7 @@ components:
             value: 4
           - id: 5
             value: 2
-    ErrorResponseDto:
+    ErrorDto:
       type: object
       properties:
         code:
@@ -1193,7 +1726,7 @@ components:
           description: 리프레시 토큰
       required:
         - accessToken
-    RevalidationRequestDto:
+    TokenRefreshRequestDto:
       type: object
       properties:
         refreshToken:
@@ -1225,13 +1758,14 @@ components:
         birthday:
           type: string
           format: date
-          example: 1999-03-01
         gender:
-          type: string
-          enum:
-            - male
-            - female
-    UserChekclistDto:
+          $ref: '#/components/schemas/Gender'
+    Gender:
+      type: string
+      enum:
+        - male
+        - female
+    UserChecklistDto:
       type: object
       properties:
         check1:
@@ -1246,22 +1780,40 @@ components:
           type: boolean
         check6:
           type: boolean
+      example:
+        check1: true
+        check2: true
+        check3: false
+        check4: false
+        check5: true
+        check6: false
     UserHabitDto:
       type: object
       properties:
         avgIncomePerMonth:
           type: integer
+          example: 3600000
         avgSpendingPerMonth:
           type: integer
+          example: 2000000
     UserPatternDto:
       type: object
       properties:
         primeUseDay:
-          type: string
-          format: day
+          $ref: '#/components/schemas/Day'
         primeUseTime:
           type: string
-          format: time
+          example: '20:30:00'
+    Day:
+      type: string
+      enum:
+        - monday
+        - tuesday
+        - wednesday
+        - thursday
+        - friday
+        - saturday
+        - sunday
     NicknameCheckRequestDto:
       type: object
       properties:
@@ -1334,6 +1886,145 @@ components:
         required: false
         method: post
         url: http://localhost:8080/api/v1/users/me/pattern
+    Error_BadRequest:
+      value:
+        code: 1001
+        message: 입력 형식이 잘못되었습니다. (error detail)
+    Error_TokenNotValid:
+      value:
+        code: 2001
+        message: 토큰이 유효하지 않습니다. (token value)
+    Error_TokenExpired:
+      value:
+        code: 2002
+        message: 토큰이 만료되었습니다. (token value)
+    Error_AuthenticationEmpty:
+      value:
+        code: 2003
+        message: 인증 정보가 없습니다.
+    Error_NoAuthorzation:
+      value:
+        code: 2004
+        message: 접근 권한이 없습니다.
+    Error_AlreadyRegistered:
+      value:
+        code: 3000
+        message: 이미 등록된 회원입니다. (id value)
+    Error_NotRegistered:
+      value:
+        code: 3001
+        message: 등록되지 않은 회원입니다. (id value)
+    Error_RegisterNotComplete:
+      value:
+        code: 3002
+        message: 회원정보 입력이 완료되지 않았습니다. (id value)
+    Error_AlreadyEnrolled:
+      value:
+        code: 4000
+        message: 이미 해당 챌린지에 참여중입니다. (challenge id)
+    Error_NotEnrolled:
+      value:
+        code: 4001
+        message: 해당 챌린지를 참여하고 있지 않습니다. (challenge id)
+    Error_ChallengeAlreadyExist:
+      value:
+        code: 4002
+        message: 같은 이름의 챌린지가 이미 존재합니다. (challenge title)
+    Error_ChallengeNotExist:
+      value:
+        code: 4003
+        message: 챌린지가 존재하지 않습니다. (challenge id)
+    Error_NotMyChallenge:
+      value:
+        code: 4004
+        message: 내가 만든 챌린지가 아닙니다. (challenge id)
+    Error_ChallengeAlreadyChecked:
+      value:
+        code: 4005
+        message: 이미 완료한 챌린지입니다. (challenge id)
+    Error_PostLimitExceed:
+      value:
+        code: 5001
+        message: 포스트 등록 한도를 초과하였습니다.
+    Error_PostNotExist:
+      value:
+        code: 5002
+        message: 포스트가 존재하지 않습니다. (post id)
+    Error_NoticeNotExist:
+      value:
+        code: 6001
+        message: 알림이 존재하지 않습니다. (notice id)
+    Error_AlreadyRead:
+      value:
+        code: 6002
+        message: 이미 읽은 알림입니다. (notice id)
+    LoginResponse_Complete:
+      value:
+        accessToken: token
+        refreshToken: token
+        registerComplete: true
+    LoginResponse_InProgress:
+      value:
+        accessToken: token
+        refreshToken: token
+        registerComplete: false
+        nextLinkDto:
+          required: true
+          method: post
+          url: http://localhost:8080/api/v1/users/me/info
+    ChallengeGroup_Form_Normal:
+      value:
+        ownerId: id0001
+        title: 배달음식 안시켜먹기
+        hashtags: [ "배달", "음식" ]
+        maxSize: 6
+        imageUrl: "http://localhost/images/ch01"
+    ChallengeGroup_Form_Hidden:
+      value:
+        ownerId: id0001
+        title: 택시 안타기
+        hashtags: [ "교통" ]
+        maxSize: 6
+        imageUrl: "http://localhost/images/ch01"
+        isHidden: true
+        password: 1234
+    ChallengeGroup_Form_Modify:
+      value:
+        title: 배달음식 저얼대 안시켜먹기
+        hashtags: [ "음식" ]
+        maxSize: 10
+        peopleCount: 1
+        imageUrl: "http://localhost/images/ch01"
+    BuyOrNot_Form_Normal:
+      value:
+        writerId: "id0001"
+        productName: "Tecket 후드티"
+        productPrice: 97000
+        productImageUrl: "http://localhost:8080/image/bn1"
+        goodReason: "후드티 안산지 벌써 2년 다됨"
+        badReason: "집에 후드티만 10장 있긴함"
+    BuyOrNot_Form_Modify:
+      value:
+        productName: "Tecket 후드티"
+        productPrice: 90000
+        productImageUrl: "http://localhost:8080/image/bn2"
+        goodReason: "후드티 안산지 벌써 2년 다됨"
+        badReason: "집에 후드티 12장 있음 ㅋㅋ"
+  parameters:
+    pageParam:
+      name: page
+      description: 페이지 번호입니다. 1부터 시작합니다.
+      in: query
+      schema:
+        type: integer
+        default: 1
+    sizeParam:
+      name: size
+      description: 페이지 사이즈입니다. 기본 10입니다.
+      in: query
+      schema:
+        type: integer
+        default: 10
   requestBodies:
     RegisterReq:
       required: true
@@ -1346,36 +2037,37 @@ components:
       description: 컨텐츠를 찾을 수 없음
     BadRequest:
       description: 잘못된 요청 형식
-    Unauthorized:
-      description: 로그인되지 않았거나 잘못된 인증 정보
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponseDto'
+            $ref: '#/components/schemas/ErrorDto'
           examples:
+            잘못된 입력 형식:
+              $ref: '#/components/examples/Error_BadRequest'
+    Unauthorized:
+      description: 인증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDto'
+          examples:
+            잘못된 토큰:
+              $ref: '#/components/examples/Error_TokenNotValid'
+            만료된 토큰:
+              $ref: '#/components/examples/Error_TokenExpired'
             인증 정보 없음:
-              value:
-                code: 1001
-                message: 인증 정보 없음 (Authorization Header Empty)
-            잘못된 인증 정보:
-              value:
-                code: 1002
-                message: 잘못된 인증 정보 (Token Not Valid)
+              $ref: '#/components/examples/Error_AuthenticationEmpty'
     Forbidden:
       description: 요청 권한이 없음
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponseDto'
+            $ref: '#/components/schemas/ErrorDto'
           examples:
             사용자 정보 입력 미완료:
-              value:
-                code: 2005
-                message: 사용자 정보 입력 미완료
+              $ref: '#/components/examples/Error_RegisterNotComplete'
             권한 없음:
-              value:
-                code: 2006
-                message: 접근 권안 없음
+              $ref: '#/components/examples/Error_NoAuthorzation'
     RegisterSuccess:
       description: 회원가입 성공
     RegisterFail:
@@ -1383,7 +2075,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponseDto'
+            $ref: '#/components/schemas/ErrorDto'
           examples:
             이미 등록된 회원:
               value:
@@ -1419,7 +2111,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponseDto'
+            $ref: '#/components/schemas/ErrorDto'
           examples:
             유효하지 않은 토큰:
               value:
@@ -1438,7 +2130,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponseDto'
+            $ref: '#/components/schemas/ErrorDto'
           examples:
             잘못된 입력 형식:
               value:
@@ -1452,19 +2144,17 @@ components:
 security:
   - bearerAuth: []
 tags:
+  - name: ETC
+    description: 기타
   - name: Auth
     description: 인증
   - name: User
     description: 유저
   - name: Challenge
     description: 작심삼일 챌린지
-  - name: ChallengeRecord
-    description: 작심삼일 챌린지 기록
   - name: ChallengeGroup
     description: 작심삼일 챌린지 그룹
-  - name: ChallengeGroupRecord
-    description: 작심삼일 챌린지 그룹 기록
   - name: BuyOrNot
     description: 살까말까
-  - name: Image
-    description: 이미지
+  - name: Notice
+    description: 알림
