@@ -1,4 +1,4 @@
-package com.goolbitg.api.exceptions;
+package com.goolbitg.api.exception;
 
 import org.springframework.http.HttpStatus;
 

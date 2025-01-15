@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.goolbitg.api.controllers.EtcController;
-import com.goolbitg.api.exceptions.AuthException;
-import com.goolbitg.api.exceptions.CommonException;
+import com.goolbitg.api.controller.EtcController;
+import com.goolbitg.api.exception.AuthException;
+import com.goolbitg.api.exception.CommonException;
 
 /**
  * EtcIntegrationTest

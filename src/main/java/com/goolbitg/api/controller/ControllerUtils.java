@@ -1,4 +1,4 @@
-package com.goolbitg.api.controllers;
+package com.goolbitg.api.controller;
 
 import java.util.Optional;
 

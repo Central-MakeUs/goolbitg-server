@@ -1,4 +1,4 @@
-package com.goolbitg.api.controllers;
+package com.goolbitg.api.controller;
 
 import java.util.Optional;
 
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.EtcApi;
-import com.goolbitg.api.exceptions.AuthException;
+import com.goolbitg.api.exception.AuthException;
 
 /**
  * ImageController
