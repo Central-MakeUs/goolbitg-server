@@ -1220,11 +1220,7 @@ components:
           format: date
           description: 생일
         gender:
-          type: string
-          enum:
-            - male
-            - female
-          description: 성별
+          $ref: '#/components/schemas/Gender'
         check1:
           type: boolean
           description: 체크리스트 1 체크 여부
