@@ -15,7 +15,6 @@ import com.goolbitg.api.controllers.UserController;
  * UserIntegrationTest
  */
 @WebMvcTest(UserController.class)
-
 public class UserIntegrationTest {
 
     @Autowired
