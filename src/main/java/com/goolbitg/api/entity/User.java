@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import com.goolbitg.api.model.Gender;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * User
@@ -19,6 +20,7 @@ import lombok.Getter;
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
 public class User {
 
     @Id
@@ -36,6 +38,9 @@ public class User {
 
     @Column(name = "birthday")
     private LocalDate birthday;
+
+    @Column(name = "register_date")
+    private LocalDate registerDate;
 
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)

@@ -162,4 +162,3 @@ CREATE TABLE challenge_group_user_stats (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-

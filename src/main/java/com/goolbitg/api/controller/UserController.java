@@ -10,6 +10,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.UserApi;
 import com.goolbitg.api.model.UserDto;
+import com.goolbitg.api.security.SecurityUtils;
 import com.goolbitg.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,8 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<UserDto> getMyInfo() throws Exception {
-        UserDto dto = userService.getUser("id0001");
+        UserDto dto = userService.getUser(SecurityUtils.getLoginUserId());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
-
 
 }

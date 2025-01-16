@@ -1,5 +1,7 @@
 package com.goolbitg.api.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
 
 import com.goolbitg.api.entity.User;
@@ -9,4 +11,6 @@ import com.goolbitg.api.entity.User;
  */
 public interface UserRepository extends CrudRepository<User, String> {
 
+    Optional<User> findByKakaoId(String kakaoId);
+    Optional<User> findByAppleId(String appleId);
 }
