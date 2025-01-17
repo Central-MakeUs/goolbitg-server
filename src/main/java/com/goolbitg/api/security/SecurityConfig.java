@@ -27,12 +27,14 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     @Value("${app.security.jwt.keystore-location}")
     private String keyStorePath;
@@ -42,6 +44,9 @@ public class SecurityConfig {
     private String keyAlias;
     @Value("${app.security.jwt.private-key-passphrase}")
     private String privateKeyPassphrase;
+
+    // FIXME: injecting logout filter shots circular injection problem
+    // private final LogoutFilter logoutFilter;
 
     @Bean
     public KeyStore keyStore() {
@@ -113,6 +118,7 @@ public class SecurityConfig {
                     jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter())
                 )
             );
+            // .addFilterBefore(logoutFilter, BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 

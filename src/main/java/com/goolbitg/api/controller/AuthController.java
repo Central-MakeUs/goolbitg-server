@@ -12,14 +12,19 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.AuthApi;
 import com.goolbitg.api.model.AuthRequestDto;
+import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.LoginResponseDto;
+import com.goolbitg.api.model.TokenRefreshRequestDto;
+import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * AuthController
  */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class AuthController implements AuthApi {
@@ -40,7 +45,22 @@ public class AuthController implements AuthApi {
     @Override
     public ResponseEntity<Void> register(@Valid AuthRequestDto authRequestDto) throws Exception {
         userService.register(authRequestDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<Void> logout() throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+        userService.logout(userId);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<AuthResponseDto> refresh(@Valid TokenRefreshRequestDto tokenRefreshRequestDto)
+            throws Exception {
+        AuthResponseDto response = userService.getAccessToken(tokenRefreshRequestDto);
+        log.info("AuthResponse: " + response);
+        return ResponseEntity.ok(response);
     }
 
 }

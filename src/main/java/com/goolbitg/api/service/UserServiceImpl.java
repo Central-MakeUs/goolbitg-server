@@ -1,12 +1,8 @@
 package com.goolbitg.api.service;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -16,9 +12,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.goolbitg.api.controller.UserController;
 import com.goolbitg.api.entity.User;
+import com.goolbitg.api.entity.UserStats;
+import com.goolbitg.api.entity.UserSurvey;
+import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
@@ -27,7 +26,10 @@ import com.goolbitg.api.model.LoginType;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
 import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.repository.UserRepository;
+import com.goolbitg.api.repository.UserStatsRepository;
+import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.repository.UserTokenRepository;
+import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.security.JwtManager;
 
 import lombok.RequiredArgsConstructor;
@@ -38,11 +40,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserRepository userRepository;
+    @Autowired
+    private final UserSurveyRepository userSurveyRepository;
+    @Autowired
+    private final UserStatsRepository userStatsRepository;
     @Autowired
     private final UserTokenRepository tokenRepository;
     @Autowired
@@ -65,29 +72,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public LoginResponseDto login(AuthRequestDto request) {
         Jwt jwt = extractToken(request);
         Optional<User> result = findUser(jwt, request);
 
-
-        log.info("User Found: " + result);
         if (result.isEmpty()) {
             throw UserException.userNotExist(jwt.getSubject());
         }
         User user = result.get();
 
-        log.info("User exists: " + user);
-        UserDetails details = org.springframework.security.core.userdetails.User
-            .withUsername(user.getId())
-            .password("")
-            .authorities(List.of())
-            .build();
+        UserDetails details = AuthUtil.createUserDetails(user.getId());
 
-        log.info("UserDetails created:" + details);
         String accessToken = jwtManager.create(details);
         String refreshToken = createRefreshToken(user.getId());
 
-        log.info("token creation success: (" + accessToken + "," + refreshToken + ")");
         LoginResponseDto dto = new LoginResponseDto();
         dto.setAccessToken(accessToken);
         dto.setRefreshToken(refreshToken);
@@ -95,6 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void register(AuthRequestDto request) {
         Jwt jwt = extractToken(request);
         Optional<User> result = findUser(jwt, request);
@@ -104,7 +104,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
-        user.setId(String.format("id%04d", idSeq++));
+        String userId = String.format("id%04d", idSeq++);
+        user.setId(userId);
         if (request.getType() == LoginType.KAKAO) {
             user.setKakaoId(jwt.getSubject());
         } else {
@@ -112,11 +113,32 @@ public class UserServiceImpl implements UserService {
         }
         user.setRegisterDate(LocalDate.now());
         userRepository.save(user);
+
+        UserSurvey survey = new UserSurvey();
+        survey.setUserId(userId);
+        userSurveyRepository.save(survey);
+
+        UserStats stats = new UserStats();
+        stats.setUserId(userId);
+        userStatsRepository.save(stats);
     }
 
     @Override
     public AuthResponseDto getAccessToken(TokenRefreshRequestDto request) {
-        return null;
+        String refreshToken = request.getRefreshToken();
+        Optional<String> result = tokenRepository.findUserIdByRefreshToken(refreshToken);
+
+        if (result.isEmpty()) {
+            throw AuthException.tokenExpired(refreshToken);
+        }
+        String userId = result.get();
+        UserDetails details = AuthUtil.createUserDetails(userId);
+        String accessToken = jwtManager.create(details);
+
+        AuthResponseDto dto = new AuthResponseDto();
+        dto.setAccessToken(accessToken);
+        dto.setRefreshToken(refreshToken);
+        return dto;
     }
 
     private String createRefreshToken(String userId) {
@@ -156,5 +178,10 @@ public class UserServiceImpl implements UserService {
             result = userRepository.findByAppleId(id);
         }
         return result;
+    }
+
+    @Override
+    public void logout(String userId) {
+        tokenRepository.deleteByUserId(userId);
     }
 }

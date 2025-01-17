@@ -15,5 +15,6 @@ public interface UserService {
     void register(AuthRequestDto request);
     LoginResponseDto login(AuthRequestDto request);
     AuthResponseDto getAccessToken(TokenRefreshRequestDto request);
+    void logout(String userId);
 
 }

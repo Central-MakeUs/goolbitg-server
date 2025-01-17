@@ -31,7 +31,13 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
 
     @Override
     public void deleteByUserId(String userId) {
+        // TODO: 없는 토큰 제거하려고 하면 에러 뜨는가?
         store.remove(userId);
+    }
+
+    @Override
+    public boolean isLoggedIn(String userId) {
+        return store.containsKey(userId);
     }
 
 }

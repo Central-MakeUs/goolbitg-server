@@ -1,13 +1,15 @@
 package com.goolbitg.api.security;
 
+import java.util.List;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
- * SecurityUtils
+ * AuthUtil
  */
-public class SecurityUtils {
+public class AuthUtil {
 
     public static String getLoginUserId() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -21,5 +23,14 @@ public class SecurityUtils {
             id = principal.toString();
         }
         return id;
+    }
+
+    public static UserDetails createUserDetails(String userId) {
+        UserDetails details = org.springframework.security.core.userdetails.User
+            .withUsername(userId)
+            .password("")
+            .authorities(List.of())
+            .build();
+        return details;
     }
 }
