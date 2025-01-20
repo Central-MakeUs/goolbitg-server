@@ -1220,11 +1220,7 @@ components:
           format: date
           description: 생일
         gender:
-          type: string
-          enum:
-            - male
-            - female
-          description: 성별
+          $ref: '#/components/schemas/Gender'
         check1:
           type: boolean
           description: 체크리스트 1 체크 여부
@@ -1730,15 +1726,17 @@ components:
         - size
         - page
         - items
+    LoginType:
+      type: string
+      enum:
+        - KAKAO
+        - APPLE
+      description: 로그인 타입 (카카오 또는 애플)
     AuthRequestDto:
       type: object
       properties:
         type:
-          type: string
-          enum:
-            - KAKAO
-            - APPLE
-          description: 로그인 타입 (카카오 또는 애플)
+          $ref: '#/components/schemas/LoginType'
         idToken:
           type: string
           description: id_token
@@ -1750,11 +1748,9 @@ components:
       properties:
         accessToken:
           type: string
-          nullable: false
           description: 엑세스 토큰
         refreshToken:
           type: string
-          nullable: true
           description: 리프레시 토큰
       required:
         - accessToken
@@ -1775,7 +1771,6 @@ components:
               type: boolean
               description: 정보등록 완료 여부
             nextLinkDto:
-              nullable: true
               $ref: '#/components/schemas/LinkDto'
           required:
             - registerComplete
