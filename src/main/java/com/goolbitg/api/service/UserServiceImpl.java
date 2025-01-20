@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Random;
 
+import jakarta.validation.ValidationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -212,10 +214,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public NicknameCheckResponseDto isNicknameExist(NicknameCheckRequestDto nickname) {
-        Optional<User> result = userRepository.findByNickname(nickname.getNickname());
-
         NicknameCheckResponseDto dto = new NicknameCheckResponseDto();
-        dto.setDuplicated(result.isPresent());
+        dto.setDuplicated(isNicknameExistInner(nickname.getNickname()));
         return dto;
     }
 
@@ -225,6 +225,13 @@ public class UserServiceImpl implements UserService {
         Optional<User> result = userRepository.findById(userId);
         if (result.isEmpty()) {
             throw UserException.userNotExist(userId);
+        }
+
+        if (isNicknameExistInner(request.getNickname())) {
+            // TODO: Integrated validation error message required.
+            throw new IllegalArgumentException(
+                "이미 존재하는 닉네임입니다. (" + request.getNickname() + ")"
+            );
         }
 
         User user = result.get();
@@ -280,5 +287,10 @@ public class UserServiceImpl implements UserService {
 
         survey.setPrimeUseTime(FormatUtil.parseTime(request.getPrimeUseTime()));
         userSurveyRepository.save(survey);
+    }
+
+    private boolean isNicknameExistInner(String nickname) {
+        Optional<User> result = userRepository.findByNickname(nickname);
+        return result.isPresent();
     }
 }
