@@ -1,9 +1,11 @@
 package com.goolbitg.api.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -26,36 +28,37 @@ public class UserSurvey {
     private String userId;
 
     @Column(name = "check_1")
-    private boolean check1;
+    private Boolean check1;
 
     @Column(name = "check_2")
-    private boolean check2;
+    private Boolean check2;
 
     @Column(name = "check_3")
-    private boolean check3;
+    private Boolean check3;
 
     @Column(name = "check_4")
-    private boolean check4;
+    private Boolean check4;
 
     @Column(name = "check_5")
-    private boolean check5;
+    private Boolean check5;
 
     @Column(name = "check_6")
-    private boolean check6;
+    private Boolean check6;
 
     @Column(name = "avg_income_per_month")
-    private int avgIncomePerMonth;
+    private Integer avgIncomePerMonth;
 
     @Column(name = "avg_spending_per_month")
-    private int avgSpendingPerMonth;
+    private Integer avgSpendingPerMonth;
 
     @Column(name = "spending_habit_score")
-    private int spendingHabitScore;
+    private Integer spendingHabitScore;
 
     @Column(name = "prime_use_day")
+    @Enumerated(EnumType.STRING)
     private Day primUseDay;
 
     @Column(name = "prime_use_time")
-    private LocalDateTime primeUseTime;
+    private LocalTime primeUseTime;
 
 }

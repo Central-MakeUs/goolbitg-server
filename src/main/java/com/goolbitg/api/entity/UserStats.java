@@ -22,12 +22,12 @@ public class UserStats {
     private String userId;
 
     @Column(name = "challenge_count")
-    private int challengeCount;
+    private Integer challengeCount;
 
     @Column(name = "post_count")
-    private int postCount;
+    private Integer postCount;
 
     @Column(name = "achivement_guage")
-    private float achivementGuage;
+    private Float achivementGuage;
 
 }

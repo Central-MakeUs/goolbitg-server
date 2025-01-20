@@ -111,6 +111,7 @@ public class SecurityConfig {
             .formLogin(formLogin -> formLogin.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/test").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2ResourceServer -> 

@@ -13,7 +13,7 @@ INSERT INTO user_surveys (
     avg_income_per_month, avg_spending_per_month, spending_habit_score,
     prime_use_day, prime_use_time
 ) VALUES ( 'id0001', 0, 1, 1, 0, 1, 1,
-    3600000, 2000000, 60, 'friday', '20:00:00' );
+    3600000, 2000000, 60, 'FRIDAY', '20:00:00' );
 
 INSERT INTO user_stats (
     user_id, challenge_count, post_count, achivement_guage
@@ -61,3 +61,14 @@ INSERT INTO challenge_group_stats (
 INSERT INTO challenge_group_records (
     group_id, user_id, date, status
 ) VALUES ( 1, 'id0001', '2025-01-14', 'fail' );
+
+
+-- user for registration test
+INSERT INTO users ( id, register_date) 
+VALUES ( 'id0002', '2025-01-15' );
+
+INSERT INTO user_surveys ( user_id ) 
+VALUES ( 'id0002' );
+
+INSERT INTO user_stats ( user_id )
+VALUES ( 'id0002' );
