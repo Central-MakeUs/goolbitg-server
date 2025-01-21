@@ -26,6 +26,18 @@ public class RestApiErrorHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDto> handleValidationException(
+        HttpServletRequest request,
+        IllegalArgumentException ex,
+        Locale locale
+    ) {
+        ErrorDto error = new ErrorDto();
+        error.setCode(1001);
+        error.setMessage(ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(CommonException.class)
     public ResponseEntity<ErrorDto> handleCommonException(
         HttpServletRequest request,

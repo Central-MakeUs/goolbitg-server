@@ -45,9 +45,6 @@ public class SecurityConfig {
     @Value("${app.security.jwt.private-key-passphrase}")
     private String privateKeyPassphrase;
 
-    // FIXME: injecting logout filter shots circular injection problem
-    // private final LogoutFilter logoutFilter;
-
     @Bean
     public KeyStore keyStore() {
         try {
@@ -112,6 +109,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/test").permitAll()
+                .requestMatchers("/token").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
             )
@@ -120,7 +118,6 @@ public class SecurityConfig {
                     jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter())
                 )
             );
-            // .addFilterBefore(logoutFilter, BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 

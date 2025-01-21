@@ -28,5 +28,11 @@ public abstract class AuthException {
             "접근 권한이 없습니다.",
             HttpStatus.FORBIDDEN);
     }
+    public static CommonException loggedOut() {
+        return new CommonException(
+            2005,
+            "로그아웃된 유저입니다.",
+            HttpStatus.FORBIDDEN);
+    }
 
 }

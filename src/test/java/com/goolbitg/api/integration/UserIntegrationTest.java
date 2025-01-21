@@ -84,6 +84,21 @@ public class UserIntegrationTest {
 
     @Test
     @WithMockUser(value = NEW_USER_ID)
+    void cannot_update_duplicated_nickname() throws Exception {
+        UserInfoDto requestBody = new UserInfoDto();
+        requestBody.setNickname("굴비왕");
+        requestBody.setBirthday(LocalDate.parse("1999-03-01"));
+        requestBody.setGender(Gender.FEMALE);
+
+        String jsonBody = mapper.writeValueAsString(requestBody);
+        mockMvc.perform(post("/users/me/info")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(value = NEW_USER_ID)
     void update_checklist() throws Exception {
         UserChecklistDto requestBody = new UserChecklistDto();
         requestBody.setCheck1(true);

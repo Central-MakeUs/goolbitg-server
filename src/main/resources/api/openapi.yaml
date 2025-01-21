@@ -23,7 +23,7 @@ info:
     자세한 에러코드 및 메시지 정보는 **아래 링크👇**에서 확인할 수 있습니다. <br>
     [에러코드 목록](https://github.com/Central-MakeUs/goolbitg-server/blob/spec/v1/docs/errors.md)
   termsOfService: http://localhost:8080/terms-of-service
-  version: 1.0.2
+  version: 1.0.3
 servers:
   - url: http://api.goolbitg.site/v1
     description: 메인 서버
@@ -79,6 +79,23 @@ paths:
                     type: string
                     format: uri
                     description: 업로드한 이미지 url
+  /token:
+    get:
+      summary: 루트 유저 엑세스 토큰 발급
+      operationId: getRootAccess
+      description: 루트 유저의 엑세스 토큰을 발급합니다. 테스트용입니다.
+      tags:
+        - ETC
+      responses:
+        '200':
+          description: 엑세스 토큰 발급 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDto'
+              examples:
+                응답:
+                  $ref: '#/components/examples/LoginResponse_Complete'
   /auth/register:
     post:
       summary: 회원가입
@@ -229,6 +246,18 @@ paths:
                   $ref: '#/components/examples/Error_TokenNotValid'
                 토큰 기한 만료:
                   $ref: '#/components/examples/Error_TokenExpired'
+  /auth/unregister:
+    post:
+      summary: 회원 탈퇴
+      operationId: unregister
+      description: > 
+        회원을 탈퇴합니다.<br><br>
+        현재 로그인된 상태여야 합니다.
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: 회원탈퇴 완료
   /users/me:
     get:
       summary: 현재 로그인한 유저 정보 반환
@@ -861,6 +890,7 @@ paths:
                   $ref: '#/components/examples/Error_NotEnrolled'
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
+
   /challengeGroupRecords/{groupId}/check:
     post:
       summary: 챌린지 그룹 기록 체크
@@ -1933,6 +1963,10 @@ components:
       value:
         code: 2004
         message: 접근 권한이 없습니다.
+    Error_LoggedOut:
+      value:
+        code: 2005
+        message: 로그아웃된 유저입니다.
     Error_AlreadyRegistered:
       value:
         code: 3001
@@ -2091,6 +2125,8 @@ components:
               $ref: '#/components/examples/Error_RegisterNotComplete'
             권한 없음:
               $ref: '#/components/examples/Error_NoAuthorzation'
+            로그아웃된 유저:
+              $ref: '#/components/examples/Error_LoggedOut'
     RegisterSuccess:
       description: 회원가입 성공
     RegisterFail:

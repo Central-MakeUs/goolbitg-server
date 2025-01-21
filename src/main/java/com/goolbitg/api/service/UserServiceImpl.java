@@ -212,10 +212,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public NicknameCheckResponseDto isNicknameExist(NicknameCheckRequestDto nickname) {
-        Optional<User> result = userRepository.findByNickname(nickname.getNickname());
-
         NicknameCheckResponseDto dto = new NicknameCheckResponseDto();
-        dto.setDuplicated(result.isPresent());
+        dto.setDuplicated(isNicknameExistInner(nickname.getNickname()));
         return dto;
     }
 
@@ -225,6 +223,13 @@ public class UserServiceImpl implements UserService {
         Optional<User> result = userRepository.findById(userId);
         if (result.isEmpty()) {
             throw UserException.userNotExist(userId);
+        }
+
+        if (isNicknameExistInner(request.getNickname())) {
+            // TODO: Integrated validation error message required.
+            throw new IllegalArgumentException(
+                "이미 존재하는 닉네임입니다. (" + request.getNickname() + ")"
+            );
         }
 
         User user = result.get();
@@ -280,5 +285,21 @@ public class UserServiceImpl implements UserService {
 
         survey.setPrimeUseTime(FormatUtil.parseTime(request.getPrimeUseTime()));
         userSurveyRepository.save(survey);
+    }
+
+    private boolean isNicknameExistInner(String nickname) {
+        Optional<User> result = userRepository.findByNickname(nickname);
+        return result.isPresent();
+    }
+
+    @Override
+    @Transactional
+    public void unregister(String userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw UserException.userNotExist(userId);
+        }
+        userSurveyRepository.deleteById(userId);
+        userStatsRepository.deleteById(userId);
+        userRepository.deleteById(userId);
     }
 }
