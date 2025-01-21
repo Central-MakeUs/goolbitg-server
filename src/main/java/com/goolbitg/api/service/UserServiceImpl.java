@@ -6,8 +6,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Random;
 
-import jakarta.validation.ValidationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -292,5 +290,16 @@ public class UserServiceImpl implements UserService {
     private boolean isNicknameExistInner(String nickname) {
         Optional<User> result = userRepository.findByNickname(nickname);
         return result.isPresent();
+    }
+
+    @Override
+    @Transactional
+    public void unregister(String userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw UserException.userNotExist(userId);
+        }
+        userSurveyRepository.deleteById(userId);
+        userStatsRepository.deleteById(userId);
+        userRepository.deleteById(userId);
     }
 }

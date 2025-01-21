@@ -890,6 +890,7 @@ paths:
                   $ref: '#/components/examples/Error_NotEnrolled'
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
+
   /challengeGroupRecords/{groupId}/check:
     post:
       summary: 챌린지 그룹 기록 체크
@@ -1962,6 +1963,10 @@ components:
       value:
         code: 2004
         message: 접근 권한이 없습니다.
+    Error_LoggedOut:
+      value:
+        code: 2005
+        message: 로그아웃된 유저입니다.
     Error_AlreadyRegistered:
       value:
         code: 3001
@@ -2120,6 +2125,8 @@ components:
               $ref: '#/components/examples/Error_RegisterNotComplete'
             권한 없음:
               $ref: '#/components/examples/Error_NoAuthorzation'
+            로그아웃된 유저:
+              $ref: '#/components/examples/Error_LoggedOut'
     RegisterSuccess:
       description: 회원가입 성공
     RegisterFail:

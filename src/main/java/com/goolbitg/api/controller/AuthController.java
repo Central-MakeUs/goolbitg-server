@@ -49,6 +49,12 @@ public class AuthController implements AuthApi {
     }
 
     @Override
+    public ResponseEntity<Void> unregister() throws Exception {
+        userService.unregister(AuthUtil.getLoginUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<Void> logout() throws Exception {
         String userId = AuthUtil.getLoginUserId();
         userService.logout(userId);

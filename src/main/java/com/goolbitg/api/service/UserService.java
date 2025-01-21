@@ -19,6 +19,7 @@ public interface UserService {
 
     UserDto getUser(String userId) throws Exception;
     void register(AuthRequestDto request);
+    void unregister(String userId);
     LoginResponseDto login(AuthRequestDto request);
     AuthResponseDto getAccessToken(TokenRefreshRequestDto request);
     void logout(String userId);

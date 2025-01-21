@@ -9,11 +9,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.EtcApi;
 import com.goolbitg.api.exception.AuthException;
-import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.LoginResponseDto;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.JwtManager;
-import com.goolbitg.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
