@@ -1800,8 +1800,6 @@ components:
             registerComplete:
               type: boolean
               description: 정보등록 완료 여부
-            nextLinkDto:
-              $ref: '#/components/schemas/LinkDto'
           required:
             - registerComplete
     UserInfoDto:
@@ -1882,28 +1880,6 @@ components:
       properties:
         duplicated:
           type: boolean
-    LinkDto:
-      type: object
-      properties:
-        required:
-          type: boolean
-          description: 필수 여부
-        method:
-          type: string
-          enum:
-            - get
-            - post
-            - put
-            - delete
-          description: 요청 메소드
-        url:
-          type: string
-          format: uri
-          description: 요청 주소
-      example:
-        required: true
-        method: post
-        url: 'http://localhost:8080/api/v1/users/me/info'
   examples:
     PrivateChallenge:
       value:
@@ -2022,13 +1998,13 @@ components:
         registerComplete: true
     LoginResponse_InProgress:
       value:
+        _links:
+          next:
+            href: "http://localhost:8080/v1/users/me/info"
+            type: "POST"
         accessToken: token
         refreshToken: token
         registerComplete: false
-        nextLinkDto:
-          required: true
-          method: post
-          url: http://localhost:8080/api/v1/users/me/info
     ChallengeGroup_Form_Normal:
       value:
         ownerId: id0001

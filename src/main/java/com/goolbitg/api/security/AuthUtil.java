@@ -24,13 +24,4 @@ public class AuthUtil {
         }
         return id;
     }
-
-    public static UserDetails createUserDetails(String userId) {
-        UserDetails details = org.springframework.security.core.userdetails.User
-            .withUsername(userId)
-            .password("")
-            .authorities(List.of())
-            .build();
-        return details;
-    }
 }
