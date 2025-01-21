@@ -1,5 +1,8 @@
 package com.goolbitg.api.service;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -7,6 +10,8 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -14,6 +19,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.goolbitg.api.controller.UserController;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStats;
 import com.goolbitg.api.entity.UserSurvey;
@@ -106,16 +112,47 @@ public class UserServiceImpl implements UserService {
             throw UserException.userNotExist(jwt.getSubject());
         }
         User user = result.get();
+        UserSurvey survey = userSurveyRepository.findById(user.getId())
+            .orElseThrow();
 
-        UserDetails details = AuthUtil.createUserDetails(user.getId());
-
-        String accessToken = jwtManager.create(details);
+        String accessToken = jwtManager.create(user.getId());
         String refreshToken = createRefreshToken(user.getId());
 
         LoginResponseDto dto = new LoginResponseDto();
         dto.setAccessToken(accessToken);
         dto.setRefreshToken(refreshToken);
+
+        Link nextLink = getNextRegisterLink(user, survey);
+        dto.setRegisterComplete(nextLink == null);
+        if (nextLink != null)
+            dto.add(nextLink);
+
         return dto;
+    }
+
+    private Link getNextRegisterLink(User user, UserSurvey survey) {
+        WebMvcLinkBuilder builder = null;
+        try {
+            if (user.getNickname() == null)
+                builder = linkTo(methodOn(UserController.class).postUserInfo(null));
+            else if (survey.getCheck1() == null)
+                builder = linkTo(methodOn(UserController.class).postUserInfo(null));
+            else if (survey.getAvgIncomePerMonth() == null)
+                builder = linkTo(methodOn(UserController.class).postUserInfo(null));
+        } catch (Exception e) {
+            log.error("getNextRegisterLink() falied.");
+        }
+
+        if (builder != null)
+            return builder.withRel("next").withType("POST");
+
+        return null;
+    }
+
+    private Boolean validateRegisterComplete(User user, UserSurvey survey) {
+        return user.getNickname() != null &&
+                survey.getCheck1() != null &&
+                survey.getAvgIncomePerMonth() != null;
     }
 
     @Override
@@ -157,8 +194,7 @@ public class UserServiceImpl implements UserService {
             throw AuthException.tokenExpired(refreshToken);
         }
         String userId = result.get();
-        UserDetails details = AuthUtil.createUserDetails(userId);
-        String accessToken = jwtManager.create(details);
+        String accessToken = jwtManager.create(userId);
 
         AuthResponseDto dto = new AuthResponseDto();
         dto.setAccessToken(accessToken);
