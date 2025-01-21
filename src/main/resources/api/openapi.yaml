@@ -246,7 +246,7 @@ paths:
                   $ref: '#/components/examples/Error_TokenNotValid'
                 토큰 기한 만료:
                   $ref: '#/components/examples/Error_TokenExpired'
-  /auth/Unregister:
+  /auth/unregister:
     post:
       summary: 회원 탈퇴
       operationId: unregister
