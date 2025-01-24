@@ -72,6 +72,26 @@ public class ChallengeIntegrationTest {
     @Test
     @Transactional
     @WithMockUser(ROOT_USER)
+    void get_challenge_records() throws Exception {
+        mockMvc.perform(get("/challengeRecords"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(1));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(ROOT_USER)
+    void get_challenge_records_of_specific_status() throws Exception {
+        mockMvc.perform(get("/challengeRecords")
+            .param("date", "2025-01-17")
+            .param("status", "SUCCESS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(1));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(ROOT_USER)
     void enroll_challenge() throws Exception {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))

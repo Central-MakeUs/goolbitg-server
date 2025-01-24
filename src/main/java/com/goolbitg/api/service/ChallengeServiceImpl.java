@@ -224,8 +224,12 @@ public class ChallengeServiceImpl implements ChallengeService {
     public PaginatedChallengeRecordDto getChallengeRecords(Integer page, Integer size, LocalDate date, ChallengeRecordStatus status) {
         PageRequest pageReq = PageRequest.of(page, size);
         String userId = AuthUtil.getLoginUserId();
+        if (date == null) {
+            date = getToday();
+        }
+
         Page<ChallengeRecord> result = 
-            challengeRecordRepository.findAllByUserIdAndDate(pageReq, userId, date);
+            challengeRecordRepository.findAllByUserIdAndDateAndStatus(pageReq, userId, date, status);
 
         return getPaginatedRecordDto(result);
     }
