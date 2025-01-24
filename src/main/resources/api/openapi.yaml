@@ -606,6 +606,35 @@ paths:
               examples:
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
+  /challengeTripple/{challengeId}:
+    get:
+      summary: 3일치 작심삼일 기록 확인
+      operationId: getChallengeTripple
+      description: 오늘 도전중인 3일치 챌린지 정보를 가져옵니다.
+      tags:
+        - Challenge
+      parameters:
+        - $ref: '#/components/parameters/challengeIdParam'
+      responses:
+        '200':
+          description: 3일치 챌린지 정보 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeTrippleDto'
+        '422':
+          description: 3일치 챌린지 정보 반환 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
+                이미 완료한 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeAlreadyChecked'
   /challengeGroups:
     get:
       summary: 챌린지 그룹 목록 가져오기
@@ -1405,6 +1434,29 @@ components:
           description: 기록일
         status:
           $ref: '#/components/schemas/ChallengeRecordStatus'
+        location:
+          type: integer
+          maximum: 0
+          minimum: 2
+          description: 오늘 날짜가 몇 번째인지 나타내는 수 (0~2)
+    ChallengeTrippleDto:
+      type: object
+      properties:
+        challengeId:
+          type: integer
+          format: int64
+          example: 1
+        check1:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        check2:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        check3:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        location:
+          type: integer
+          minimum: 0
+          maximum: 2
+          description: 오늘 날짜가 몇 번째인지 나타내는 수 (0~2)
     ChallengeStatDto:
       type: object
       properties:

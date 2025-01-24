@@ -75,6 +75,7 @@ CREATE TABLE challenge_records (
   user_id VARCHAR(50),
   date DATE NOT NULL,
   status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
+  location INT,
   PRIMARY KEY (challenge_id, user_id, date),
   FOREIGN KEY (challenge_id) REFERENCES challenges(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

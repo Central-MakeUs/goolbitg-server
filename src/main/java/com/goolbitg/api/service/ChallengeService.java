@@ -6,6 +6,7 @@ import com.goolbitg.api.model.ChallengeDto;
 import com.goolbitg.api.model.ChallengeRecordDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.ChallengeStatDto;
+import com.goolbitg.api.model.ChallengeTrippleDto;
 import com.goolbitg.api.model.PaginatedChallengeDto;
 import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 
@@ -22,4 +23,5 @@ public interface ChallengeService {
     ChallengeRecordDto getChallengeRecord(Long challengeId, LocalDate date);
     PaginatedChallengeRecordDto getChallengeRecords(Integer page, Integer size, LocalDate date, ChallengeRecordStatus status);
     ChallengeStatDto getChallengeStat(Long challengeId);
+    ChallengeTrippleDto getChallengeTripple(Long challengeId);
 }

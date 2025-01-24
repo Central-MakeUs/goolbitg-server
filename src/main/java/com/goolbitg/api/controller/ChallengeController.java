@@ -16,6 +16,7 @@ import com.goolbitg.api.model.ChallengeDto;
 import com.goolbitg.api.model.ChallengeRecordDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.ChallengeStatDto;
+import com.goolbitg.api.model.ChallengeTrippleDto;
 import com.goolbitg.api.model.PaginatedChallengeDto;
 import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 import com.goolbitg.api.service.ChallengeService;
@@ -31,6 +32,12 @@ public class ChallengeController implements ChallengeApi {
 
     @Autowired
     private final ChallengeService challengeService;
+
+    @Override
+    public ResponseEntity<ChallengeTrippleDto> getChallengeTripple(Long challengeId) throws Exception {
+        ChallengeTrippleDto result = challengeService.getChallengeTripple(challengeId);
+        return ResponseEntity.ok(result);
+    }
 
     @Override
     public ResponseEntity<ChallengeDto> getChallenge(Long challengeId) throws Exception {

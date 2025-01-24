@@ -41,19 +41,19 @@ INSERT INTO challenges (
         ( '아침 일찍 일어나기', 'exmaple_url', 0, 0, 0 );
 
 INSERT INTO challenge_records (
-    challenge_id, user_id, date, status
-) VALUES ( 2, 'id0001', '2025-01-15', 'SUCCESS' ),
-        ( 2, 'id0001', '2025-01-16', 'SUCCESS' ),
-        ( 2, 'id0001', '2025-01-17', 'FAIL' ),
-        ( 2, 'id0001', '2025-01-21', 'SUCCESS' ),
-        ( 2, 'id0001', '2025-01-22', 'SUCCESS' ),
-        ( 2, 'id0001', '2025-01-23', 'WAIT' ),
-        ( 1, 'id0001', '2025-01-17', 'SUCCESS' ),
-        ( 1, 'id0001', '2025-01-18', 'SUCCESS' ),
-        ( 1, 'id0001', '2025-01-19', 'SUCCESS' ),
-        ( 2, 'id0003', '2025-01-22', 'SUCCESS' ),
-        ( 2, 'id0003', '2025-01-23', 'WAIT' ),
-        ( 2, 'id0003', '2025-01-24', 'WAIT' );
+    challenge_id, user_id, date, status, location
+) VALUES ( 2, 'id0001', '2025-01-15', 'SUCCESS', 0 ),
+        ( 2, 'id0001', '2025-01-16', 'SUCCESS', 1 ),
+        ( 2, 'id0001', '2025-01-17', 'FAIL', 2 ),
+        ( 2, 'id0001', '2025-01-21', 'SUCCESS', 0 ),
+        ( 2, 'id0001', '2025-01-22', 'SUCCESS', 1 ),
+        ( 2, 'id0001', '2025-01-23', 'WAIT', 2 ),
+        ( 1, 'id0001', '2025-01-17', 'SUCCESS', 0 ),
+        ( 1, 'id0001', '2025-01-18', 'SUCCESS', 1 ),
+        ( 1, 'id0001', '2025-01-19', 'SUCCESS', 2 ),
+        ( 2, 'id0003', '2025-01-22', 'SUCCESS', 0 ),
+        ( 2, 'id0003', '2025-01-23', 'WAIT', 1 ),
+        ( 2, 'id0003', '2025-01-24', 'WAIT', 2 );
 
 INSERT INTO challenge_stats (
     challenge_id, user_id, continue_count, current_continue_count, total_count, enroll_count
