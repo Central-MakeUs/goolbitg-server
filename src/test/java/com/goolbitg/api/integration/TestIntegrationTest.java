@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /**
  * TestIntegrationTest
  */
-@SpringBootTest
-@AutoConfigureMockMvc
+@CustomIntegrationTest
 public class TestIntegrationTest {
 
     @Autowired

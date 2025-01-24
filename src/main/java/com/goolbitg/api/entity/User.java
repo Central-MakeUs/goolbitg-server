@@ -46,4 +46,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @Column(name = "spending_type_id")
+    private String spendingTypeId;
+
 }

@@ -30,4 +30,13 @@ public class Challenge {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "participant_count")
+    private Integer participantCount;
+
+    @Column(name = "avg_achive_ratio")
+    private Float avgAchiveRatio;
+
+    @Column(name = "max_achive_days")
+    private Integer maxAchiveDays;
+
 }
