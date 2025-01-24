@@ -206,6 +206,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeRecordDto getChallengeRecord(Long challengeId, LocalDate date) {
+        if (date == null) {
+            date = getToday();
+        }
         String userId = AuthUtil.getLoginUserId();
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
@@ -224,8 +227,12 @@ public class ChallengeServiceImpl implements ChallengeService {
     public PaginatedChallengeRecordDto getChallengeRecords(Integer page, Integer size, LocalDate date, ChallengeRecordStatus status) {
         PageRequest pageReq = PageRequest.of(page, size);
         String userId = AuthUtil.getLoginUserId();
+        if (date == null) {
+            date = getToday();
+        }
+
         Page<ChallengeRecord> result = 
-            challengeRecordRepository.findAllByUserIdAndDate(pageReq, userId, date);
+            challengeRecordRepository.findAllByUserIdAndDateAndStatus(pageReq, userId, date, status);
 
         return getPaginatedRecordDto(result);
     }
@@ -251,7 +258,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeStatId id = new ChallengeStatId(challengeId, userId);
         Optional<ChallengeStat> result = challengeStatRepository.findById(id);
         if (result.isEmpty()) {
-            throw ChallengeException.challengeNotExist(challengeId);
+            throw ChallengeException.notEnrolled(challengeId);
         }
 
         ChallengeStat stat = result.get();
