@@ -15,8 +15,7 @@ import com.goolbitg.api.exception.CommonException;
 /**
  * EtcIntegrationTest
  */
-@SpringBootTest
-@AutoConfigureMockMvc
+@CustomIntegrationTest
 public class EtcIntegrationTest {
 
     @Autowired

@@ -353,13 +353,13 @@ paths:
           입력 형식은 다음과 같습니다.<br><br>
           **primeUseDay**<br>
           다음 요소중 하나:
-            - `monday`
-            - `tuesday`
-            - `wednesday`
-            - `thursday`
-            - `friday`
-            - `saturday`
-            - `sunday`
+            - `MONDAY`
+            - `TUESDAY`
+            - `WEDNESDAY`
+            - `THURSDAY`
+            - `FRIDAY`
+            - `SATURDAY`
+            - `SUNDAY`
 
           **primeUseTime**<br>
           `hh:mm:ss` 형식의 스트링. 초 부분은 무시됩니다.
@@ -395,6 +395,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedChallengeDto'
+  /challenges/{challengeId}:
+    get:
+      summary: 특정 챌린지 정보 가져오기
+      operationId: getChallenge
+      description: >
+        특정 챌린지 정보를 가져옵니다.
+      tags:
+        - Challenge
+      parameters:
+        - $ref: '#/components/parameters/challengeIdParam'
+      responses:
+        '200':
+          description: 특정 챌린지 정보 반환
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChallengeDto"
+        '422':
+          description: 챌린지 정보 반환 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
   /challenges/{challengeId}/enroll:
     post:
       summary: 챌린지 참여하기
@@ -408,13 +434,7 @@ paths:
       tags:
         - Challenge
       parameters:
-        - name: challengeId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/challengeIdParam'
       responses:
         '201':
           description: >
@@ -440,9 +460,9 @@ paths:
 
         ### 챌린지 기록
 
-        챌린지 기록은 처음 생성되면 wait 상태입니다.<br><br>
+        챌린지 기록은 처음 생성되면 WAIT 상태입니다.<br><br>
         오늘의 챌린지를 수행하거나 챌린지 수행 기간이 지나면 
-        success 또는 fail 상태로 바뀌게 됩니다.
+        SUCCESS 또는 FAIL 상태로 바뀌게 됩니다.
       tags:
         - Challenge
       parameters:
@@ -475,14 +495,7 @@ paths:
       tags:
         - Challenge
       parameters:
-        - name: challengeId
-          description: 기록을 확인할 챌린지 ID 입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/challengeIdParam'
         - name: date
           description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
           in: query
@@ -547,14 +560,7 @@ paths:
       tags:
         - Challenge
       parameters:
-        - name: challengeId
-          description: 체크할 챌린지 ID입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/challengeIdParam'
       responses:
         '200':
           description: 오늘의 챌린지 체크 성공. 체크된 챌린지 기록이 반환됩니다.
@@ -583,14 +589,7 @@ paths:
       tags:
         - Challenge
       parameters:
-        - name: challengeId
-          description: 통계를 확인할 챌린지 ID입니다.
-          required: true
-          in: path
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/challengeIdParam'
       responses:
         '200':
           description: 챌린지 통계 반환 성공.
@@ -679,14 +678,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 가져올 챌린지 그룹의 ID입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
       responses:
         '200':
           description: 챌린지 그룹 정보
@@ -712,14 +704,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 수정할 챌린지 그룹의 ID입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
       requestBody:
         content:
           application/json:
@@ -760,14 +745,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 삭제할 챌린지 그룹의 ID입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
       responses:
         '200':
           description: >
@@ -791,14 +769,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 참여할 챌린지 그룹 ID입니다.
-          required: true
-          in: path
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
       responses:
         '201':
           description: 챌린지 그룹 기록 생성 성공
@@ -857,14 +828,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 기록을 확인할 챌린지 그룹 ID입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
         - name: date
           description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 확인합니다.
           in: query
@@ -890,7 +854,6 @@ paths:
                   $ref: '#/components/examples/Error_NotEnrolled'
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
-
   /challengeGroupRecords/{groupId}/check:
     post:
       summary: 챌린지 그룹 기록 체크
@@ -899,14 +862,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 체크할 챌린지 그룹 ID입니다.
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
       responses:
         '200':
           description: 체크 성공. 기록을 반환합니다.
@@ -935,14 +891,7 @@ paths:
       tags:
         - ChallengeGroup
       parameters:
-        - name: groupId
-          description: 통계를 확인할 챌린지 그룹 ID입니다.
-          required: true
-          in: path
-          schema:
-            type: integer
-            format: int64
-            default: 0
+        - $ref: '#/components/parameters/groupIdParam'
       responses:
         '200':
           description: 챌린지 통계 반환 성공.
@@ -1316,7 +1265,7 @@ components:
         id: "id0001"
         nickname: 굴비왕
         birthday: "1999-03-01"
-        gender: male
+        gender: MALE
         check1: false
         check2: true
         check3: true
@@ -1325,7 +1274,7 @@ components:
         check6: true
         avgIncomePerMonth: 3600000
         avgSpendingPerMonth: 2000000
-        primeUseDay: "friday"
+        primeUseDay: "FRIDAY"
         primeUseTime: "20:00:00"
         spendingHabitScore: 62
         spendingType:
@@ -1484,10 +1433,10 @@ components:
     ChallengeRecordStatus:
       type: string
       enum:
-        - wait
-        - success
-        - fail
-      default: wait
+        - WAIT
+        - SUCCESS
+        - FAIL
+      default: WAIT
     ChallengeDto:
       type: object
       properties:
@@ -1602,14 +1551,14 @@ components:
         receiverId: id2003952
         message: 오늘 아직 챌린지를 달성하지 못했어요.
         publishDateTime: 2024-01-07T14:26:32
-        type: challenge
+        type: CHALLENGE
         read: false
     NoticeType:
       type: string
       enum:
-        - challenge
-        - vote
-        - chat
+        - CHALLENGE
+        - VOTE
+        - CHAT
       description: 메시지 타입
     BuyOrNotDto:
       type: object
@@ -1746,9 +1695,9 @@ components:
           description: 아이템 개수
         page:
           type: integer
-          minimum: 1
-          default: 1
-          description: 페이지 번호 (1부터 시작)
+          minimum: 0
+          default: 0
+          description: 페이지 번호 (0부터 시작)
         items: {}
       required:
         - totalSize
@@ -1818,8 +1767,8 @@ components:
     Gender:
       type: string
       enum:
-        - male
-        - female
+        - MALE
+        - FEMALE
     UserChecklistDto:
       type: object
       properties:
@@ -1862,13 +1811,13 @@ components:
     Day:
       type: string
       enum:
-        - monday
-        - tuesday
-        - wednesday
-        - thursday
-        - friday
-        - saturday
-        - sunday
+        - MONDAY
+        - TUESDAY
+        - WEDNESDAY
+        - THURSDAY
+        - FRIDAY
+        - SATURDAY
+        - SUNDAY
     NicknameCheckRequestDto:
       type: object
       properties:
@@ -2046,11 +1995,11 @@ components:
   parameters:
     pageParam:
       name: page
-      description: 페이지 번호입니다. 1부터 시작합니다.
+      description: 페이지 번호입니다. 0부터 시작합니다.
       in: query
       schema:
         type: integer
-        default: 1
+        default: 0
     sizeParam:
       name: size
       description: 페이지 사이즈입니다. 기본 10입니다.
@@ -2058,6 +2007,24 @@ components:
       schema:
         type: integer
         default: 10
+    challengeIdParam:
+      name: challengeId
+      description: 챌린지 아이디입니다.
+      required: true
+      in: path
+      schema:
+        type: integer
+        format: int64
+        example: 1
+    groupIdParam:
+      name: groupId
+      description: 챌린지 그룹 아이디입니다.
+      required: true
+      in: path
+      schema:
+        type: integer
+        format: int64
+        example: 1
   requestBodies:
     RegisterReq:
       required: true

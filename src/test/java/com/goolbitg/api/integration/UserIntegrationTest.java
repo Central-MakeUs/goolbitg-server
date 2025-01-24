@@ -9,11 +9,10 @@ import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goolbitg.api.model.Day;
@@ -27,8 +26,7 @@ import com.goolbitg.api.model.UserPatternDto;
 /**
  * UserIntegrationTest
  */
-@SpringBootTest
-@AutoConfigureMockMvc
+@CustomIntegrationTest
 public class UserIntegrationTest {
 
     @Autowired
@@ -40,6 +38,7 @@ public class UserIntegrationTest {
     private final String NEW_USER_ID = "id0002";
 
     @Test
+    @Transactional
     @WithMockUser(value = ROOT_USER_ID)
     void get_user_info() throws Exception {
         mockMvc.perform(get("/users/me").contentType(MediaType.APPLICATION_JSON))
@@ -48,6 +47,7 @@ public class UserIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(value = ROOT_USER_ID)
     void check_nickname_duplication() throws Exception {
         NicknameCheckRequestDto requestBody = new NicknameCheckRequestDto();
@@ -62,6 +62,7 @@ public class UserIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(value = NEW_USER_ID)
     void update_user_info() throws Exception {
         UserInfoDto requestBody = new UserInfoDto();
@@ -79,10 +80,11 @@ public class UserIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.nickname").value("굴비노예"))
             .andExpect(jsonPath("$.birthday").value("1999-03-01"))
-            .andExpect(jsonPath("$.gender").value("female"));
+            .andExpect(jsonPath("$.gender").value("FEMALE"));
     }
 
     @Test
+    @Transactional
     @WithMockUser(value = NEW_USER_ID)
     void cannot_update_duplicated_nickname() throws Exception {
         UserInfoDto requestBody = new UserInfoDto();
@@ -98,6 +100,7 @@ public class UserIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(value = NEW_USER_ID)
     void update_checklist() throws Exception {
         UserChecklistDto requestBody = new UserChecklistDto();
@@ -121,6 +124,7 @@ public class UserIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(value = NEW_USER_ID)
     void update_habit() throws Exception {
         UserHabitDto requestBody = new UserHabitDto();
@@ -140,6 +144,7 @@ public class UserIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(value = NEW_USER_ID)
     void update_pattern() throws Exception {
         UserPatternDto requestBody = new UserPatternDto();
@@ -154,7 +159,7 @@ public class UserIntegrationTest {
 
         mockMvc.perform(get("/users/me"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.primeUseDay").value("sunday"))
+            .andExpect(jsonPath("$.primeUseDay").value("SUNDAY"))
             .andExpect(jsonPath("$.primeUseTime").value("18:30:00"));
     }
 
