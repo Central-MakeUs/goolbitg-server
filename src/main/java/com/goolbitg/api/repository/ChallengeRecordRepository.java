@@ -15,5 +15,6 @@ import com.goolbitg.api.model.ChallengeRecordStatus;
  */
 public interface ChallengeRecordRepository extends JpaRepository<ChallengeRecord, ChallengeRecordId> {
 
+    Page<ChallengeRecord> findAllByUserIdAndDate(Pageable pageable, String userId, LocalDate date);
     Page<ChallengeRecord> findAllByUserIdAndDateAndStatus(Pageable pageable, String userId, LocalDate date, ChallengeRecordStatus status);
 }

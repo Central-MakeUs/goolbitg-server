@@ -1436,7 +1436,7 @@ components:
         - WAIT
         - SUCCESS
         - FAIL
-      default: WAIT
+      example: WAIT
     ChallengeDto:
       type: object
       properties:
