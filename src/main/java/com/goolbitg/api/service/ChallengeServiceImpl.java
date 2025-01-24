@@ -231,8 +231,12 @@ public class ChallengeServiceImpl implements ChallengeService {
             date = getToday();
         }
 
-        Page<ChallengeRecord> result = 
-            challengeRecordRepository.findAllByUserIdAndDateAndStatus(pageReq, userId, date, status);
+        Page<ChallengeRecord> result;
+        if (status == null) {
+            result = challengeRecordRepository.findAllByUserIdAndDate(pageReq, userId, date);
+        } else {
+            result = challengeRecordRepository.findAllByUserIdAndDateAndStatus(pageReq, userId, date, status);
+        }
 
         return getPaginatedRecordDto(result);
     }
