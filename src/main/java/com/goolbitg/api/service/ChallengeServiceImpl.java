@@ -3,6 +3,8 @@ package com.goolbitg.api.service;
 import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import com.goolbitg.api.model.ChallengeDto;
 import com.goolbitg.api.model.ChallengeRecordDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.ChallengeStatDto;
+import com.goolbitg.api.model.ChallengeTrippleDto;
 import com.goolbitg.api.model.PaginatedChallengeDto;
 import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 import com.goolbitg.api.repository.ChallengeRecordRepository;
@@ -281,6 +284,39 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private LocalDate getToday() {
         return LocalDate.now(clock);
+    }
+
+
+    @Override
+    public ChallengeTrippleDto getChallengeTripple(Long challengeId) {
+        String userId = AuthUtil.getLoginUserId();
+        LocalDate date = getToday();
+        ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
+        Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
+        if (result.isEmpty()) {
+            throw ChallengeException.challengeRecordNotExist(challengeId);
+        }
+
+        List<ChallengeRecord> records = new ArrayList<>();
+        ChallengeRecord currentRecord = result.get();
+        date = date.minusDays(currentRecord.getLocation());
+        for (int i = 0; i < 3; i++) {
+            id = new ChallengeRecordId(challengeId, userId, date);
+            records.add(challengeRecordRepository.findById(id).get());
+            date = date.plusDays(1);
+        }
+        return getChallengeTrippleDto(challengeId, records, currentRecord);
+    }
+
+
+    private ChallengeTrippleDto getChallengeTrippleDto(Long challengeId, List<ChallengeRecord> records, ChallengeRecord currentRecord) {
+        ChallengeTrippleDto dto = new ChallengeTrippleDto();
+        dto.setChallengeId(challengeId);
+        dto.setCheck1(records.get(0).getStatus());
+        dto.setCheck2(records.get(1).getStatus());
+        dto.setCheck3(records.get(2).getStatus());
+        dto.setLocation(currentRecord.getLocation());
+        return dto;
     }
 
 }

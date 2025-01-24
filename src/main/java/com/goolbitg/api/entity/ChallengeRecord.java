@@ -41,4 +41,7 @@ public class ChallengeRecord {
     @Enumerated(EnumType.STRING)
     private ChallengeRecordStatus status;
 
+    @Column(name = "location")
+    private Integer location;
+
 }

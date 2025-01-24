@@ -212,4 +212,18 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.challengeId").value(challengeId));
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(NORMAL_USER)
+    void get_challenge_tripple() throws Exception {
+        Long challengeId = 2L;
+        mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.check1").value("SUCCESS"))
+                .andExpect(jsonPath("$.check2").value("WAIT"))
+                .andExpect(jsonPath("$.check3").value("WAIT"))
+                .andExpect(jsonPath("$.location").value(1));
+    }
+
 }
