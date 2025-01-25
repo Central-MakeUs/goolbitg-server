@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goolbitg.api.model.Day;
 import com.goolbitg.api.model.Gender;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
+import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
@@ -39,7 +40,7 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = ROOT_USER_ID)
+    @WithMockUser(ROOT_USER_ID)
     void get_user_info() throws Exception {
         mockMvc.perform(get("/users/me").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -48,7 +49,7 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = ROOT_USER_ID)
+    @WithMockUser(ROOT_USER_ID)
     void check_nickname_duplication() throws Exception {
         NicknameCheckRequestDto requestBody = new NicknameCheckRequestDto();
         requestBody.setNickname("굴비왕");
@@ -63,7 +64,28 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = NEW_USER_ID)
+    @WithMockUser(NEW_USER_ID)
+    void update_agreement_and_check_status() throws Exception {
+        UserAgreementDto requestBody = new UserAgreementDto();
+        requestBody.setAgreement1(true);
+        requestBody.setAgreement2(true);
+        requestBody.setAgreement3(true);
+        requestBody.setAgreement4(false);
+
+        String jsonBody = mapper.writeValueAsString(requestBody);
+        mockMvc.perform(post("/users/me/agreement")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonBody))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(1))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(NEW_USER_ID)
     void update_user_info() throws Exception {
         UserInfoDto requestBody = new UserInfoDto();
         requestBody.setNickname("굴비노예");
@@ -85,7 +107,7 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = NEW_USER_ID)
+    @WithMockUser(NEW_USER_ID)
     void cannot_update_duplicated_nickname() throws Exception {
         UserInfoDto requestBody = new UserInfoDto();
         requestBody.setNickname("굴비왕");
@@ -101,7 +123,7 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = NEW_USER_ID)
+    @WithMockUser(NEW_USER_ID)
     void update_checklist() throws Exception {
         UserChecklistDto requestBody = new UserChecklistDto();
         requestBody.setCheck1(true);
@@ -125,7 +147,7 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = NEW_USER_ID)
+    @WithMockUser(NEW_USER_ID)
     void update_habit() throws Exception {
         UserHabitDto requestBody = new UserHabitDto();
         requestBody.setAvgIncomePerMonth(360000);
@@ -145,7 +167,7 @@ public class UserIntegrationTest {
 
     @Test
     @Transactional
-    @WithMockUser(value = NEW_USER_ID)
+    @WithMockUser(NEW_USER_ID)
     void update_pattern() throws Exception {
         UserPatternDto requestBody = new UserPatternDto();
         requestBody.setPrimeUseDay(Day.SUNDAY);

@@ -49,4 +49,19 @@ public class User {
     @Column(name = "spending_type_id")
     private String spendingTypeId;
 
+    @Column(name = "allow_push_notification")
+    private Boolean allowPushNotification;
+
+    @Column(name = "agreement1")
+    private Boolean agreement1;
+
+    @Column(name = "agreement2")
+    private Boolean agreement2;
+
+    @Column(name = "agreement3")
+    private Boolean agreement3;
+
+    @Column(name = "agreement4")
+    private Boolean agreement4;
+
 }

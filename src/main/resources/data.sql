@@ -14,11 +14,12 @@ VALUES ( 'id0002' );
 
 INSERT INTO users (
     id, apple_id, kakao_id, nickname,
-    register_date, birthday, gender, spending_type_id
+    register_date, birthday, gender, spending_type_id,
+    allow_push_notification, agreement1, agreement2, agreement3, agreement4
 ) VALUES ( 'id0001', 'ap0001', 'ka0001', '굴비왕',
-    '2025-01-15', '1999-03-01', 'MALE', 'st01' ),
+    '2025-01-15', '1999-03-01', 'MALE', 'st01', 1, 1, 1, 1, 1),
         ( 'id0003', 'ap0003', 'ka0003', '굴비왕비',
-    '2025-01-21', '1999-04-28', 'FEMALE', 'st01' );
+    '2025-01-21', '1999-04-28', 'FEMALE', 'st01', 1, 1, 1, 1, 1);
 
 INSERT INTO user_surveys (
     user_id, check_1, check_2, check_3, check_4, check_5, check_6,

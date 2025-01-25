@@ -1,8 +1,5 @@
 package com.goolbitg.api.service;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -10,16 +7,12 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goolbitg.api.controller.UserController;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStats;
 import com.goolbitg.api.entity.UserSurvey;
@@ -27,21 +20,21 @@ import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
-import com.goolbitg.api.model.LoginResponseDto;
 import com.goolbitg.api.model.LoginType;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
+import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
+import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatsRepository;
 import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.repository.UserTokenRepository;
-import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.security.JwtManager;
 import com.goolbitg.api.util.FormatUtil;
 
@@ -104,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public LoginResponseDto login(AuthRequestDto request) {
+    public AuthResponseDto login(AuthRequestDto request) {
         Jwt jwt = extractToken(request);
         Optional<User> result = findUser(jwt, request);
 
@@ -112,47 +105,15 @@ public class UserServiceImpl implements UserService {
             throw UserException.userNotExist(jwt.getSubject());
         }
         User user = result.get();
-        UserSurvey survey = userSurveyRepository.findById(user.getId())
-            .orElseThrow();
 
         String accessToken = jwtManager.create(user.getId());
         String refreshToken = createRefreshToken(user.getId());
 
-        LoginResponseDto dto = new LoginResponseDto();
+        AuthResponseDto dto = new AuthResponseDto();
         dto.setAccessToken(accessToken);
         dto.setRefreshToken(refreshToken);
 
-        Link nextLink = getNextRegisterLink(user, survey);
-        dto.setRegisterComplete(nextLink == null);
-        if (nextLink != null)
-            dto.add(nextLink);
-
         return dto;
-    }
-
-    private Link getNextRegisterLink(User user, UserSurvey survey) {
-        WebMvcLinkBuilder builder = null;
-        try {
-            if (user.getNickname() == null)
-                builder = linkTo(methodOn(UserController.class).postUserInfo(null));
-            else if (survey.getCheck1() == null)
-                builder = linkTo(methodOn(UserController.class).postUserInfo(null));
-            else if (survey.getAvgIncomePerMonth() == null)
-                builder = linkTo(methodOn(UserController.class).postUserInfo(null));
-        } catch (Exception e) {
-            log.error("getNextRegisterLink() falied.");
-        }
-
-        if (builder != null)
-            return builder.withRel("next").withType("POST");
-
-        return null;
-    }
-
-    private Boolean validateRegisterComplete(User user, UserSurvey survey) {
-        return user.getNickname() != null &&
-                survey.getCheck1() != null &&
-                survey.getAvgIncomePerMonth() != null;
     }
 
     @Override
@@ -337,5 +298,55 @@ public class UserServiceImpl implements UserService {
         userSurveyRepository.deleteById(userId);
         userStatsRepository.deleteById(userId);
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public UserRegisterStatusDto getRegisterStatus(String userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> UserException.userNotExist(userId));
+        UserSurvey survey = userSurveyRepository.findById(userId)
+            .orElseThrow(() -> UserException.userNotExist(userId));
+        int status = getRegisterStatusInner(user, survey);
+        UserRegisterStatusDto dto = new UserRegisterStatusDto();
+        dto.setStatus(status);
+        dto.setRequiredInfoCompleted(status >= 4);
+        return dto;
+    }
+
+    @Override
+    public void updateAgreementInfo(String userId, UserAgreementDto request) {
+        // TODO: throw error when required agreement is not agreed
+        Optional<User> result = userRepository.findById(userId);
+        if (result.isEmpty()) {
+            throw UserException.userNotExist(userId);
+        }
+
+        User user = result.get();
+        user.setAgreement1(request.getAgreement1());
+        user.setAgreement2(request.getAgreement2());
+        user.setAgreement3(request.getAgreement3());
+        user.setAgreement4(request.getAgreement4());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void postPushNotificationAgreement(String userId) {
+        Optional<User> result = userRepository.findById(userId);
+        if (result.isEmpty()) {
+            throw UserException.userNotExist(userId);
+        }
+
+        User user = result.get();
+        user.setAllowPushNotification(true);
+        userRepository.save(user);
+    }
+
+    private int getRegisterStatusInner(User user, UserSurvey survey) {
+        if (user.getAgreement1() == null) return 0;
+        if (user.getNickname() == null) return 1;
+        if (survey.getCheck1() == null) return 2;
+        if (survey.getAvgIncomePerMonth() == null) return 3;
+        if (survey.getPrimUseDay() == null) return 4;
+        return 5;
     }
 }

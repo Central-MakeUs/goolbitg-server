@@ -30,6 +30,11 @@ CREATE TABLE users (
   birthday DATE,
   gender VARCHAR(6) CHECK (gender IN ('MALE', 'FEMALE')),
   spending_type_id VARCHAR(10),
+  allow_push_notification BOOLEAN,
+  agreement1 BOOLEAN,
+  agreement2 BOOLEAN,
+  agreement3 BOOLEAN,
+  agreement4 BOOLEAN,
   PRIMARY KEY (id),
   FOREIGN KEY (spending_type_id) REFERENCES spending_types(id) ON DELETE SET NULL
 );
@@ -55,7 +60,7 @@ CREATE TABLE user_stats (
   user_id VARCHAR(50),
   challenge_count INT DEFAULT 0,
   post_count INT DEFAULT 0,
-  achivement_guage FLOAT DEFAULT 0.00,
+  achivement_guage FLOAT DEFAULT 0.0,
   PRIMARY KEY (user_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

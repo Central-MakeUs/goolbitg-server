@@ -13,11 +13,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import com.goolbitg.api.UserApi;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
+import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
+import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.service.UserService;
 
@@ -76,6 +78,24 @@ public class UserController implements UserApi {
     @Override
     public ResponseEntity<Void> postUserInfo(@Valid UserInfoDto userInfoDto) throws Exception {
         userService.updateUserInfo(AuthUtil.getLoginUserId(), userInfoDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<UserRegisterStatusDto> getRegisterStatus() throws Exception {
+        UserRegisterStatusDto result = userService.getRegisterStatus(AuthUtil.getLoginUserId());
+        return ResponseEntity.ok(result);
+    }
+
+    @Override
+    public ResponseEntity<Void> postPushNotificationAgreement() throws Exception {
+        userService.postPushNotificationAgreement(AuthUtil.getLoginUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> postUserAgreement(@Valid UserAgreementDto userAgreementDto) throws Exception {
+        userService.updateAgreementInfo(AuthUtil.getLoginUserId(), userAgreementDto);
         return ResponseEntity.ok().build();
     }
 

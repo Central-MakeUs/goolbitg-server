@@ -9,7 +9,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.EtcApi;
 import com.goolbitg.api.exception.AuthException;
-import com.goolbitg.api.model.LoginResponseDto;
+import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.JwtManager;
 
@@ -39,11 +39,11 @@ public class EtcController implements EtcApi {
     }
 
     @Override
-    public ResponseEntity<LoginResponseDto> getRootAccess() throws Exception {
+    public ResponseEntity<AuthResponseDto> getRootAccess() throws Exception {
         String accessToken = jwtManager.createPermanent("id0001");
         String refreshToken = "root_user_refresh_token";
         userTokenRepository.save("id0001", "root_user_refresh_token");
-        LoginResponseDto dto = new LoginResponseDto();
+        AuthResponseDto dto = new AuthResponseDto();
         dto.setAccessToken(accessToken);
         dto.setRefreshToken(refreshToken);
         return ResponseEntity.ok(dto);

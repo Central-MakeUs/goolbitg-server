@@ -92,10 +92,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponseDto'
-              examples:
-                응답:
-                  $ref: '#/components/examples/LoginResponse_Complete'
+                $ref: '#/components/schemas/AuthResponseDto'
   /auth/register:
     post:
       summary: 회원가입
@@ -167,12 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponseDto'
-              examples:
-                필수정보 입력 완료:
-                  $ref: '#/components/examples/LoginResponse_Complete'
-                필수정보 입력 필요:
-                  $ref: '#/components/examples/LoginResponse_InProgress'
+                $ref: '#/components/schemas/AuthResponseDto'
         '422':
           description: 로그인 실패
           content:
@@ -272,6 +264,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDto'
+  /users/me/registerStatus:
+    get:
+      summary: 회원정보 입력 상태 반환
+      operationId: getRegisterStatus
+      tags:
+        - User
+      responses:
+        '200':
+          description: 회원정보 입력 상태 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegisterStatusDto'
   /users/nickname/check:
     post:
       summary: 닉네임 중복 체크
@@ -292,9 +297,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NicknameCheckResponseDto'
+  /users/me/agreePushNotification:
+    post:
+      summary: 푸시 알림 동의
+      operationId: postPushNotificationAgreement
+      description: 푸시 알림을 동의합니다.
+      tags:
+        - User
+      responses:
+        '200':
+          description: 푸시 알림 동의 완료
+  /users/me/agreement:
+    post:
+      summary: 1. 약관동의 정보 등록
+      operationId: postUserAgreement
+      description: 사용자의 약관동의 정보를 등록합니다. 필수 등록 정보입니다.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAgreementDto'
+      responses:
+        '200':
+          description: 등록 성공
   /users/me/info:
     post:
-      summary: 사용자 개인정보 등록
+      summary: 2. 사용자 개인정보 등록
       operationId: postUserInfo
       description: 사용자의 개인정보를 등록합니다. 필수 등록 정보입니다.
       tags:
@@ -310,7 +341,7 @@ paths:
           description: 등록 성공
   /users/me/checklist:
     post:
-      summary: 소비중독 체크리스트 정보 등록
+      summary: 3. 소비중독 체크리스트 정보 등록
       operationId: postChecklistInfo
       description: 소비중독 체크리스트 정보를 등록합니다. 필수 등록 정보입니다.
       tags:
@@ -326,7 +357,7 @@ paths:
           description: 등록 성공
   /users/me/habit:
     post:
-      summary: 소비습관 정보 등록
+      summary: 4. 소비습관 정보 등록
       operationId: postHabitInfo
       description: 소비습관 정보를 등록합니니다. 필수 등록 정보입니다.
       tags:
@@ -342,7 +373,7 @@ paths:
           description: 등록 성공
   /users/me/pattern:
     post:
-      summary: 사용자 소비습관 패턴 등록
+      summary: 5. 사용자 소비습관 패턴 등록
       operationId: postPatternInfo
       description: 사용자의 소비습관 패턴을 등록합니다. 필수 등록 요소가 아닙니다.
       tags:
@@ -1313,6 +1344,15 @@ components:
         challengeCount: 14
         postCount: 4
         achivementGuage: 37.2
+    UserRegisterStatusDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: 회원정보 입력 상태 (0 ~ 5)
+        requiredInfoCompleted:
+          type: boolean
+          description: 필수정보 입력 완료 여부
     SpendingTypeDto:
       type: object
       properties:
@@ -1793,16 +1833,17 @@ components:
           description: 리프레시 토큰
       required:
         - refreshToken
-    LoginResponseDto:
-      allOf:
-        - $ref: '#/components/schemas/AuthResponseDto'
-        - type: object
-          properties:
-            registerComplete:
-              type: boolean
-              description: 정보등록 완료 여부
-          required:
-            - registerComplete
+    UserAgreementDto:
+      type: object
+      properties:
+        agreement1:
+          type: boolean
+        agreement2:
+          type: boolean
+        agreement3:
+          type: boolean
+        agreement4:
+          type: boolean
     UserInfoDto:
       type: object
       properties:
@@ -2122,74 +2163,6 @@ components:
               $ref: '#/components/examples/Error_NoAuthorzation'
             로그아웃된 유저:
               $ref: '#/components/examples/Error_LoggedOut'
-    RegisterSuccess:
-      description: 회원가입 성공
-    RegisterFail:
-      description: 회원가입 실패
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorDto'
-          examples:
-            이미 등록된 회원:
-              value:
-                code: 2001
-                message: 이미 등록된 회원입니다. (id value)
-            유효하지 않은 토큰:
-              value:
-                code: 2002
-                message: id 토큰이 유효하지 않습니다. (token value)
-    LoginSuccess:
-      description: 로그인 성공
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LoginResponseDto'
-          examples:
-            필수정보 입력 완료:
-              value:
-                accessToken: token
-                refreshToken: token
-                registerComplete: true
-            필수정보 입력 필요:
-              value:
-                accessToken: token
-                refreshToken: token
-                registerComplete: false
-                nextLinkDto:
-                  required: true
-                  method: post
-                  url: http://localhost:8080/api/v1/users/me/info
-    LoginFail:
-      description: 로그인 실패
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorDto'
-          examples:
-            유효하지 않은 토큰:
-              value:
-                code: 2002
-                message: id 토큰이 유효하지 않습니다. (token value)
-            등록되지 않은 회원:
-              value:
-                code: 2003
-                message: 등록되지 않은 회원입니다. (id value)
-            회원정보 입력이 완료되지 않은 회원:
-              value:
-                code: 2004
-                message: 회원정보 입력이 완료되지 않았습니다. (id value)
-    RegisterInfoFail:
-      description: 정보 등록 실패
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorDto'
-          examples:
-            잘못된 입력 형식:
-              value:
-                code: 2010
-                message: 입력 형식이 잘못되었습니다. (error detail)
   securitySchemes:
     bearerAuth:
       type: http

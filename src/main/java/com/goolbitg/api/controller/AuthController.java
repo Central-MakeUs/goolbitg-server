@@ -13,7 +13,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import com.goolbitg.api.AuthApi;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
-import com.goolbitg.api.model.LoginResponseDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
 import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.service.UserService;
@@ -38,7 +37,7 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<LoginResponseDto> login(@Valid AuthRequestDto authRequestDto) throws Exception {
+    public ResponseEntity<AuthResponseDto> login(@Valid AuthRequestDto authRequestDto) throws Exception {
         return ResponseEntity.ok(userService.login(authRequestDto));
     }
 
