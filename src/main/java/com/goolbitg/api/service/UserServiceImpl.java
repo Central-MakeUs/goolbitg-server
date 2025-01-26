@@ -331,6 +331,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void postPushNotificationAgreement(String userId) {
         Optional<User> result = userRepository.findById(userId);
         if (result.isEmpty()) {
