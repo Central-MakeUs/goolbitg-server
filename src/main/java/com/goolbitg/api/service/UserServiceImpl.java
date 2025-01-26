@@ -314,6 +314,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void updateAgreementInfo(String userId, UserAgreementDto request) {
         // TODO: throw error when required agreement is not agreed
         Optional<User> result = userRepository.findById(userId);
@@ -330,6 +331,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void postPushNotificationAgreement(String userId) {
         Optional<User> result = userRepository.findById(userId);
         if (result.isEmpty()) {
