@@ -267,6 +267,17 @@ paths:
   /users/me/registerStatus:
     get:
       summary: 회원정보 입력 상태 반환
+      description: >
+        응답으로 반환되는 `status` 필드는 현재까지 완료된 유저 정보의 번호입니다.<br>
+        0~5까지 있으며, 0이면 아무것도 입력되지 않은 상태, 5이면 5번 정보까지 입력된
+        상태, 즉, 모두 입력된 상태입니다. 이 값을 이용해서 다음에 호출해야 할 유저 정보
+        입력 API가 무엇인지 알아낼 수 있습니다.<br>만약 1이 반환된다면 2번째 정보 입력
+        API를 호출하면 됩니다.<br>
+        각 정보 입력 API의 순서는 API 설명 옆에 적혀있습니다. (예: 1. 약관동의 정보 등록)
+        <br><br>
+        `requiredInfoCompleted` 필드는 필수로 입력해야 할 정보가 모두 입력되었는지를
+        나타냅니다. 만약 이 필드값이 true라면 나머지 정보는 필수 입력 사항이 아님을
+        의미합니다.
       operationId: getRegisterStatus
       tags:
         - User
