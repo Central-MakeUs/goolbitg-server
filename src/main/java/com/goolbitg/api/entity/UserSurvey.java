@@ -53,7 +53,7 @@ public class UserSurvey {
 
     @Column(name = "prime_use_day")
     @Enumerated(EnumType.STRING)
-    private Day primUseDay;
+    private Day primeUseDay;
 
     @Column(name = "prime_use_time")
     private LocalTime primeUseTime;
