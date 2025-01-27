@@ -2121,8 +2121,6 @@ components:
         productImageUrl: "http://localhost:8080/image/bn1"
         goodReason: "후드티 안산지 벌써 2년 다됨"
         badReason: "집에 후드티만 10장 있긴함"
-        goodVoteCount: 10
-        badVoteCount: 3
     BuyOrNot_Form_Modify:
       value:
         productName: "Tecket 후드티"
