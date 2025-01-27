@@ -51,9 +51,6 @@ public class UserSurvey {
     @Column(name = "avg_spending_per_month")
     private Integer avgSpendingPerMonth;
 
-    @Column(name = "spending_habit_score")
-    private Integer spendingHabitScore;
-
     @Column(name = "prime_use_day")
     @Enumerated(EnumType.STRING)
     private Day primUseDay;
@@ -61,4 +58,23 @@ public class UserSurvey {
     @Column(name = "prime_use_time")
     private LocalTime primeUseTime;
 
+    public Integer getChecklistScore() {
+        if (check1 == null || check2 == null || check3 == null ||
+            check4 == null || check5 == null || check6 == null)
+            return null;
+        int count = 0;
+        if (check1) count++;
+        if (check2) count++;
+        if (check3) count++;
+        if (check4) count++;
+        if (check5) count++;
+        if (check6) count++;
+        return (int)(count / 2);
+    }
+
+    public Integer getSpendingHabitScore() {
+        if (avgIncomePerMonth == null || avgSpendingPerMonth == null)
+            return null;
+        return (int)(100.0 - ((float)avgSpendingPerMonth / avgIncomePerMonth) * 100.0);
+    }
 }

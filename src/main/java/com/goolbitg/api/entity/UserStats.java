@@ -28,6 +28,6 @@ public class UserStats {
     private Integer postCount;
 
     @Column(name = "achivement_guage")
-    private Float achivementGuage;
+    private Integer achivementGuage;
 
 }

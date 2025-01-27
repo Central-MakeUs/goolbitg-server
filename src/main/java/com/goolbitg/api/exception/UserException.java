@@ -22,5 +22,11 @@ public abstract class UserException {
             "회원정보 입력이 완료되지 않았습니다. (" + id + ")",
             HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    public static CommonException previousStepNotComplete(int status) {
+        return new CommonException(
+            3004,
+            "이전 단계의 정보 입력이 완료되지 않았습니다. (" + status + ")",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
 }

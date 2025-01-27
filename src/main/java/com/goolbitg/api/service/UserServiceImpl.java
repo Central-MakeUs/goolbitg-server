@@ -1,6 +1,7 @@
 package com.goolbitg.api.service;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStats;
 import com.goolbitg.api.entity.UserSurvey;
@@ -23,6 +25,7 @@ import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.LoginType;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
+import com.goolbitg.api.model.SpendingTypeDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
@@ -31,6 +34,7 @@ import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
+import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatsRepository;
 import com.goolbitg.api.repository.UserSurveyRepository;
@@ -59,6 +63,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final UserTokenRepository tokenRepository;
     @Autowired
+    private final SpendingTypeRepository spendingTypeRepository;
+    @Autowired
     private final JwtManager jwtManager;
 
     private int idSeq = 2;
@@ -73,9 +79,12 @@ public class UserServiceImpl implements UserService {
         UserStats stats = userStatsRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
 
-        log.info("User: " + user);
+        return getUserDto(user, survey, stats);
+    }
+
+    private UserDto getUserDto(User user, UserSurvey survey, UserStats stats) {
         UserDto dto = new UserDto();
-        dto.setId(userId);
+        dto.setId(user.getId());
         dto.setNickname(user.getNickname());
         dto.setBirthday(user.getBirthday());
         dto.setGender(user.getGender());
@@ -87,6 +96,19 @@ public class UserServiceImpl implements UserService {
         dto.setCheck6(survey.getCheck6());
         dto.setAvgIncomePerMonth(survey.getAvgIncomePerMonth());
         dto.setAvgSpendingPerMonth(survey.getAvgSpendingPerMonth());
+        dto.setPostCount(stats.getPostCount());
+        dto.setChallengeCount(stats.getChallengeCount());
+        dto.setAchivementGuage(stats.getAchivementGuage());
+
+        if (user.getSpendingTypeId() != null) {
+            SpendingType spendingType = 
+                spendingTypeRepository.findById(user.getSpendingTypeId()).get();
+            SpendingTypeDto spendingTypeDto = new SpendingTypeDto();
+            spendingTypeDto.setId(spendingType.getId());
+            spendingTypeDto.setTitle(spendingType.getTitle());
+            spendingTypeDto.setImageUrl(URI.create(spendingType.getImageUrl()));
+            dto.setSpendingType(spendingTypeDto);
+        }
 
         if (survey.getPrimUseDay() != null)
             dto.setPrimeUseDay(survey.getPrimUseDay().getValue());
@@ -163,45 +185,6 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
-    private String createRefreshToken(String userId) {
-        String token = RandomHolder.randomKey(128);
-        tokenRepository.save(userId, token);
-        return token;
-    }
-
-    private static class RandomHolder {
-        static final Random random = new SecureRandom();
-        public static String randomKey(int length) {
-            return String.format("%"+length+"s", new BigInteger(length*5, random)
-                    .toString(32)).replace('\u0020', '0');
-        }
-    }
-
-    private Jwt extractToken(AuthRequestDto request) {
-        String jwkUri;
-        if (request.getType() == LoginType.KAKAO) {
-            jwkUri = "https://kauth.kakao.com/.well-known/jwks.json";
-        } else {
-            jwkUri = "https://appleid.apple.com/auth/keys";
-        }
-        JwtDecoder decoder = NimbusJwtDecoder
-            .withJwkSetUri(jwkUri)
-            .build();
-        Jwt jwt = decoder.decode(request.getIdToken());
-        return jwt;
-    }
-
-    private Optional<User> findUser(Jwt jwt, AuthRequestDto request) {
-        String id = jwt.getSubject();
-        Optional<User> result;
-        if (request.getType() == LoginType.KAKAO) {
-            result = userRepository.findByKakaoId(id);
-        } else {
-            result = userRepository.findByAppleId(id);
-        }
-        return result;
-    }
-
     @Override
     public void logout(String userId) {
         tokenRepository.deleteByUserId(userId);
@@ -217,10 +200,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUserInfo(String userId, UserInfoDto request) {
-        Optional<User> result = userRepository.findById(userId);
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        if (user.getAgreement1() == null)
+            throw UserException.previousStepNotComplete(0);
 
         if (isNicknameExistInner(request.getNickname())) {
             // TODO: Integrated validation error message required.
@@ -229,7 +212,6 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        User user = result.get();
         user.setNickname(request.getNickname());
         user.setBirthday(request.getBirthday());
         user.setGender(request.getGender());
@@ -239,12 +221,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateChecklistInfo(String userId, UserChecklistDto request) {
-        Optional<UserSurvey> result = userSurveyRepository.findById(userId);
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        if (user.getNickname() == null)
+            throw UserException.previousStepNotComplete(1);
 
-        UserSurvey survey = result.get();
+        UserSurvey survey = userSurveyRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+
         survey.setCheck1(request.getCheck1());
         survey.setCheck2(request.getCheck2());
         survey.setCheck3(request.getCheck3());
@@ -257,16 +241,19 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateHabitinfo(String userId, UserHabitDto request) {
-        Optional<UserSurvey> result = userSurveyRepository.findById(userId);
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        if (user.getNickname() == null)
+            throw UserException.previousStepNotComplete(1);
 
-        UserSurvey survey = result.get();
+        UserSurvey survey = userSurveyRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+
         survey.setAvgIncomePerMonth(request.getAvgIncomePerMonth());
         survey.setAvgSpendingPerMonth(request.getAvgSpendingPerMonth());
-        // TODO: spending score calculation logic
+        user.setSpendingTypeId(determineSpendingType(survey));
         userSurveyRepository.save(survey);
+        userRepository.save(user);
     }
 
     @Override
@@ -282,11 +269,6 @@ public class UserServiceImpl implements UserService {
 
         survey.setPrimeUseTime(FormatUtil.parseTime(request.getPrimeUseTime()));
         userSurveyRepository.save(survey);
-    }
-
-    private boolean isNicknameExistInner(String nickname) {
-        Optional<User> result = userRepository.findByNickname(nickname);
-        return result.isPresent();
     }
 
     @Override
@@ -351,4 +333,67 @@ public class UserServiceImpl implements UserService {
         if (survey.getPrimUseDay() == null) return 4;
         return 5;
     }
+
+    private String createRefreshToken(String userId) {
+        String token = RandomHolder.randomKey(128);
+        tokenRepository.save(userId, token);
+        return token;
+    }
+
+    private static class RandomHolder {
+        static final Random random = new SecureRandom();
+        public static String randomKey(int length) {
+            return String.format("%"+length+"s", new BigInteger(length*5, random)
+                    .toString(32)).replace('\u0020', '0');
+        }
+    }
+
+    private Jwt extractToken(AuthRequestDto request) {
+        String jwkUri;
+        if (request.getType() == LoginType.KAKAO) {
+            jwkUri = "https://kauth.kakao.com/.well-known/jwks.json";
+        } else {
+            jwkUri = "https://appleid.apple.com/auth/keys";
+        }
+        JwtDecoder decoder = NimbusJwtDecoder
+            .withJwkSetUri(jwkUri)
+            .build();
+        Jwt jwt = decoder.decode(request.getIdToken());
+        return jwt;
+    }
+
+    private Optional<User> findUser(Jwt jwt, AuthRequestDto request) {
+        String id = jwt.getSubject();
+        Optional<User> result;
+        if (request.getType() == LoginType.KAKAO) {
+            result = userRepository.findByKakaoId(id);
+        } else {
+            result = userRepository.findByAppleId(id);
+        }
+        return result;
+    }
+
+    private boolean isNicknameExistInner(String nickname) {
+        Optional<User> result = userRepository.findByNickname(nickname);
+        return result.isPresent();
+    }
+
+    private String determineSpendingType(UserSurvey survey) {
+        Integer checklistScore = survey.getChecklistScore();
+        Integer spendingHabitScore = survey.getSpendingHabitScore();
+        if (checklistScore == null || spendingHabitScore == null)
+            throw UserException.registrationNotComplete(survey.getUserId());
+
+        if (checklistScore == 3 || spendingHabitScore < 50)
+            return "st01";
+        if (checklistScore == 2 || spendingHabitScore < 70)
+            return "st02";
+        if (checklistScore == 1 || spendingHabitScore < 80)
+            return "st03";
+        if (checklistScore == 0 || spendingHabitScore < 90)
+            return "st04";
+
+        return "st05";
+    }
+
 }
