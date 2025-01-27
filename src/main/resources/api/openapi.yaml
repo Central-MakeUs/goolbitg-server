@@ -1723,8 +1723,8 @@ components:
     BuyOrNotVoteDto:
       type: object
       properties:
-        buy:
-          type: boolean
+        vote:
+          $ref: '#/components/schemas/BuyOrNotVoteType'
           description: 사는 것에 투표할지 여부
     BuyOrNotVoteChangeDto:
       type: object
@@ -1735,6 +1735,11 @@ components:
         badVoteCount:
           type: integer
           description: 말까 투표 개수
+    BuyOrNotVoteType:
+      type: string
+      enum:
+        - GOOD
+        - BAD
     HabitPatternAnalysisDto:
       type: object
       properties:
@@ -2111,7 +2116,6 @@ components:
         imageUrl: "http://localhost/images/ch01"
     BuyOrNot_Form_Normal:
       value:
-        writerId: "id0001"
         productName: "Tecket 후드티"
         productPrice: 97000
         productImageUrl: "http://localhost:8080/image/bn1"
