@@ -652,7 +652,10 @@ paths:
     get:
       summary: 3일치 작심삼일 기록 확인
       operationId: getChallengeTripple
-      description: 오늘 도전중인 3일치 챌린지 정보를 가져옵니다.
+      description: >
+        오늘 도전중인 3일치 챌린지 정보를 가져옵니다.<br><br>
+        `location` 필드는 오늘 챌린지 기록이 3일중 몇번째인지 나타내는 수입니다.<br>
+        0, 1, 2가 가능합니다.
       tags:
         - Challenge
       parameters:
