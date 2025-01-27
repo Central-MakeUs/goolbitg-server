@@ -18,6 +18,7 @@ CREATE TABLE spending_types (
   id VARCHAR(10),
   title VARCHAR(100) NOT NULL UNIQUE,
   image_url VARCHAR(100) NOT NULL,
+  cutline INT,
   PRIMARY KEY (id)
 );
 
@@ -49,7 +50,6 @@ CREATE TABLE user_surveys (
   check_6 BOOLEAN,
   avg_income_per_month INT,
   avg_spending_per_month INT,
-  spending_habit_score INT,
   prime_use_day VARCHAR(10),
   prime_use_time TIME,
   PRIMARY KEY (user_id),
@@ -60,7 +60,7 @@ CREATE TABLE user_stats (
   user_id VARCHAR(50),
   challenge_count INT DEFAULT 0,
   post_count INT DEFAULT 0,
-  achivement_guage FLOAT DEFAULT 0.0,
+  achivement_guage INT DEFAULT 0,
   PRIMARY KEY (user_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

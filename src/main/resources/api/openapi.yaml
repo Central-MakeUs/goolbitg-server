@@ -350,6 +350,15 @@ paths:
       responses:
         '200':
           description: 등록 성공
+        '422':
+          description: 등록 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이전 단계 미완료:
+                  $ref: '#/components/examples/Error_PreviousStepNotCompleted'
   /users/me/checklist:
     post:
       summary: 3. 소비중독 체크리스트 정보 등록
@@ -366,6 +375,15 @@ paths:
       responses:
         '200':
           description: 등록 성공
+        '422':
+          description: 등록 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이전 단계 미완료:
+                  $ref: '#/components/examples/Error_PreviousStepNotCompleted'
   /users/me/habit:
     post:
       summary: 4. 소비습관 정보 등록
@@ -382,6 +400,15 @@ paths:
       responses:
         '200':
           description: 등록 성공
+        '422':
+          description: 등록 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이전 단계 미완료:
+                  $ref: '#/components/examples/Error_PreviousStepNotCompleted'
   /users/me/pattern:
     post:
       summary: 5. 사용자 소비습관 패턴 등록
@@ -412,6 +439,15 @@ paths:
       responses:
         '200':
           description: 등록 성공
+        '422':
+          description: 등록 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                이전 단계 미완료:
+                  $ref: '#/components/examples/Error_PreviousStepNotCompleted'
   /challenges:
     get:
       summary: 챌린지 목록 가져오기
@@ -1331,8 +1367,7 @@ components:
           type: integer
           description: 총 작성글 수
         achivementGuage:
-          type: number
-          format: float
+          type: integer
           description: 달성 게이지
       required:
         - id
@@ -2051,6 +2086,10 @@ components:
       value:
         code: 3003
         message: 회원정보 입력이 완료되지 않았습니다. (id value)
+    Error_PreviousStepNotCompleted:
+      value:
+        code: 3004
+        message: 이전 단계의 정보 입력이 완료되지 않았습니다. (status)
     Error_AlreadyEnrolled:
       value:
         code: 4001

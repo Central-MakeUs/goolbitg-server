@@ -14,6 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goolbitg.api.model.Day;
 import com.goolbitg.api.model.Gender;
@@ -44,7 +45,9 @@ public class UserIntegrationTest {
     void get_user_info() throws Exception {
         mockMvc.perform(get("/users/me").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.nickname").isString());
+            .andExpect(jsonPath("$.nickname").value("굴비왕"))
+            .andExpect(jsonPath("$.spendingType.id").value("st05"))
+            .andExpect(jsonPath("$.postCount").value(1));
     }
 
     @Test
@@ -65,50 +68,8 @@ public class UserIntegrationTest {
     @Test
     @Transactional
     @WithMockUser(NEW_USER_ID)
-    void update_agreement_and_check_status() throws Exception {
-        UserAgreementDto requestBody = new UserAgreementDto();
-        requestBody.setAgreement1(true);
-        requestBody.setAgreement2(true);
-        requestBody.setAgreement3(true);
-        requestBody.setAgreement4(false);
-
-        String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/agreement")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonBody))
-                .andExpect(status().isOk());
-        mockMvc.perform(get("/users/me/registerStatus"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(1))
-                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
-    }
-
-    @Test
-    @Transactional
-    @WithMockUser(NEW_USER_ID)
-    void update_user_info() throws Exception {
-        UserInfoDto requestBody = new UserInfoDto();
-        requestBody.setNickname("굴비노예");
-        requestBody.setBirthday(LocalDate.parse("1999-03-01"));
-        requestBody.setGender(Gender.FEMALE);
-
-        String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/info")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonBody))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/users/me"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.nickname").value("굴비노예"))
-            .andExpect(jsonPath("$.birthday").value("1999-03-01"))
-            .andExpect(jsonPath("$.gender").value("FEMALE"));
-    }
-
-    @Test
-    @Transactional
-    @WithMockUser(NEW_USER_ID)
     void cannot_update_duplicated_nickname() throws Exception {
+        updateAgreement();
         UserInfoDto requestBody = new UserInfoDto();
         requestBody.setNickname("굴비왕");
         requestBody.setBirthday(LocalDate.parse("1999-03-01"));
@@ -124,7 +85,84 @@ public class UserIntegrationTest {
     @Test
     @Transactional
     @WithMockUser(NEW_USER_ID)
-    void update_checklist() throws Exception {
+    void update_info_and_check_status() throws Exception {
+        updateAgreement();
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(1))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
+
+        updateUserInfo();
+        mockMvc.perform(get("/users/me"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.nickname").value("굴비노예"))
+            .andExpect(jsonPath("$.birthday").value("1999-03-01"))
+            .andExpect(jsonPath("$.gender").value("FEMALE"));
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(2))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
+
+        updateChecklist();
+        mockMvc.perform(get("/users/me"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.check1").value(true))
+            .andExpect(jsonPath("$.check3").value(false));
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(3))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
+
+        updateHabit();
+        mockMvc.perform(get("/users/me"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.avgIncomePerMonth").value(360000))
+            .andExpect(jsonPath("$.avgSpendingPerMonth").value(200000))
+            .andExpect(jsonPath("$.spendingType.id").value("st01"));
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(4))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(true));
+
+        updatePattern();
+        mockMvc.perform(get("/users/me"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.primeUseDay").value("SUNDAY"))
+            .andExpect(jsonPath("$.primeUseTime").value("18:30:00"));
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(5))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(true));
+    }
+
+    private void updateAgreement() throws JsonProcessingException, Exception {
+        UserAgreementDto requestBody = new UserAgreementDto();
+        requestBody.setAgreement1(true);
+        requestBody.setAgreement2(true);
+        requestBody.setAgreement3(true);
+        requestBody.setAgreement4(false);
+
+        String jsonBody = mapper.writeValueAsString(requestBody);
+        mockMvc.perform(post("/users/me/agreement")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonBody))
+                .andExpect(status().isOk());
+    }
+
+    private void updateUserInfo() throws JsonProcessingException, Exception {
+        UserInfoDto requestBody = new UserInfoDto();
+        requestBody.setNickname("굴비노예");
+        requestBody.setBirthday(LocalDate.parse("1999-03-01"));
+        requestBody.setGender(Gender.FEMALE);
+
+        String jsonBody = mapper.writeValueAsString(requestBody);
+        mockMvc.perform(post("/users/me/info")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonBody))
+                .andExpect(status().isOk());
+    }
+
+    private void updateChecklist() throws JsonProcessingException, Exception {
         UserChecklistDto requestBody = new UserChecklistDto();
         requestBody.setCheck1(true);
         requestBody.setCheck2(true);
@@ -138,17 +176,9 @@ public class UserIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get("/users/me"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.check1").value(true))
-            .andExpect(jsonPath("$.check3").value(false));
     }
 
-    @Test
-    @Transactional
-    @WithMockUser(NEW_USER_ID)
-    void update_habit() throws Exception {
+    private void updateHabit() throws JsonProcessingException, Exception {
         UserHabitDto requestBody = new UserHabitDto();
         requestBody.setAvgIncomePerMonth(360000);
         requestBody.setAvgSpendingPerMonth(200000);
@@ -158,17 +188,9 @@ public class UserIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get("/users/me"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.avgIncomePerMonth").value(360000))
-            .andExpect(jsonPath("$.avgSpendingPerMonth").value(200000));
     }
 
-    @Test
-    @Transactional
-    @WithMockUser(NEW_USER_ID)
-    void update_pattern() throws Exception {
+    private void updatePattern() throws JsonProcessingException, Exception {
         UserPatternDto requestBody = new UserPatternDto();
         requestBody.setPrimeUseDay(Day.SUNDAY);
         requestBody.setPrimeUseTime("18:30:00");
@@ -178,11 +200,6 @@ public class UserIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get("/users/me"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.primeUseDay").value("SUNDAY"))
-            .andExpect(jsonPath("$.primeUseTime").value("18:30:00"));
     }
 
 }

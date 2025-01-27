@@ -1,6 +1,10 @@
 INSERT INTO spending_types (
-    id, title, image_url
-) VALUES ( 'st01', '자린고비 굴비', 'exmaple_url' );
+    id, title, image_url, cutline
+) VALUES ( 'st01', '거지굴비', 'exmaple_url', 20000 ),
+        ( 'st02', '우당탕 굴비', 'exmaple_url', 50000 ),
+        ( 'st03', '룰루굴비', 'exmaple_url', 100000 ),
+        ( 'st04', '배부른굴비', 'exmaple_url', 200000 ),
+        ( 'st05', '이로운 굴비', 'exmaple_url', null );
 
 -- user for registration test
 INSERT INTO users ( id, register_date) 
@@ -17,20 +21,20 @@ INSERT INTO users (
     register_date, birthday, gender, spending_type_id,
     allow_push_notification, agreement1, agreement2, agreement3, agreement4
 ) VALUES ( 'id0001', 'ap0001', 'ka0001', '굴비왕',
-    '2025-01-15', '1999-03-01', 'MALE', 'st01', 1, 1, 1, 1, 1),
+    '2025-01-15', '1999-03-01', 'MALE', 'st05', 1, 1, 1, 1, 1),
         ( 'id0003', 'ap0003', 'ka0003', '굴비왕비',
-    '2025-01-21', '1999-04-28', 'FEMALE', 'st01', 1, 1, 1, 1, 1);
+    '2025-01-21', '1999-04-28', 'FEMALE', 'st05', 1, 1, 1, 1, 1);
 
 INSERT INTO user_surveys (
     user_id, check_1, check_2, check_3, check_4, check_5, check_6,
-    avg_income_per_month, avg_spending_per_month, spending_habit_score,
+    avg_income_per_month, avg_spending_per_month,
     prime_use_day, prime_use_time
-) VALUES ( 'id0001', 0, 1, 1, 0, 1, 1,
-    3600000, 2000000, 60, 'FRIDAY', '20:00:00' );
+) VALUES ( 'id0001', 0, 0, 0, 0, 0, 0,
+    3600000, 30000, 'FRIDAY', '20:00:00' );
 
 INSERT INTO user_stats (
     user_id, challenge_count, post_count, achivement_guage
-) VALUES ( 'id0001', 14, 4, 37.2 );
+) VALUES ( 'id0001', 2, 1, 2000 );
 
 INSERT INTO challenges (
     title, image_url, participant_count, avg_achive_ratio, max_achive_days
