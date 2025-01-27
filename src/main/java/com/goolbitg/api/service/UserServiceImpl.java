@@ -96,6 +96,7 @@ public class UserServiceImpl implements UserService {
         dto.setCheck6(survey.getCheck6());
         dto.setAvgIncomePerMonth(survey.getAvgIncomePerMonth());
         dto.setAvgSpendingPerMonth(survey.getAvgSpendingPerMonth());
+        dto.setSpendingHabitScore(survey.getSpendingHabitScore());
         dto.setPostCount(stats.getPostCount());
         dto.setChallengeCount(stats.getChallengeCount());
         dto.setAchivementGuage(stats.getAchivementGuage());
@@ -110,8 +111,8 @@ public class UserServiceImpl implements UserService {
             dto.setSpendingType(spendingTypeDto);
         }
 
-        if (survey.getPrimUseDay() != null)
-            dto.setPrimeUseDay(survey.getPrimUseDay().getValue());
+        if (survey.getPrimeUseDay() != null)
+            dto.setPrimeUseDay(survey.getPrimeUseDay().getValue());
         dto.setPrimeUseTime(FormatUtil.formatTime(survey.getPrimeUseTime()));
 
         return dto;
@@ -165,6 +166,9 @@ public class UserServiceImpl implements UserService {
 
         UserStats stats = new UserStats();
         stats.setUserId(userId);
+        stats.setPostCount(0);
+        stats.setChallengeCount(0);
+        stats.setAchivementGuage(0);
         userStatsRepository.save(stats);
     }
 
@@ -265,7 +269,7 @@ public class UserServiceImpl implements UserService {
         }
 
         UserSurvey survey = result.get();
-        survey.setPrimUseDay(request.getPrimeUseDay());
+        survey.setPrimeUseDay(request.getPrimeUseDay());
 
         survey.setPrimeUseTime(FormatUtil.parseTime(request.getPrimeUseTime()));
         userSurveyRepository.save(survey);
@@ -330,7 +334,7 @@ public class UserServiceImpl implements UserService {
         if (user.getNickname() == null) return 1;
         if (survey.getCheck1() == null) return 2;
         if (survey.getAvgIncomePerMonth() == null) return 3;
-        if (survey.getPrimUseDay() == null) return 4;
+        if (survey.getPrimeUseDay() == null) return 4;
         return 5;
     }
 
