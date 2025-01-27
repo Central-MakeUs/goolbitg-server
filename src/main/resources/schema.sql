@@ -113,13 +113,12 @@ CREATE TABLE buyornots (
 );
 
 CREATE TABLE buyornot_votes (
-  id INT AUTO_INCREMENT,
   post_id INT NOT NULL,
   voter_id VARCHAR(50) NOT NULL,
   vote VARCHAR(4) DEFAULT 'GOOD' CHECK (vote IN ('GOOD', 'BAD')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP AS CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
+  PRIMARY KEY (post_id, voter_id),
   FOREIGN KEY (post_id) REFERENCES buyornots(id) ON DELETE CASCADE,
   FOREIGN KEY (voter_id) REFERENCES users(id) ON DELETE CASCADE
 );
