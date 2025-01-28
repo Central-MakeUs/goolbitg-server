@@ -248,7 +248,7 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.check1").value("SUCCESS"))
                 .andExpect(jsonPath("$.check2").value("WAIT"))
                 .andExpect(jsonPath("$.check3").value("WAIT"))
-                .andExpect(jsonPath("$.location").value(1));
+                .andExpect(jsonPath("$.location").value(2));
     }
 
 }

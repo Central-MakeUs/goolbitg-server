@@ -41,14 +41,12 @@ public class LogoutFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
-        log.info("Logout filter executed");
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             Jwt jwt = jwtDecoder.decode(token);
             String userId = jwt.getSubject();
             if (!userTokenRepository.isLoggedIn(userId)) {
-                log.info("User logged out");
                 CommonException ex = AuthException.loggedOut();
                 response.setStatus(ex.getStatus().value());
                 response.setContentType("application/json");
