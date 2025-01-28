@@ -30,6 +30,9 @@ public class Challenge {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "award")
+    private Integer award;
+
     @Column(name = "participant_count")
     private Integer participantCount;
 

@@ -1606,6 +1606,9 @@ components:
           type: string
           format: uri
           description: 챌린지 대표 이미지 URL
+        award:
+          type: integer
+          description: 챌린지를 달성했을 때 얻게 되는 금액
         participantCount:
           type: integer
           description: 챌린지 참여인원
@@ -1628,6 +1631,7 @@ components:
         id: 0
         title: 커피 안마시기
         imageUrl: "http://localhost/images/ch01"
+        award: 2000
         participantCount: 23
         avgAchiveRatio: 50.0
         maxAchiveDays: 63

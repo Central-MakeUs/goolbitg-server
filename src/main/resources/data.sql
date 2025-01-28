@@ -37,13 +37,13 @@ INSERT INTO user_stats (
 ) VALUES ( 'id0001', 2, 1, 2000 );
 
 INSERT INTO challenges (
-    title, image_url, participant_count, avg_achive_ratio, max_achive_days
-) VALUES ( '커피 안마시기', 'exmaple_url', 1, 100, 3 ),
-        ( '대중교통 이용하기', 'exmaple_url', 2, 0.56, 2 ),
-        ( '외식하지 않기', 'exmaple_url', 0, 0, 0 ),
-        ( '집밥 먹기', 'exmaple_url', 0, 0, 0 ),
-        ( '주식 차트 확인하지 않기', 'exmaple_url', 0, 0, 0 ),
-        ( '아침 일찍 일어나기', 'exmaple_url', 0, 0, 0 );
+    title, image_url, award, participant_count, avg_achive_ratio, max_achive_days
+) VALUES ( '커피 안마시기', 'exmaple_url', 2000, 1, 100, 3 ),
+        ( '대중교통 이용하기', 'exmaple_url', 3000, 2, 0.56, 2 ),
+        ( '외식하지 않기', 'exmaple_url', 3000, 0, 0, 0 ),
+        ( '집밥 먹기', 'exmaple_url', 3000, 0, 0, 0 ),
+        ( '주식 차트 확인하지 않기', 'exmaple_url', 500, 0, 0, 0 ),
+        ( '아침 일찍 일어나기', 'exmaple_url', 500, 0, 0, 0 );
 
 INSERT INTO challenge_records (
     challenge_id, user_id, date, status, location

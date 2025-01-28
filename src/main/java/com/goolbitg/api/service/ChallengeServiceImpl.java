@@ -51,6 +51,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Autowired
     private final Clock clock;
 
+
+
     /*  ----------- API Implementations ----------- */
 
     @Override
@@ -236,7 +238,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
 
 
-    /*  ----------- DTO Mappers ----------- */
+    /*  --------------- DTO Mappers ------------- */
 
     private ChallengeDto getChallengeDto(Challenge challenge) {
         ChallengeDto dto = new ChallengeDto();
@@ -304,6 +306,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setLocation(currentRecord.getLocation());
         return dto;
     }
+
 
 
     /* ----------- Helper Methods -------------- */
