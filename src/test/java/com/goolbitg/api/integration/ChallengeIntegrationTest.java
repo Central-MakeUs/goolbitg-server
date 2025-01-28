@@ -221,6 +221,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.duration").value(2))
                 .andExpect(jsonPath("$.check1").value("SUCCESS"))
                 .andExpect(jsonPath("$.check2").value("WAIT"))
                 .andExpect(jsonPath("$.check3").value("WAIT"))

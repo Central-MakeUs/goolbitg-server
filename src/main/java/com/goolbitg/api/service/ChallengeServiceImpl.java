@@ -219,21 +219,20 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeTrippleDto getChallengeTripple(Long challengeId) {
         String userId = AuthUtil.getLoginUserId();
         LocalDate date = getToday();
-        ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
-        Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
-        if (result.isEmpty()) {
-            throw ChallengeException.challengeRecordNotExist(challengeId);
-        }
+        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
+        ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
+        ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
+        ChallengeStat stat = challengeStatRepository.findById(statId).get();
 
         List<ChallengeRecord> records = new ArrayList<>();
-        ChallengeRecord currentRecord = result.get();
         date = date.minusDays(currentRecord.getLocation());
         for (int i = 0; i < 3; i++) {
-            id = new ChallengeRecordId(challengeId, userId, date);
-            records.add(challengeRecordRepository.findById(id).get());
+            recordId = new ChallengeRecordId(challengeId, userId, date);
+            records.add(challengeRecordRepository.findById(recordId).get());
             date = date.plusDays(1);
         }
-        return getChallengeTrippleDto(challengeId, records, currentRecord);
+        return getChallengeTrippleDto(challengeId, records, currentRecord, stat);
     }
 
 
@@ -297,9 +296,13 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-    private ChallengeTrippleDto getChallengeTrippleDto(Long challengeId, List<ChallengeRecord> records, ChallengeRecord currentRecord) {
+    private ChallengeTrippleDto getChallengeTrippleDto(Long challengeId, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat) {
         ChallengeTrippleDto dto = new ChallengeTrippleDto();
         dto.setChallengeId(challengeId);
+        if (currentRecord.getStatus() == ChallengeRecordStatus.WAIT)
+            dto.setDuration(stat.getContinueCount() + 1);
+        else
+            dto.setDuration(stat.getContinueCount());
         dto.setCheck1(records.get(0).getStatus());
         dto.setCheck2(records.get(1).getStatus());
         dto.setCheck3(records.get(2).getStatus());
