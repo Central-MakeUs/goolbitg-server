@@ -37,28 +37,28 @@ INSERT INTO user_stats (
 ) VALUES ( 'id0001', 2, 1, 2000 );
 
 INSERT INTO challenges (
-    title, image_url, participant_count, avg_achive_ratio, max_achive_days
-) VALUES ( '커피 안마시기', 'exmaple_url', 1, 100, 3 ),
-        ( '대중교통 이용하기', 'exmaple_url', 2, 0.56, 2 ),
-        ( '외식하지 않기', 'exmaple_url', 0, 0, 0 ),
-        ( '집밥 먹기', 'exmaple_url', 0, 0, 0 ),
-        ( '주식 차트 확인하지 않기', 'exmaple_url', 0, 0, 0 ),
-        ( '아침 일찍 일어나기', 'exmaple_url', 0, 0, 0 );
+    title, image_url, reward, participant_count, avg_achive_ratio, max_achive_days
+) VALUES ( '커피 안마시기', 'exmaple_url', 2000, 1, 100, 3 ),
+        ( '대중교통 이용하기', 'exmaple_url', 3000, 2, 0.56, 2 ),
+        ( '외식하지 않기', 'exmaple_url', 3000, 0, 0, 0 ),
+        ( '집밥 먹기', 'exmaple_url', 3000, 0, 0, 0 ),
+        ( '주식 차트 확인하지 않기', 'exmaple_url', 500, 0, 0, 0 ),
+        ( '아침 일찍 일어나기', 'exmaple_url', 500, 0, 0, 0 );
 
 INSERT INTO challenge_records (
     challenge_id, user_id, date, status, location
-) VALUES ( 2, 'id0001', '2025-01-15', 'SUCCESS', 0 ),
-        ( 2, 'id0001', '2025-01-16', 'SUCCESS', 1 ),
-        ( 2, 'id0001', '2025-01-17', 'FAIL', 2 ),
-        ( 2, 'id0001', '2025-01-21', 'SUCCESS', 0 ),
-        ( 2, 'id0001', '2025-01-22', 'SUCCESS', 1 ),
-        ( 2, 'id0001', '2025-01-23', 'WAIT', 2 ),
-        ( 1, 'id0001', '2025-01-17', 'SUCCESS', 0 ),
-        ( 1, 'id0001', '2025-01-18', 'SUCCESS', 1 ),
-        ( 1, 'id0001', '2025-01-19', 'SUCCESS', 2 ),
-        ( 2, 'id0003', '2025-01-22', 'SUCCESS', 0 ),
-        ( 2, 'id0003', '2025-01-23', 'WAIT', 1 ),
-        ( 2, 'id0003', '2025-01-24', 'WAIT', 2 );
+) VALUES ( 2, 'id0001', '2025-01-15', 'SUCCESS', 1 ),
+        ( 2, 'id0001', '2025-01-16', 'SUCCESS', 2 ),
+        ( 2, 'id0001', '2025-01-17', 'FAIL', 3 ),
+        ( 2, 'id0001', '2025-01-21', 'SUCCESS', 1 ),
+        ( 2, 'id0001', '2025-01-22', 'SUCCESS', 2 ),
+        ( 2, 'id0001', '2025-01-23', 'WAIT', 3 ),
+        ( 1, 'id0001', '2025-01-17', 'SUCCESS', 1 ),
+        ( 1, 'id0001', '2025-01-18', 'SUCCESS', 2 ),
+        ( 1, 'id0001', '2025-01-19', 'SUCCESS', 3 ),
+        ( 2, 'id0003', '2025-01-22', 'SUCCESS', 1 ),
+        ( 2, 'id0003', '2025-01-23', 'WAIT', 2 ),
+        ( 2, 'id0003', '2025-01-24', 'WAIT', 3 );
 
 INSERT INTO challenge_stats (
     challenge_id, user_id, continue_count, current_continue_count, total_count, enroll_count
@@ -77,8 +77,8 @@ INSERT INTO buyornot_votes (
 ) VALUES ( 1, 'id0001', 'GOOD' );
 
 INSERT INTO challenge_groups (
-    owner_id, title, hashtags, image_url, max_size, people_count, participant_count, avg_achive_ratio, max_achive_days
-) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 6, 1, 23, 50, 63 );
+    owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achive_ratio, max_achive_days
+) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 2000, 6, 1, 23, 50, 63 );
 
 INSERT INTO notices (
     receiver_id, message, published_at, type, read

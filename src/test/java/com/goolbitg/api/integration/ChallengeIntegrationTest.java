@@ -32,6 +32,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challenges/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.participantCount").value(1))
+                .andExpect(jsonPath("$.reward").value(2000))
                 .andExpect(jsonPath("$.avgAchiveRatio").value(100.0))
                 .andExpect(jsonPath("$.maxAchiveDays").value(3));
     }
@@ -106,18 +107,41 @@ public class ChallengeIntegrationTest {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
-        mockMvc.perform(get("/challengeRecords")
-            .param("date", "2025-01-23"))
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(2));
-        mockMvc.perform(get("/challengeRecords")
+                .andExpect(jsonPath("$.location").value(1));
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
             .param("date", "2025-01-24"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(1));
-        mockMvc.perform(get("/challengeRecords")
+                .andExpect(jsonPath("$.location").value(2));
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
             .param("date", "2025-01-25"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(1));
+                .andExpect(jsonPath("$.location").value(3));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(ROOT_USER)
+    void enroll_challenge_first_time() throws Exception {
+        Long challengeId = 3L;
+        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+                .andExpect(status().isCreated());
+        mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.userId").value(ROOT_USER))
+                .andExpect(jsonPath("$.continueCount").value(0))
+                .andExpect(jsonPath("$.totalCount").value(0))
+                .andExpect(jsonPath("$.enrollCount").value(1));
+        mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.duration").value(1))
+                .andExpect(jsonPath("$.check1").value("WAIT"))
+                .andExpect(jsonPath("$.check2").value("WAIT"))
+                .andExpect(jsonPath("$.check3").value("WAIT"))
+                .andExpect(jsonPath("$.location").value(1));
     }
 
     @Test
@@ -220,10 +244,11 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.duration").value(2))
                 .andExpect(jsonPath("$.check1").value("SUCCESS"))
                 .andExpect(jsonPath("$.check2").value("WAIT"))
                 .andExpect(jsonPath("$.check3").value("WAIT"))
-                .andExpect(jsonPath("$.location").value(1));
+                .andExpect(jsonPath("$.location").value(2));
     }
 
 }

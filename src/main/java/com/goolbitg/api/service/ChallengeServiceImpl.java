@@ -52,6 +52,9 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final Clock clock;
 
 
+
+    /*  ----------- API Implementations ----------- */
+
     @Override
     public ChallengeDto getChallenge(Long challengeId) {
         Optional<Challenge> result = challengeRepository.findById(challengeId);
@@ -62,7 +65,6 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = result.get();
         return getChallengeDto(challenge);
     }
-
 
     @Override
     public PaginatedChallengeDto getChallenges(Integer page, Integer size, String spendingTypeId) {
@@ -76,33 +78,6 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         return getPaginatedChallengeDto(result);
     }
-
-    private PaginatedChallengeDto getPaginatedChallengeDto(Page<Challenge> result) {
-        PaginatedChallengeDto dto = new PaginatedChallengeDto();
-        dto.setTotalPages(result.getTotalPages());
-        dto.setTotalSize((int)result.getTotalElements());
-        dto.setPage(result.getNumber());
-        dto.setSize((int)result.get().count());
-        dto.setItems(result.stream().map(e -> {
-            return getChallengeDto(e);
-        }).toList());
-
-        return dto;
-    }
-
-
-    private ChallengeDto getChallengeDto(Challenge challenge) {
-        ChallengeDto dto = new ChallengeDto();
-        dto.setId(challenge.getId());
-        dto.setTitle(challenge.getTitle());
-        dto.setImageUrl(URI.create(challenge.getImageUrl()));
-        dto.setMaxAchiveDays(challenge.getMaxAchiveDays());
-        dto.setAvgAchiveRatio(challenge.getAvgAchiveRatio());
-        dto.setParticipantCount(challenge.getParticipantCount());
-        return dto;
-    }
-
-
 
     @Override
     @Transactional
@@ -125,8 +100,6 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeRecordRepository.deleteById(id);
         }
     }
-
-
 
     @Override
     @Transactional
@@ -159,27 +132,14 @@ public class ChallengeServiceImpl implements ChallengeService {
         return getChallengeRecordDto(record);
     }
 
-    private ChallengeRecordDto getChallengeRecordDto(ChallengeRecord record) {
-        ChallengeRecordDto dto = new ChallengeRecordDto();
-        dto.setChallengeId(record.getChallengeId());
-        dto.setUserId(record.getUserId());
-        dto.setStatus(record.getStatus());
-        dto.setDate(record.getDate());
-        return dto;
-    }
-
-
-
     @Override
     @Transactional
     public void enrollChallenge(Long challengeId) {
-        String loginUserId = AuthUtil.getLoginUserId();
-        ChallengeStatId id = new ChallengeStatId(challengeId, loginUserId);
-        Optional<ChallengeStat> result = challengeStatRepository.findById(id);
-        if (result.isEmpty()) {
-            throw ChallengeException.challengeRecordNotExist(challengeId);
-        }
-        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, loginUserId, getToday());
+        String userId = AuthUtil.getLoginUserId();
+        ChallengeStatId id = new ChallengeStatId(challengeId, userId);
+        ChallengeStat stat = challengeStatRepository.findById(id)
+                .orElse(new ChallengeStat());
+        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, getToday());
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
         int startDay = 0;
         if (recordResult.isPresent()) {
@@ -190,22 +150,28 @@ public class ChallengeServiceImpl implements ChallengeService {
             }
         }
 
-        ChallengeStat stat = result.get();
-        stat.setEnrollCount(stat.getEnrollCount() + 1);
+        stat.setUserId(userId);
+        stat.setChallengeId(challengeId);
+        Integer prevEnrollCount = stat.getEnrollCount();
+        if (prevEnrollCount == null) prevEnrollCount = 0;
+        stat.setEnrollCount(prevEnrollCount + 1);
+        if (stat.getTotalCount() == null) stat.setTotalCount(0);
+        if (stat.getContinueCount() == null) stat.setContinueCount(0);
+
         challengeStatRepository.save(stat);
-        for (int i = startDay; i < startDay + 3; i++) {
+
+        for (int i = 0; i < 3; i++) {
             LocalDate date = getToday();
-            date = date.plusDays(i);
+            date = date.plusDays(i + startDay);
             ChallengeRecord record = new ChallengeRecord();
             record.setChallengeId(challengeId);
-            record.setUserId(loginUserId);
+            record.setUserId(userId);
             record.setDate(date);
             record.setStatus(ChallengeRecordStatus.WAIT);
+            record.setLocation(i + 1);
             challengeRecordRepository.save(record);
         }
     }
-
-
 
     @Override
     public ChallengeRecordDto getChallengeRecord(Long challengeId, LocalDate date) {
@@ -223,8 +189,6 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         return getChallengeRecordDto(record);
     }
-
-
 
     @Override
     public PaginatedChallengeRecordDto getChallengeRecords(Integer page, Integer size, LocalDate date, ChallengeRecordStatus status) {
@@ -244,6 +208,75 @@ public class ChallengeServiceImpl implements ChallengeService {
         return getPaginatedRecordDto(result);
     }
 
+    @Override
+    public ChallengeStatDto getChallengeStat(Long challengeId) {
+        String userId = AuthUtil.getLoginUserId();
+        ChallengeStatId id = new ChallengeStatId(challengeId, userId);
+        ChallengeStat stat = challengeStatRepository.findById(id)
+                .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
+
+        return getChallengeStatDto(stat);
+    }
+
+    @Override
+    public ChallengeTrippleDto getChallengeTripple(Long challengeId) {
+        String userId = AuthUtil.getLoginUserId();
+        LocalDate date = getToday();
+        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
+        ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)
+                .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
+        ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
+        ChallengeStat stat = challengeStatRepository.findById(statId).get();
+
+        List<ChallengeRecord> records = new ArrayList<>();
+        date = date.minusDays(currentRecord.getLocation() - 1);
+        for (int i = 0; i < 3; i++) {
+            recordId = new ChallengeRecordId(challengeId, userId, date);
+            records.add(challengeRecordRepository.findById(recordId).get());
+            date = date.plusDays(1);
+        }
+        return getChallengeTrippleDto(challengeId, records, currentRecord, stat);
+    }
+
+
+
+    /*  --------------- DTO Mappers ------------- */
+
+    private ChallengeDto getChallengeDto(Challenge challenge) {
+        ChallengeDto dto = new ChallengeDto();
+        dto.setId(challenge.getId());
+        dto.setTitle(challenge.getTitle());
+        dto.setImageUrl(URI.create(challenge.getImageUrl()));
+        dto.setReward(challenge.getReward());
+        dto.setMaxAchiveDays(challenge.getMaxAchiveDays());
+        dto.setAvgAchiveRatio(challenge.getAvgAchiveRatio());
+        dto.setParticipantCount(challenge.getParticipantCount());
+        return dto;
+    }
+
+    private PaginatedChallengeDto getPaginatedChallengeDto(Page<Challenge> result) {
+        PaginatedChallengeDto dto = new PaginatedChallengeDto();
+        dto.setTotalPages(result.getTotalPages());
+        dto.setTotalSize((int)result.getTotalElements());
+        dto.setPage(result.getNumber());
+        dto.setSize((int)result.get().count());
+        dto.setItems(result.stream().map(e -> {
+            return getChallengeDto(e);
+        }).toList());
+
+        return dto;
+    }
+
+    private ChallengeRecordDto getChallengeRecordDto(ChallengeRecord record) {
+        ChallengeRecordDto dto = new ChallengeRecordDto();
+        dto.setChallengeId(record.getChallengeId());
+        dto.setUserId(record.getUserId());
+        dto.setStatus(record.getStatus());
+        dto.setDate(record.getDate());
+        dto.setLocation(record.getLocation());
+        return dto;
+    }
+
     private PaginatedChallengeRecordDto getPaginatedRecordDto(Page<ChallengeRecord> result) {
         PaginatedChallengeRecordDto dto = new PaginatedChallengeRecordDto();
         dto.setTotalPages(result.getTotalPages());
@@ -257,21 +290,6 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-
-
-    @Override
-    public ChallengeStatDto getChallengeStat(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
-        ChallengeStatId id = new ChallengeStatId(challengeId, userId);
-        Optional<ChallengeStat> result = challengeStatRepository.findById(id);
-        if (result.isEmpty()) {
-            throw ChallengeException.notEnrolled(challengeId);
-        }
-
-        ChallengeStat stat = result.get();
-        return getChallengeStatDto(stat);
-    }
-
     private ChallengeStatDto getChallengeStatDto(ChallengeStat stat) {
         ChallengeStatDto dto = new ChallengeStatDto();
         dto.setUserId(stat.getUserId());
@@ -282,41 +300,26 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-    private LocalDate getToday() {
-        return LocalDate.now(clock);
-    }
-
-
-    @Override
-    public ChallengeTrippleDto getChallengeTripple(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
-        LocalDate date = getToday();
-        ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
-        Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
-        if (result.isEmpty()) {
-            throw ChallengeException.challengeRecordNotExist(challengeId);
-        }
-
-        List<ChallengeRecord> records = new ArrayList<>();
-        ChallengeRecord currentRecord = result.get();
-        date = date.minusDays(currentRecord.getLocation());
-        for (int i = 0; i < 3; i++) {
-            id = new ChallengeRecordId(challengeId, userId, date);
-            records.add(challengeRecordRepository.findById(id).get());
-            date = date.plusDays(1);
-        }
-        return getChallengeTrippleDto(challengeId, records, currentRecord);
-    }
-
-
-    private ChallengeTrippleDto getChallengeTrippleDto(Long challengeId, List<ChallengeRecord> records, ChallengeRecord currentRecord) {
+    private ChallengeTrippleDto getChallengeTrippleDto(Long challengeId, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat) {
         ChallengeTrippleDto dto = new ChallengeTrippleDto();
         dto.setChallengeId(challengeId);
+        if (currentRecord.getStatus() == ChallengeRecordStatus.WAIT)
+            dto.setDuration(stat.getContinueCount() + 1);
+        else
+            dto.setDuration(stat.getContinueCount());
         dto.setCheck1(records.get(0).getStatus());
         dto.setCheck2(records.get(1).getStatus());
         dto.setCheck3(records.get(2).getStatus());
         dto.setLocation(currentRecord.getLocation());
         return dto;
+    }
+
+
+
+    /* ----------- Helper Methods -------------- */
+
+    private LocalDate getToday() {
+        return LocalDate.now(clock);
     }
 
 }
