@@ -155,14 +155,15 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeStat stat = result.get();
         stat.setEnrollCount(stat.getEnrollCount() + 1);
         challengeStatRepository.save(stat);
-        for (int i = startDay; i < startDay + 3; i++) {
+        for (int i = 0; i < 3; i++) {
             LocalDate date = getToday();
-            date = date.plusDays(i);
+            date = date.plusDays(i + startDay);
             ChallengeRecord record = new ChallengeRecord();
             record.setChallengeId(challengeId);
             record.setUserId(loginUserId);
             record.setDate(date);
             record.setStatus(ChallengeRecordStatus.WAIT);
+            record.setLocation(i + 1);
             challengeRecordRepository.save(record);
         }
     }
@@ -221,7 +222,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         LocalDate date = getToday();
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)
-                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
+                .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
         ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
         ChallengeStat stat = challengeStatRepository.findById(statId).get();
 
@@ -270,6 +271,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setUserId(record.getUserId());
         dto.setStatus(record.getStatus());
         dto.setDate(record.getDate());
+        dto.setLocation(record.getLocation());
         return dto;
     }
 

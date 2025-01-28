@@ -107,18 +107,17 @@ public class ChallengeIntegrationTest {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
-        mockMvc.perform(get("/challengeRecords")
-            .param("date", "2025-01-23"))
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(2));
-        mockMvc.perform(get("/challengeRecords")
+                .andExpect(jsonPath("$.location").value(1));
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
             .param("date", "2025-01-24"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(1));
-        mockMvc.perform(get("/challengeRecords")
+                .andExpect(jsonPath("$.location").value(2));
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
             .param("date", "2025-01-25"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(1));
+                .andExpect(jsonPath("$.location").value(3));
     }
 
     @Test
