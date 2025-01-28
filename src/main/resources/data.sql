@@ -1,10 +1,10 @@
 INSERT INTO spending_types (
     id, title, image_url, cutline
-) VALUES ( 'st01', '거지굴비', 'exmaple_url', 20000 ),
-        ( 'st02', '우당탕 굴비', 'exmaple_url', 50000 ),
-        ( 'st03', '룰루굴비', 'exmaple_url', 100000 ),
-        ( 'st04', '배부른굴비', 'exmaple_url', 200000 ),
-        ( 'st05', '이로운 굴비', 'exmaple_url', null );
+) VALUES ( 1, '거지굴비', 'exmaple_url', 20000 ),
+        ( 2, '우당탕 굴비', 'exmaple_url', 50000 ),
+        ( 3, '룰루굴비', 'exmaple_url', 100000 ),
+        ( 4, '배부른굴비', 'exmaple_url', 200000 ),
+        ( 5, '이로운 굴비', 'exmaple_url', null );
 
 -- user for registration test
 INSERT INTO users ( id, register_date) 
@@ -21,9 +21,9 @@ INSERT INTO users (
     register_date, birthday, gender, spending_type_id,
     allow_push_notification, agreement1, agreement2, agreement3, agreement4
 ) VALUES ( 'id0001', 'ap0001', 'ka0001', '굴비왕',
-    '2025-01-15', '1999-03-01', 'MALE', 'st05', 1, 1, 1, 1, 1),
+    '2025-01-15', '1999-03-01', 'MALE', 5, 1, 1, 1, 1, 1),
         ( 'id0003', 'ap0003', 'ka0003', '굴비왕비',
-    '2025-01-21', '1999-04-28', 'FEMALE', 'st05', 1, 1, 1, 1, 1);
+    '2025-01-21', '1999-04-28', 'FEMALE', 5, 1, 1, 1, 1, 1);
 
 INSERT INTO user_surveys (
     user_id, check_1, check_2, check_3, check_4, check_5, check_6,

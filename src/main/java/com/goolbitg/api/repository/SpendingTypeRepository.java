@@ -7,6 +7,6 @@ import com.goolbitg.api.entity.SpendingType;
 /**
  * SpendingTypeRepository
  */
-public interface SpendingTypeRepository extends JpaRepository<SpendingType, String> {
+public interface SpendingTypeRepository extends JpaRepository<SpendingType, Long> {
 
 }

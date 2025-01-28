@@ -382,22 +382,22 @@ public class UserServiceImpl implements UserService {
         return result.isPresent();
     }
 
-    private String determineSpendingType(UserSurvey survey) {
+    private Long determineSpendingType(UserSurvey survey) {
         Integer checklistScore = survey.getChecklistScore();
         Integer spendingHabitScore = survey.getSpendingHabitScore();
         if (checklistScore == null || spendingHabitScore == null)
             throw UserException.registrationNotComplete(survey.getUserId());
 
         if (checklistScore == 3 || spendingHabitScore < 50)
-            return "st01";
+            return 1L;
         if (checklistScore == 2 || spendingHabitScore < 70)
-            return "st02";
+            return 2L;
         if (checklistScore == 1 || spendingHabitScore < 80)
-            return "st03";
+            return 3L;
         if (checklistScore == 0 || spendingHabitScore < 90)
-            return "st04";
+            return 4L;
 
-        return "st05";
+        return 5L;
     }
 
 }

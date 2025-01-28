@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS challenge_group_records;
 DROP TABLE IF EXISTS challenge_group_user_stats;
 
 CREATE TABLE spending_types (
-  id VARCHAR(10),
+  id BIGINT,
   title VARCHAR(100) NOT NULL UNIQUE,
   image_url VARCHAR(100) NOT NULL,
   cutline INT,
@@ -30,7 +30,7 @@ CREATE TABLE users (
   register_date DATE NOT NULL,
   birthday DATE,
   gender VARCHAR(6) CHECK (gender IN ('MALE', 'FEMALE')),
-  spending_type_id VARCHAR(10),
+  spending_type_id BIGINT,
   allow_push_notification BOOLEAN,
   agreement1 BOOLEAN,
   agreement2 BOOLEAN,

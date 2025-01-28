@@ -57,7 +57,7 @@ public class ChallengeIntegrationTest {
     void get_challenges_for_type() throws Exception {
         Integer page = 0;
         Integer size = 10;
-        String id = "st05";
+        Long id = 5L;
 
         mockMvc.perform(get("/challenges")
             .param("page", page.toString())

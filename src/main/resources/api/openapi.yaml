@@ -1403,7 +1403,8 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           description: 소비유형 ID
         title:
           type: string
@@ -1412,8 +1413,11 @@ components:
           type: string
           format: uri
           description: 소비유형 대표 이미지
+        peopleCount:
+          type: integer
+          description: 소비유형 사람 수
       example:
-        id: st1
+        id: 1
         title: 자린고비 굴비
         imageUrl: http://localhost:8080/image/st1
     ChallengeGroupStatDto:

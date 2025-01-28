@@ -46,7 +46,7 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/users/me").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.nickname").value("굴비왕"))
-            .andExpect(jsonPath("$.spendingType.id").value("st05"))
+            .andExpect(jsonPath("$.spendingType.id").value(5))
             .andExpect(jsonPath("$.postCount").value(1));
     }
 
@@ -118,7 +118,7 @@ public class UserIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.avgIncomePerMonth").value(360000))
             .andExpect(jsonPath("$.avgSpendingPerMonth").value(200000))
-            .andExpect(jsonPath("$.spendingType.id").value("st01"));
+            .andExpect(jsonPath("$.spendingType.id").value(1));
         mockMvc.perform(get("/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(4))

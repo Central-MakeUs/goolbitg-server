@@ -47,7 +47,7 @@ public class User {
     private Gender gender;
 
     @Column(name = "spending_type_id")
-    private String spendingTypeId;
+    private Long spendingTypeId;
 
     @Column(name = "allow_push_notification")
     private Boolean allowPushNotification;
