@@ -1384,6 +1384,11 @@ components:
         - check6
         - spendingType
         - spendingHabitScore
+        - avgIncomePerMonth
+        - avgSpendingPerMonth
+        - challengeCount
+        - postCount
+        - achivementGuage
       example:
         id: "id0001"
         nickname: 굴비왕
@@ -1404,6 +1409,7 @@ components:
           id: 1
           title: 자린고비 굴비
           imageUrl: http://localhost:8080/image/st1
+          peopleCount: 40
         challengeCount: 14
         postCount: 4
         achivementGuage: 37.2
