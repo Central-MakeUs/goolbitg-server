@@ -66,9 +66,10 @@ CREATE TABLE user_stats (
 );
 
 CREATE TABLE challenges (
-  id INT AUTO_INCREMENT,
+  id BIGINT AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   image_url VARCHAR(50) NOT NULL,
+  award INT NOT NULL,
   participant_count INT DEFAULT 0,
   avg_achive_ratio FLOAT DEFAULT 0.0,
   max_achive_days INT DEFAULT 0,
@@ -76,7 +77,7 @@ CREATE TABLE challenges (
 );
 
 CREATE TABLE challenge_records (
-  challenge_id INT,
+  challenge_id BIGINT,
   user_id VARCHAR(50),
   date DATE NOT NULL,
   status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
@@ -87,7 +88,7 @@ CREATE TABLE challenge_records (
 );
 
 CREATE TABLE challenge_stats (
-  challenge_id INT,
+  challenge_id BIGINT,
   user_id VARCHAR(50),
   continue_count INT DEFAULT 0,
   current_continue_count INT DEFAULT 0,
@@ -99,7 +100,7 @@ CREATE TABLE challenge_stats (
 );
 
 CREATE TABLE buyornots (
-  id INT AUTO_INCREMENT,
+  id BIGINT AUTO_INCREMENT,
   writer_id VARCHAR(50) NOT NULL,
   product_name VARCHAR(50) NOT NULL,
   product_price INT NOT NULL,
@@ -113,7 +114,7 @@ CREATE TABLE buyornots (
 );
 
 CREATE TABLE buyornot_votes (
-  post_id INT NOT NULL,
+  post_id BIGINT NOT NULL,
   voter_id VARCHAR(50) NOT NULL,
   vote VARCHAR(4) DEFAULT 'GOOD' CHECK (vote IN ('GOOD', 'BAD')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -124,7 +125,7 @@ CREATE TABLE buyornot_votes (
 );
 
 CREATE TABLE challenge_groups (
-  id INT AUTO_INCREMENT,
+  id BIGINT AUTO_INCREMENT,
   owner_id VARCHAR(50) NOT NULL,
   title VARCHAR(50) NOT NULL,
   hashtags VARCHAR(100) DEFAULT '',
@@ -141,7 +142,7 @@ CREATE TABLE challenge_groups (
 );
 
 CREATE TABLE notices (
-  id INT AUTO_INCREMENT,
+  id BIGINT AUTO_INCREMENT,
   receiver_id VARCHAR(50) NOT NULL,
   message VARCHAR(100) NOT NULL,
   published_at DATETIME NOT NULL,
@@ -152,7 +153,7 @@ CREATE TABLE notices (
 );
 
 CREATE TABLE challenge_group_records (
-  group_id INT,
+  group_id BIGINT,
   user_id VARCHAR(50),
   date DATE NOT NULL,
   status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
@@ -162,7 +163,7 @@ CREATE TABLE challenge_group_records (
 );
 
 CREATE TABLE challenge_group_stats (
-  group_id INT,
+  group_id BIGINT,
   user_id VARCHAR(50),
   continue_count INT DEFAULT 0,
   total_count INT DEFAULT 0,
