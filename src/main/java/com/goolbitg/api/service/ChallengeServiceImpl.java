@@ -67,7 +67,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public PaginatedChallengeDto getChallenges(Integer page, Integer size, String spendingTypeId) {
+    public PaginatedChallengeDto getChallenges(Integer page, Integer size, Long spendingTypeId) {
         Page<Challenge> result;
         Pageable pageReq = PageRequest.of(page, size);
         if (spendingTypeId == null) {

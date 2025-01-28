@@ -24,6 +24,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
         GROUP BY c
         ORDER BY COUNT(r) DESC
         """)
-    Page<Challenge> findAllBySpendingTypeId(@Param("spendingTypeId") String spendingTypeId, Pageable pageable);
+    Page<Challenge> findAllBySpendingTypeId(@Param("spendingTypeId") Long spendingTypeId, Pageable pageable);
 
 }

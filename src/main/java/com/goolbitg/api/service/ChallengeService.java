@@ -16,7 +16,7 @@ import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 public interface ChallengeService {
 
     ChallengeDto getChallenge(Long challengeId);
-    PaginatedChallengeDto getChallenges(Integer page, Integer size, String spendingTypeId);
+    PaginatedChallengeDto getChallenges(Integer page, Integer size, Long spendingTypeId);
     void cancelChallenge(Long challengeId);
     ChallengeRecordDto checkChallenge(Long challengeId);
     void enrollChallenge(Long challengeId);
