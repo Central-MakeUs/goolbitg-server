@@ -134,6 +134,14 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.continueCount").value(0))
                 .andExpect(jsonPath("$.totalCount").value(0))
                 .andExpect(jsonPath("$.enrollCount").value(1));
+        mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.duration").value(1))
+                .andExpect(jsonPath("$.check1").value("WAIT"))
+                .andExpect(jsonPath("$.check2").value("WAIT"))
+                .andExpect(jsonPath("$.check3").value("WAIT"))
+                .andExpect(jsonPath("$.location").value(1));
     }
 
     @Test

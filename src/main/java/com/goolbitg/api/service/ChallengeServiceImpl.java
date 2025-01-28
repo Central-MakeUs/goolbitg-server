@@ -229,7 +229,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeStat stat = challengeStatRepository.findById(statId).get();
 
         List<ChallengeRecord> records = new ArrayList<>();
-        date = date.minusDays(currentRecord.getLocation());
+        date = date.minusDays(currentRecord.getLocation() - 1);
         for (int i = 0; i < 3; i++) {
             recordId = new ChallengeRecordId(challengeId, userId, date);
             records.add(challengeRecordRepository.findById(recordId).get());
