@@ -104,10 +104,12 @@ public class UserServiceImpl implements UserService {
         if (user.getSpendingTypeId() != null) {
             SpendingType spendingType = 
                 spendingTypeRepository.findById(user.getSpendingTypeId()).get();
+            Integer peopleCount = userRepository.countBySpendingTypeId(user.getSpendingTypeId());
             SpendingTypeDto spendingTypeDto = new SpendingTypeDto();
             spendingTypeDto.setId(spendingType.getId());
             spendingTypeDto.setTitle(spendingType.getTitle());
             spendingTypeDto.setImageUrl(URI.create(spendingType.getImageUrl()));
+            spendingTypeDto.setPeopleCount(peopleCount);
             dto.setSpendingType(spendingTypeDto);
         }
 

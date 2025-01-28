@@ -14,5 +14,6 @@ public interface UserRepository extends CrudRepository<User, String> {
     Optional<User> findByKakaoId(String kakaoId);
     Optional<User> findByAppleId(String appleId);
     Optional<User> findByNickname(String nickname);
+    Integer countBySpendingTypeId(Long spendingTypeId);
 
 }
