@@ -37,7 +37,7 @@ INSERT INTO user_stats (
 ) VALUES ( 'id0001', 2, 1, 2000 );
 
 INSERT INTO challenges (
-    title, image_url, award, participant_count, avg_achive_ratio, max_achive_days
+    title, image_url, reward, participant_count, avg_achive_ratio, max_achive_days
 ) VALUES ( '커피 안마시기', 'exmaple_url', 2000, 1, 100, 3 ),
         ( '대중교통 이용하기', 'exmaple_url', 3000, 2, 0.56, 2 ),
         ( '외식하지 않기', 'exmaple_url', 3000, 0, 0, 0 ),
@@ -77,8 +77,8 @@ INSERT INTO buyornot_votes (
 ) VALUES ( 1, 'id0001', 'GOOD' );
 
 INSERT INTO challenge_groups (
-    owner_id, title, hashtags, image_url, max_size, people_count, participant_count, avg_achive_ratio, max_achive_days
-) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 6, 1, 23, 50, 63 );
+    owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achive_ratio, max_achive_days
+) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 2000, 6, 1, 23, 50, 63 );
 
 INSERT INTO notices (
     receiver_id, message, published_at, type, read

@@ -1611,7 +1611,7 @@ components:
           type: string
           format: uri
           description: 챌린지 대표 이미지 URL
-        award:
+        reward:
           type: integer
           description: 챌린지를 달성했을 때 얻게 되는 금액
         participantCount:

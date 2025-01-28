@@ -247,7 +247,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setId(challenge.getId());
         dto.setTitle(challenge.getTitle());
         dto.setImageUrl(URI.create(challenge.getImageUrl()));
-        dto.setAward(challenge.getAward());
+        dto.setReward(challenge.getReward());
         dto.setMaxAchiveDays(challenge.getMaxAchiveDays());
         dto.setAvgAchiveRatio(challenge.getAvgAchiveRatio());
         dto.setParticipantCount(challenge.getParticipantCount());

@@ -32,7 +32,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challenges/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.participantCount").value(1))
-                .andExpect(jsonPath("$.award").value(2000))
+                .andExpect(jsonPath("$.reward").value(2000))
                 .andExpect(jsonPath("$.avgAchiveRatio").value(100.0))
                 .andExpect(jsonPath("$.maxAchiveDays").value(3));
     }
