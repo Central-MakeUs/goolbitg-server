@@ -135,13 +135,11 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public void enrollChallenge(Long challengeId) {
-        String loginUserId = AuthUtil.getLoginUserId();
-        ChallengeStatId id = new ChallengeStatId(challengeId, loginUserId);
-        Optional<ChallengeStat> result = challengeStatRepository.findById(id);
-        if (result.isEmpty()) {
-            throw ChallengeException.challengeRecordNotExist(challengeId);
-        }
-        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, loginUserId, getToday());
+        String userId = AuthUtil.getLoginUserId();
+        ChallengeStatId id = new ChallengeStatId(challengeId, userId);
+        ChallengeStat stat = challengeStatRepository.findById(id)
+                .orElse(new ChallengeStat());
+        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, getToday());
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
         int startDay = 0;
         if (recordResult.isPresent()) {
@@ -152,15 +150,22 @@ public class ChallengeServiceImpl implements ChallengeService {
             }
         }
 
-        ChallengeStat stat = result.get();
-        stat.setEnrollCount(stat.getEnrollCount() + 1);
+        stat.setUserId(userId);
+        stat.setChallengeId(challengeId);
+        Integer prevEnrollCount = stat.getEnrollCount();
+        if (prevEnrollCount == null) prevEnrollCount = 0;
+        stat.setEnrollCount(prevEnrollCount + 1);
+        if (stat.getTotalCount() == null) stat.setTotalCount(0);
+        if (stat.getContinueCount() == null) stat.setContinueCount(0);
+
         challengeStatRepository.save(stat);
+
         for (int i = 0; i < 3; i++) {
             LocalDate date = getToday();
             date = date.plusDays(i + startDay);
             ChallengeRecord record = new ChallengeRecord();
             record.setChallengeId(challengeId);
-            record.setUserId(loginUserId);
+            record.setUserId(userId);
             record.setDate(date);
             record.setStatus(ChallengeRecordStatus.WAIT);
             record.setLocation(i + 1);
@@ -207,12 +212,9 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeStatDto getChallengeStat(Long challengeId) {
         String userId = AuthUtil.getLoginUserId();
         ChallengeStatId id = new ChallengeStatId(challengeId, userId);
-        Optional<ChallengeStat> result = challengeStatRepository.findById(id);
-        if (result.isEmpty()) {
-            throw ChallengeException.notEnrolled(challengeId);
-        }
+        ChallengeStat stat = challengeStatRepository.findById(id)
+                .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
 
-        ChallengeStat stat = result.get();
         return getChallengeStatDto(stat);
     }
 

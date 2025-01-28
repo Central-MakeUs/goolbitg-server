@@ -122,6 +122,22 @@ public class ChallengeIntegrationTest {
 
     @Test
     @Transactional
+    @WithMockUser(ROOT_USER)
+    void enroll_challenge_first_time() throws Exception {
+        Long challengeId = 3L;
+        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+                .andExpect(status().isCreated());
+        mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.userId").value(ROOT_USER))
+                .andExpect(jsonPath("$.continueCount").value(0))
+                .andExpect(jsonPath("$.totalCount").value(0))
+                .andExpect(jsonPath("$.enrollCount").value(1));
+    }
+
+    @Test
+    @Transactional
     @WithMockUser(NORMAL_USER)
     void reject_enroll_when_already_enrolled() throws Exception {
         Long challengeId = 2L;
