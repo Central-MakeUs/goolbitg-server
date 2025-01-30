@@ -31,4 +31,7 @@ public class UserStats {
     @Column(name = "achivement_guage")
     private Integer achivementGuage;
 
+    @Column(name = "continue_count")
+    private Integer continueCount;
+
 }

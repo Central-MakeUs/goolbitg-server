@@ -61,7 +61,17 @@ CREATE TABLE user_stats (
   challenge_count INT DEFAULT 0,
   post_count INT DEFAULT 0,
   achivement_guage INT DEFAULT 0,
+  continue_count INT DEFAULT 0,
   PRIMARY KEY (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE daily_records (
+  user_id VARCHAR(50),
+  date DATE NOT NULL,
+  saving INT DEFAULT 0,
+  status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
+  PRIMARY KEY (user_id, date),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

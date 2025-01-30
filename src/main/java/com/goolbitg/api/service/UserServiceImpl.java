@@ -3,7 +3,11 @@ package com.goolbitg.api.service;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.SecureRandom;
+import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -14,6 +18,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.goolbitg.api.entity.DailyRecord;
 import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStats;
@@ -22,6 +27,7 @@ import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
+import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.LoginType;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
@@ -34,6 +40,8 @@ import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
+import com.goolbitg.api.model.UserWeeklyStatusDto;
+import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatsRepository;
@@ -65,9 +73,18 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final SpendingTypeRepository spendingTypeRepository;
     @Autowired
+    private final DailyRecordRepository dailyRecordRepository;
+    @Autowired
     private final JwtManager jwtManager;
+    @Autowired
+    private final Clock clock;
 
     private int idSeq = 2;
+
+    private final int CHICKEN_PRICE = 15000;
+
+
+    /* --------------- API Implements ----------------------*/
 
     @Override
     public UserDto getUser(String userId) throws Exception {
@@ -80,44 +97,6 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> UserException.userNotExist(userId));
 
         return getUserDto(user, survey, stats);
-    }
-
-    private UserDto getUserDto(User user, UserSurvey survey, UserStats stats) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setNickname(user.getNickname());
-        dto.setBirthday(user.getBirthday());
-        dto.setGender(user.getGender());
-        dto.setCheck1(survey.getCheck1());
-        dto.setCheck2(survey.getCheck2());
-        dto.setCheck3(survey.getCheck3());
-        dto.setCheck4(survey.getCheck4());
-        dto.setCheck5(survey.getCheck5());
-        dto.setCheck6(survey.getCheck6());
-        dto.setAvgIncomePerMonth(survey.getAvgIncomePerMonth());
-        dto.setAvgSpendingPerMonth(survey.getAvgSpendingPerMonth());
-        dto.setSpendingHabitScore(survey.getSpendingHabitScore());
-        dto.setPostCount(stats.getPostCount());
-        dto.setChallengeCount(stats.getChallengeCount());
-        dto.setAchivementGuage(stats.getAchivementGuage());
-
-        if (user.getSpendingTypeId() != null) {
-            SpendingType spendingType = 
-                spendingTypeRepository.findById(user.getSpendingTypeId()).get();
-            Integer peopleCount = userRepository.countBySpendingTypeId(user.getSpendingTypeId());
-            SpendingTypeDto spendingTypeDto = new SpendingTypeDto();
-            spendingTypeDto.setId(spendingType.getId());
-            spendingTypeDto.setTitle(spendingType.getTitle());
-            spendingTypeDto.setImageUrl(URI.create(spendingType.getImageUrl()));
-            spendingTypeDto.setPeopleCount(peopleCount);
-            dto.setSpendingType(spendingTypeDto);
-        }
-
-        if (survey.getPrimeUseDay() != null)
-            dto.setPrimeUseDay(survey.getPrimeUseDay().getValue());
-        dto.setPrimeUseTime(FormatUtil.formatTime(survey.getPrimeUseTime()));
-
-        return dto;
     }
 
     @Override
@@ -331,6 +310,86 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public UserWeeklyStatusDto getWeeklyStatus(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        UserStats stats = userStatsRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        LocalDate today = getToday();
+        DayOfWeek todayOfWeek = today.getDayOfWeek();
+        int todayIndex = todayOfWeek.getValue() - 1;
+        LocalDate sunday = today.minusDays(todayIndex + 1);
+        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, sunday, today);
+
+        return getWeeklyStatusDto(user, stats, todayIndex, records);
+    }
+
+
+    /* ------------ DTO Mappers ------------- */
+
+    private UserDto getUserDto(User user, UserSurvey survey, UserStats stats) {
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setNickname(user.getNickname());
+        dto.setBirthday(user.getBirthday());
+        dto.setGender(user.getGender());
+        dto.setCheck1(survey.getCheck1());
+        dto.setCheck2(survey.getCheck2());
+        dto.setCheck3(survey.getCheck3());
+        dto.setCheck4(survey.getCheck4());
+        dto.setCheck5(survey.getCheck5());
+        dto.setCheck6(survey.getCheck6());
+        dto.setAvgIncomePerMonth(survey.getAvgIncomePerMonth());
+        dto.setAvgSpendingPerMonth(survey.getAvgSpendingPerMonth());
+        dto.setSpendingHabitScore(survey.getSpendingHabitScore());
+        dto.setPostCount(stats.getPostCount());
+        dto.setChallengeCount(stats.getChallengeCount());
+        dto.setAchivementGuage(stats.getAchivementGuage());
+
+        if (user.getSpendingTypeId() != null) {
+            SpendingType spendingType = 
+                spendingTypeRepository.findById(user.getSpendingTypeId()).get();
+            Integer peopleCount = userRepository.countBySpendingTypeId(user.getSpendingTypeId());
+            SpendingTypeDto spendingTypeDto = new SpendingTypeDto();
+            spendingTypeDto.setId(spendingType.getId());
+            spendingTypeDto.setTitle(spendingType.getTitle());
+            spendingTypeDto.setImageUrl(URI.create(spendingType.getImageUrl()));
+            spendingTypeDto.setPeopleCount(peopleCount);
+            dto.setSpendingType(spendingTypeDto);
+        }
+
+        if (survey.getPrimeUseDay() != null)
+            dto.setPrimeUseDay(survey.getPrimeUseDay().getValue());
+        dto.setPrimeUseTime(FormatUtil.formatTime(survey.getPrimeUseTime()));
+
+        return dto;
+    }
+
+    private UserWeeklyStatusDto getWeeklyStatusDto(User user, UserStats stats, int todayIndex, List<DailyRecord> records) {
+        int saving = 0;
+        UserWeeklyStatusDto dto = new UserWeeklyStatusDto();
+        List<ChallengeRecordStatus> weekStatus = new ArrayList<>();
+        for (DailyRecord record : records) {
+            if (record == null) {
+                weekStatus.add(ChallengeRecordStatus.FAIL);
+            } else {
+                weekStatus.add(record.getStatus());
+                saving += record.getSaving();
+            }
+        }
+        dto.setNickname(user.getNickname());
+        dto.setContinueCount(stats.getContinueCount());
+        dto.setSaving(saving);
+        dto.setChickenCount((int)(saving / CHICKEN_PRICE));
+        dto.setTodayIndex(todayIndex);
+        dto.setWeekStatus(weekStatus);
+        return dto;
+    }
+
+
+    /* ------------- Helper Methods ------------- */
+
     private int getRegisterStatusInner(User user, UserSurvey survey) {
         if (user.getAgreement1() == null) return 0;
         if (user.getNickname() == null) return 1;
@@ -400,6 +459,10 @@ public class UserServiceImpl implements UserService {
             return 4L;
 
         return 5L;
+    }
+
+    private LocalDate getToday() {
+        return LocalDate.now(clock);
     }
 
 }

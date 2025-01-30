@@ -20,6 +20,7 @@ import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
+import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.service.UserService;
 
@@ -97,6 +98,12 @@ public class UserController implements UserApi {
     public ResponseEntity<Void> postUserAgreement(@Valid UserAgreementDto userAgreementDto) throws Exception {
         userService.updateAgreementInfo(AuthUtil.getLoginUserId(), userAgreementDto);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<UserWeeklyStatusDto> getWeeklyStatus() throws Exception {
+        UserWeeklyStatusDto result = userService.getWeeklyStatus(AuthUtil.getLoginUserId());
+        return ResponseEntity.ok(result);
     }
 
 }

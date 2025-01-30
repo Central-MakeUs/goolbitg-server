@@ -33,8 +33,15 @@ INSERT INTO user_surveys (
     3600000, 30000, 'FRIDAY', '20:00:00' );
 
 INSERT INTO user_stats (
-    user_id, challenge_count, post_count, achivement_guage
-) VALUES ( 'id0001', 2, 1, 2000 );
+    user_id, challenge_count, post_count, achivement_guage, continue_count
+) VALUES ( 'id0001', 2, 1, 2000, 2 );
+
+INSERT INTO daily_records (
+    user_id, date, saving, status
+) VALUES ( 'id0001', '2025-01-19', 2000, 'SUCCESS' ),
+        ( 'id0001', '2025-01-21', 3000, 'SUCCESS' ),
+        ( 'id0001', '2025-01-22', 3000, 'SUCCESS' ),
+        ( 'id0001', '2025-01-23', 0, 'WAIT' );
 
 INSERT INTO challenges (
     title, image_url, reward, participant_count, avg_achive_ratio, max_achive_days

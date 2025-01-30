@@ -12,6 +12,7 @@ import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
+import com.goolbitg.api.model.UserWeeklyStatusDto;
 
 /**
  * UserService
@@ -32,5 +33,6 @@ public interface UserService {
     void updateHabitinfo(String userId, UserHabitDto request);
     void updatePatternInfo(String userId, UserPatternDto request);
     void postPushNotificationAgreement(String userId);
+    UserWeeklyStatusDto getWeeklyStatus(String userId);
 
 }
