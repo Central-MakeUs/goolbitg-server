@@ -25,7 +25,7 @@ public class SpendingType {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "cutline")
-    private Integer cutline;
+    @Column(name = "goal")
+    private Integer goal;
 
 }

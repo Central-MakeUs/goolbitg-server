@@ -1,5 +1,5 @@
 INSERT INTO spending_types (
-    id, title, image_url, cutline
+    id, title, image_url, goal
 ) VALUES ( 1, '거지굴비', 'exmaple_url', 20000 ),
         ( 2, '우당탕 굴비', 'exmaple_url', 50000 ),
         ( 3, '룰루굴비', 'exmaple_url', 100000 ),

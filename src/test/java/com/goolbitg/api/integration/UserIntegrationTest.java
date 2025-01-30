@@ -48,6 +48,7 @@ public class UserIntegrationTest {
             .andExpect(jsonPath("$.nickname").value("굴비왕"))
             .andExpect(jsonPath("$.spendingType.id").value(5))
             .andExpect(jsonPath("$.spendingType.peopleCount").value(2))
+            .andExpect(jsonPath("$.spendingType.goal").isEmpty())
             .andExpect(jsonPath("$.postCount").value(1));
     }
 
