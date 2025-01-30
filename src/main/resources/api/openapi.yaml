@@ -288,6 +288,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserRegisterStatusDto'
+  /users/me/weeklyStatus:
+    get:
+      summary: 주간 기록 보기
+      description: > 
+        주간 기록 통계를 반환합니다.<br><br>
+        홈 페이지의 상단 부분에 필요한 정보입니다.
+      operationId: getWeeklyStatus
+      tags:
+        - User
+      responses:
+        '200':
+          description: 주간 기록 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserWeeklyStatusDto'
   /users/nickname/check:
     post:
       summary: 닉네임 중복 체크
@@ -1409,19 +1425,61 @@ components:
           id: 1
           title: 자린고비 굴비
           imageUrl: http://localhost:8080/image/st1
-          peopleCount: 40
+          goal: 20000
+          peopleCount: 20
         challengeCount: 14
         postCount: 4
-        achivementGuage: 37.2
+        achivementGuage: 2000
     UserRegisterStatusDto:
       type: object
       properties:
         status:
           type: integer
-          description: 회원정보 입력 상태 (0 ~ 5)
+          minimum: 0
+          maximum: 6
+          description: 회원정보 입력 상태 (0 ~ 6)
         requiredInfoCompleted:
           type: boolean
           description: 필수정보 입력 완료 여부
+    UserWeeklyStatusDto:
+      type: object
+      properties:
+        nickname:
+          type: string
+          description: 사용자 닉네임
+        saving:
+          type: integer
+          description: 주간 아낀 금액
+        continueCount:
+          type: integer
+          description: 연속 달성 일수 (전체)
+        chickenCount:
+          type: integer
+          description: 아낀 치킨 개수
+        weekStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChallengeRecordStatus'
+          description: 주간 성공 기록
+        todayIndex:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: 오늘 위치 (0 ~ 6)
+      example:
+        nickname: 바쁜굴비
+        saving: 50000
+        continueCount: 3
+        chickenCount: 2
+        weekStatus:
+          - SUCCESS
+          - SUCCESS
+          - SUCCESS
+          - WAIT
+          - WAIT
+          - WAIT
+          - WAIT
+        todayIndex: 3
     SpendingTypeDto:
       type: object
       properties:
@@ -1436,6 +1494,9 @@ components:
           type: string
           format: uri
           description: 소비유형 대표 이미지
+        goal:
+          type: integer
+          description: 다음 단계까지 남은 금액
         peopleCount:
           type: integer
           description: 소비유형 사람 수
@@ -1443,6 +1504,8 @@ components:
         id: 1
         title: 자린고비 굴비
         imageUrl: http://localhost:8080/image/st1
+        goal: 20000
+        peopleCount: 20
     ChallengeGroupStatDto:
       type: object
       properties:
