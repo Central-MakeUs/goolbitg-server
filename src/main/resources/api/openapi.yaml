@@ -1609,10 +1609,8 @@ components:
     ChallengeRecordDto:
       type: object
       properties:
-        challengeId:
-          type: integer
-          format: int64
-          description: 챌린지 ID
+        challenge:
+          $ref: '#/components/schemas/ChallengeDto'
         userId:
           type: string
           description: 유저 ID
@@ -1630,10 +1628,8 @@ components:
     ChallengeTrippleDto:
       type: object
       properties:
-        challengeId:
-          type: integer
-          format: int64
-          example: 1
+        challenge:
+          $ref: '#/components/schemas/ChallengeDto'
         duration:
           type: integer
           example: 7

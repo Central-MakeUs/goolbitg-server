@@ -163,7 +163,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         userStatRepository.save(userStat);
         dailyRecordRepository.save(dailyRecord);
 
-        return getChallengeRecordDto(record);
+        return getChallengeRecordDto(challenge, record);
     }
 
     private void increaseAchievementGuage(Challenge challenge, User user, UserStat userStat) {
@@ -257,7 +257,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         ChallengeRecord record = result.get();
 
-        return getChallengeRecordDto(record);
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
+
+        return getChallengeRecordDto(challenge, record);
     }
 
     @Override
@@ -287,6 +290,8 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeTrippleDto getChallengeTripple(String userId, Long challengeId, LocalDate date) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)
                 .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
@@ -300,7 +305,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             records.add(challengeRecordRepository.findById(recordId).get());
             date = date.plusDays(1);
         }
-        return getChallengeTrippleDto(challengeId, records, currentRecord, stat);
+        return getChallengeTrippleDto(challenge, records, currentRecord, stat);
     }
 
 
@@ -332,9 +337,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-    private ChallengeRecordDto getChallengeRecordDto(ChallengeRecord record) {
+    private ChallengeRecordDto getChallengeRecordDto(Challenge challenge, ChallengeRecord record) {
         ChallengeRecordDto dto = new ChallengeRecordDto();
-        dto.setChallengeId(record.getChallengeId());
+        dto.setChallenge(getChallengeDto(challenge));
         dto.setUserId(record.getUserId());
         dto.setStatus(record.getStatus());
         dto.setDate(record.getDate());
@@ -349,7 +354,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setPage(result.getNumber());
         dto.setSize((int)result.get().count());
         dto.setItems(result.map(e -> {
-            return getChallengeRecordDto(e);
+            Challenge c = challengeRepository.findById(e.getChallengeId()).get();
+            return getChallengeRecordDto(c, e);
         }).toList());
 
         return dto;
@@ -365,9 +371,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-    private ChallengeTrippleDto getChallengeTrippleDto(Long challengeId, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat) {
+    private ChallengeTrippleDto getChallengeTrippleDto(Challenge challenge, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat) {
         ChallengeTrippleDto dto = new ChallengeTrippleDto();
-        dto.setChallengeId(challengeId);
+        dto.setChallenge(getChallengeDto(challenge));
         if (currentRecord.getStatus() == ChallengeRecordStatus.WAIT)
             dto.setDuration(stat.getContinueCount() + 1);
         else
