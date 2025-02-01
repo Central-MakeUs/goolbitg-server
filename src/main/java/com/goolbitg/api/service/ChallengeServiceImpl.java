@@ -1,7 +1,6 @@
 package com.goolbitg.api.service;
 
 import java.net.URI;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +20,8 @@ import com.goolbitg.api.entity.ChallengeStat;
 import com.goolbitg.api.entity.ChallengeStatId;
 import com.goolbitg.api.entity.DailyRecord;
 import com.goolbitg.api.entity.DailyRecordId;
+import com.goolbitg.api.entity.SpendingType;
+import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStat;
 import com.goolbitg.api.exception.ChallengeException;
 import com.goolbitg.api.exception.UserException;
@@ -35,6 +36,8 @@ import com.goolbitg.api.repository.ChallengeRecordRepository;
 import com.goolbitg.api.repository.ChallengeRepository;
 import com.goolbitg.api.repository.ChallengeStatRepository;
 import com.goolbitg.api.repository.DailyRecordRepository;
+import com.goolbitg.api.repository.SpendingTypeRepository;
+import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -54,11 +57,13 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Autowired
     private final ChallengeStatRepository challengeStatRepository;
     @Autowired
+    private final UserRepository userRepository;
+    @Autowired
     private final UserStatRepository userStatRepository;
     @Autowired
     private final DailyRecordRepository dailyRecordRepository;
     @Autowired
-    private final Clock clock;
+    private final SpendingTypeRepository spendingTypeRepository;
 
 
 
@@ -111,30 +116,68 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public ChallengeRecordDto checkChallenge(String userId, Long challengeId, LocalDate date) {
-        ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
-        Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
+        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
+        Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
         ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
         Optional<ChallengeStat> statResult = challengeStatRepository.findById(statId);
 
-        if (result.isEmpty() || statResult.isEmpty()) {
+        if (recordResult.isEmpty() || statResult.isEmpty()) {
             throw ChallengeException.notEnrolled(challengeId);
         }
-        ChallengeRecord record = result.get();
-        ChallengeStat stat = statResult.get();
+        ChallengeRecord record = recordResult.get();
+        ChallengeStat challengeStat = statResult.get();
         if (record.getStatus() != ChallengeRecordStatus.WAIT) {
             throw ChallengeException.alreadyComplete(challengeId);
         }
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        UserStat userStat = userStatRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
+        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
+                .orElseGet(() -> {
+            DailyRecord entity = new DailyRecord();
+            entity.setUserId(userId);
+            entity.setDate(date);
+            entity.setSaving(0);
+            entity.setTotalChallenges(0);
+            entity.setAchievedChallenges(0);
+            return entity;
+        });
+
         record.setStatus(ChallengeRecordStatus.SUCCESS);
-        stat.setTotalCount(stat.getTotalCount() + 1);
-        stat.setCurrentContinueCount(stat.getCurrentContinueCount() + 1);
-        if (stat.getCurrentContinueCount() > stat.getContinueCount()) {
-            stat.setContinueCount(stat.getCurrentContinueCount());
+        challengeStat.setTotalCount(challengeStat.getTotalCount() + 1);
+        challengeStat.setCurrentContinueCount(challengeStat.getCurrentContinueCount() + 1);
+        if (challengeStat.getCurrentContinueCount() > challengeStat.getContinueCount()) {
+            challengeStat.setContinueCount(challengeStat.getCurrentContinueCount());
         }
         challengeRecordRepository.save(record);
-        challengeStatRepository.save(stat);
+        challengeStatRepository.save(challengeStat);
+
+        increaseAchievementGuage(challenge, user, userStat);
+        dailyRecord.setSaving(dailyRecord.getSaving() + challenge.getReward());
+        dailyRecord.setAchievedChallenges(dailyRecord.getAchievedChallenges() + 1);
+
+        userRepository.save(user);
+        userStatRepository.save(userStat);
+        dailyRecordRepository.save(dailyRecord);
 
         return getChallengeRecordDto(record);
+    }
+
+    private void increaseAchievementGuage(Challenge challenge, User user, UserStat userStat) {
+        SpendingType currentType = spendingTypeRepository.findById(user.getSpendingTypeId()).get();
+        int newGuage = userStat.getAchievementGuage() + challenge.getReward();
+
+        if (currentType.getGoal() != null && newGuage >= currentType.getGoal()) {
+            SpendingType newType = spendingTypeRepository.findById(user.getSpendingTypeId() + 1).orElseGet(null);
+            newGuage = newGuage - currentType.getGoal();
+            user.setSpendingTypeId(newType.getId());
+        }
+        userStat.setAchievementGuage(newGuage);
     }
 
     @Override

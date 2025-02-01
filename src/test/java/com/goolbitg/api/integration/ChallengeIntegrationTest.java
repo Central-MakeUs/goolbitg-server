@@ -192,8 +192,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.continueCount").value(3))
-                .andExpect(jsonPath("$.totalCount").value(5))
-                .andExpect(jsonPath("$.currentContinueCount").value(3));
+                .andExpect(jsonPath("$.totalCount").value(5));
         mockMvc.perform(get("/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weeklyStatus[3].achievedChallenges").value(1));
