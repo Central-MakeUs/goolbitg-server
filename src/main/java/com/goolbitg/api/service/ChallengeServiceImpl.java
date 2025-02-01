@@ -96,21 +96,28 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public void cancelChallenge(String userId, Long challengeId, LocalDate date) {
-        ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
-        Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
+        ChallengeRecordId challengeRecordId = new ChallengeRecordId(challengeId, userId, date);
+        ChallengeRecord record = challengeRecordRepository.findById(challengeRecordId)
+                .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
+        ChallengeStatId challengeStatId = new ChallengeStatId(challengeId, userId);
+        ChallengeStat challengeStat = challengeStatRepository.findById(challengeStatId).get();
 
-        if (result.isEmpty()) {
-            throw ChallengeException.notEnrolled(challengeId);
-        }
-        ChallengeRecord record = result.get();
+        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
+        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId).get();
+
         if (record.getStatus() == ChallengeRecordStatus.WAIT) {
             challengeRecordRepository.delete(record);
+            dailyRecord.setTotalChallenges(dailyRecord.getTotalChallenges() - 1);
         }
         for (int i = 1; i < 3; i++) {
             date = date.plusDays(1);
-            id = new ChallengeRecordId(challengeId, userId, date);
-            challengeRecordRepository.deleteById(id);
+            challengeRecordId = new ChallengeRecordId(challengeId, userId, date);
+            challengeRecordRepository.deleteById(challengeRecordId);
         }
+        challengeStat.setEnrollCount(challengeStat.getEnrollCount() - 1);
+
+        challengeStatRepository.save(challengeStat);
+        dailyRecordRepository.save(dailyRecord);
     }
 
     @Override
@@ -137,16 +144,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         UserStat userStat = userStatRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
         DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
-        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
-                .orElseGet(() -> {
-            DailyRecord entity = new DailyRecord();
-            entity.setUserId(userId);
-            entity.setDate(date);
-            entity.setSaving(0);
-            entity.setTotalChallenges(0);
-            entity.setAchievedChallenges(0);
-            return entity;
-        });
+        DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
 
         record.setStatus(ChallengeRecordStatus.SUCCESS);
         challengeStat.setTotalCount(challengeStat.getTotalCount() + 1);
@@ -186,16 +184,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         UserStat userStat = userStatRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
         DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
-        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
-                .orElseGet(() -> {
-            DailyRecord entity = new DailyRecord();
-            entity.setUserId(userId);
-            entity.setDate(date);
-            entity.setSaving(0);
-            entity.setTotalChallenges(0);
-            entity.setAchievedChallenges(0);
-            return entity;
-        });
+        DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
         ChallengeStatId id = new ChallengeStatId(challengeId, userId);
         ChallengeStat challengeStat = challengeStatRepository.findById(id)
                 .orElse(new ChallengeStat());
@@ -239,6 +228,20 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         dailyRecord.setTotalChallenges(dailyRecord.getTotalChallenges() + 1);
         dailyRecordRepository.save(dailyRecord);
+    }
+
+    private DailyRecord findOrCreateDailyRecord(String userId, LocalDate date, DailyRecordId dailyRecordId) {
+        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
+                .orElseGet(() -> {
+            DailyRecord entity = new DailyRecord();
+            entity.setUserId(userId);
+            entity.setDate(date);
+            entity.setSaving(0);
+            entity.setTotalChallenges(0);
+            entity.setAchievedChallenges(0);
+            return entity;
+        });
+        return dailyRecord;
     }
 
     @Override

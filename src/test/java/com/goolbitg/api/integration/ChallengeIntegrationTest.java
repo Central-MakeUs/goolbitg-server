@@ -231,8 +231,15 @@ public class ChallengeIntegrationTest {
                 .andExpect(status().isCreated());
         mockMvc.perform(delete("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk());
+
         mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enrollCount").value(1));
+        mockMvc.perform(get("/users/me/weeklyStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weeklyStatus[3].totalChallenges").value(1));
     }
 
     @Test
