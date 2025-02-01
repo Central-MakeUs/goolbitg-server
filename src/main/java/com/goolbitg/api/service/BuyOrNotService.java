@@ -11,10 +11,10 @@ import com.goolbitg.api.model.PaginatedBuyOrNotDto;
 public interface BuyOrNotService {
 
     BuyOrNotDto getBuyOrNot(Long postId);
-    PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, Boolean created);
-    BuyOrNotDto createBuyOrNot(BuyOrNotDto request);
-    BuyOrNotDto updateBuyOrNot(Long postId, BuyOrNotDto request);
-    void deleteBuyOrNot(Long postId);
-    BuyOrNotVoteChangeDto voteBuyOrNot(Long postId, BuyOrNotVoteDto request);
+    PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String writerId);
+    BuyOrNotDto createBuyOrNot(String userId, BuyOrNotDto request);
+    BuyOrNotDto updateBuyOrNot(String userId, Long postId, BuyOrNotDto request);
+    void deleteBuyOrNot(String userId, Long postId);
+    BuyOrNotVoteChangeDto voteBuyOrNot(String userId, Long postId, BuyOrNotVoteDto request);
 
 }

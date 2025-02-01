@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.goolbitg.api.entity.BuyOrNot;
 import com.goolbitg.api.entity.BuyOrNotVote;
 import com.goolbitg.api.entity.BuyOrNotVoteId;
+import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.BuyOrNotException;
 import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
@@ -20,7 +21,6 @@ import com.goolbitg.api.model.BuyOrNotVoteType;
 import com.goolbitg.api.model.PaginatedBuyOrNotDto;
 import com.goolbitg.api.repository.BuyOrNotRepository;
 import com.goolbitg.api.repository.BuyOrNotVoteRepository;
-import com.goolbitg.api.security.AuthUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,11 +62,11 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     }
 
     @Override
-    public PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, Boolean created) {
+    public PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String writerId) {
         Pageable pageReq = PageRequest.of(page, size);
         Page<BuyOrNot> result;
-        if (created) {
-            result = buyOrNotRepository.findAllByWriterId(AuthUtil.getLoginUserId(), pageReq);
+        if (writerId != null) {
+            result = buyOrNotRepository.findAllByWriterId(writerId, pageReq);
         } else {
             result = buyOrNotRepository.findAll(pageReq);
         }
@@ -86,9 +86,9 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
 
     @Override
     @Transactional
-    public BuyOrNotDto createBuyOrNot(BuyOrNotDto request) {
+    public BuyOrNotDto createBuyOrNot(String userId, BuyOrNotDto request) {
         BuyOrNot post = new BuyOrNot();
-        post.setWriterId(AuthUtil.getLoginUserId());
+        post.setWriterId(userId);
         post.setProductName(request.getProductName());
         post.setProductPrice(request.getProductPrice());
         post.setProductImageUrl(request.getProductImageUrl().toString());
@@ -101,9 +101,11 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
 
     @Override
     @Transactional
-    public BuyOrNotDto updateBuyOrNot(Long postId, BuyOrNotDto request) {
+    public BuyOrNotDto updateBuyOrNot(String userId, Long postId, BuyOrNotDto request) {
         BuyOrNot post = buyOrNotRepository.findById(postId)
                 .orElseThrow(() -> BuyOrNotException.postNotExist(postId));
+        if (!post.getWriterId().equals(userId))
+            throw AuthException.notAllowed();
         if (request.getProductName() != null)
             post.setProductName(request.getProductName());
         if (request.getProductPrice() != null)
@@ -121,24 +123,25 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
 
     @Override
     @Transactional
-    public void deleteBuyOrNot(Long postId) {
-        if (buyOrNotRepository.existsById(postId) == false)
-            throw BuyOrNotException.postNotExist(postId);
+    public void deleteBuyOrNot(String userId, Long postId) {
+        BuyOrNot post = buyOrNotRepository.findById(postId)
+                .orElseThrow(() -> BuyOrNotException.postNotExist(postId));
+        if (!post.getWriterId().equals(userId))
+            throw AuthException.notAllowed();
         buyOrNotRepository.deleteById(postId);
     }
 
     @Override
     @Transactional
-    public BuyOrNotVoteChangeDto voteBuyOrNot(Long postId, BuyOrNotVoteDto request) {
+    public BuyOrNotVoteChangeDto voteBuyOrNot(String userId, Long postId, BuyOrNotVoteDto request) {
         if (buyOrNotRepository.existsById(postId) == false)
             throw BuyOrNotException.postNotExist(postId);
-        String voterId = AuthUtil.getLoginUserId();
-        BuyOrNotVoteId id = new BuyOrNotVoteId(postId, voterId);
+        BuyOrNotVoteId id = new BuyOrNotVoteId(postId, userId);
         BuyOrNotVote vote = buyOrNotVoteRepository.findById(id)
                 .orElseGet(() -> {
             BuyOrNotVote newVote = new BuyOrNotVote();
             newVote.setPostId(postId);
-            newVote.setVoterId(voterId);
+            newVote.setVoterId(userId);
             return newVote;
         });
         vote.setVote(request.getVote());

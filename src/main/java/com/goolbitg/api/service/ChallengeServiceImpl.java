@@ -30,7 +30,6 @@ import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 import com.goolbitg.api.repository.ChallengeRecordRepository;
 import com.goolbitg.api.repository.ChallengeRepository;
 import com.goolbitg.api.repository.ChallengeStatRepository;
-import com.goolbitg.api.security.AuthUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -81,8 +80,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public void cancelChallenge(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
+    public void cancelChallenge(String userId, Long challengeId) {
         LocalDate date = getToday();
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
@@ -103,8 +101,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public ChallengeRecordDto checkChallenge(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
+    public ChallengeRecordDto checkChallenge(String userId, Long challengeId) {
         LocalDate date = getToday();
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
@@ -134,8 +131,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public void enrollChallenge(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
+    public void enrollChallenge(String userId, Long challengeId) {
         ChallengeStatId id = new ChallengeStatId(challengeId, userId);
         ChallengeStat stat = challengeStatRepository.findById(id)
                 .orElse(new ChallengeStat());
@@ -174,11 +170,10 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public ChallengeRecordDto getChallengeRecord(Long challengeId, LocalDate date) {
+    public ChallengeRecordDto getChallengeRecord(String userId, Long challengeId, LocalDate date) {
         if (date == null) {
             date = getToday();
         }
-        String userId = AuthUtil.getLoginUserId();
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
 
@@ -191,9 +186,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public PaginatedChallengeRecordDto getChallengeRecords(Integer page, Integer size, LocalDate date, ChallengeRecordStatus status) {
+    public PaginatedChallengeRecordDto getChallengeRecords(String userId, Integer page, Integer size, LocalDate date, ChallengeRecordStatus status) {
         PageRequest pageReq = PageRequest.of(page, size);
-        String userId = AuthUtil.getLoginUserId();
         if (date == null) {
             date = getToday();
         }
@@ -209,8 +203,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public ChallengeStatDto getChallengeStat(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
+    public ChallengeStatDto getChallengeStat(String userId, Long challengeId) {
         ChallengeStatId id = new ChallengeStatId(challengeId, userId);
         ChallengeStat stat = challengeStatRepository.findById(id)
                 .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
@@ -219,8 +212,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public ChallengeTrippleDto getChallengeTripple(Long challengeId) {
-        String userId = AuthUtil.getLoginUserId();
+    public ChallengeTrippleDto getChallengeTripple(String userId, Long challengeId) {
         LocalDate date = getToday();
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)

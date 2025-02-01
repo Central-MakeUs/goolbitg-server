@@ -15,6 +15,7 @@ import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
 import com.goolbitg.api.model.PaginatedBuyOrNotDto;
+import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.service.BuyOrNotService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,13 +37,15 @@ public class BuyOrNotController implements BuyOrNotApi {
 
     @Override
     public ResponseEntity<BuyOrNotDto> createBuyOrNot(@Valid BuyOrNotDto buyOrNotDto) throws Exception {
-        BuyOrNotDto result = buyOrNotService.createBuyOrNot(buyOrNotDto);
+        String userId = AuthUtil.getLoginUserId();
+        BuyOrNotDto result = buyOrNotService.createBuyOrNot(userId, buyOrNotDto);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Void> deleteBuyOrNot(Long postId) throws Exception {
-        buyOrNotService.deleteBuyOrNot(postId);
+        String userId = AuthUtil.getLoginUserId();
+        buyOrNotService.deleteBuyOrNot(userId, postId);
         return ResponseEntity.ok().build();
     }
 
@@ -55,20 +58,25 @@ public class BuyOrNotController implements BuyOrNotApi {
     @Override
     public ResponseEntity<PaginatedBuyOrNotDto> getBuyOrNots(@Valid Integer page, @Valid Integer size,
             @Valid Boolean created) throws Exception {
-        PaginatedBuyOrNotDto result = buyOrNotService.getBuyOrNots(page, size, created);
+        String userId = null;
+        if (created)
+            userId = AuthUtil.getLoginUserId();
+        PaginatedBuyOrNotDto result = buyOrNotService.getBuyOrNots(page, size, userId);
         return ResponseEntity.ok(result);
     }
 
     @Override
     public ResponseEntity<BuyOrNotDto> updateBuyOrNot(Long postId, @Valid BuyOrNotDto buyOrNotDto) throws Exception {
-        BuyOrNotDto result = buyOrNotService.updateBuyOrNot(postId, buyOrNotDto);
+        String userId = AuthUtil.getLoginUserId();
+        BuyOrNotDto result = buyOrNotService.updateBuyOrNot(userId, postId, buyOrNotDto);
         return ResponseEntity.ok(result);
     }
 
     @Override
     public ResponseEntity<BuyOrNotVoteChangeDto> voteBuyOrNot(Long postId, @Valid BuyOrNotVoteDto buyOrNotVoteDto)
             throws Exception {
-        BuyOrNotVoteChangeDto result = buyOrNotService.voteBuyOrNot(postId, buyOrNotVoteDto);
+        String userId = AuthUtil.getLoginUserId();
+        BuyOrNotVoteChangeDto result = buyOrNotService.voteBuyOrNot(userId, postId, buyOrNotVoteDto);
         return ResponseEntity.ok(result);
     }
 
