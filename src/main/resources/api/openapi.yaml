@@ -25,7 +25,7 @@ info:
   termsOfService: http://localhost:8080/terms-of-service
   version: 1.0.3
 servers:
-  - url: http://api.goolbitg.site/v1
+  - url: https://api.goolbitg.site/v1
     description: 메인 서버
 paths:
   /health:
