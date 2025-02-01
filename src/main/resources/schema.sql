@@ -1,19 +1,3 @@
-DROP TABLE IF EXISTS spending_types;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS user_surveys;
-DROP TABLE IF EXISTS user_stats;
-DROP TABLE IF EXISTS challenges;
-DROP TABLE IF EXISTS challenge_records;
-DROP TABLE IF EXISTS challenge_stats;
-DROP TABLE IF EXISTS challenge_user_stats;
-DROP TABLE IF EXISTS buyornots;
-DROP TABLE IF EXISTS buyornot_votes;
-DROP TABLE IF EXISTS challenge_groups;
-DROP TABLE IF EXISTS notices;
-DROP TABLE IF EXISTS challenge_group_stats;
-DROP TABLE IF EXISTS challenge_group_records;
-DROP TABLE IF EXISTS challenge_group_user_stats;
-
 CREATE TABLE spending_types (
   id BIGINT,
   title VARCHAR(100) NOT NULL UNIQUE,
