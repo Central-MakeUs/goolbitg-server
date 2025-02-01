@@ -106,6 +106,7 @@ public class ChallengeIntegrationTest {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
+
         mockMvc.perform(get("/challengeRecords")
             .param("date", "2025-01-23"))
                 .andExpect(status().isOk())
@@ -127,6 +128,7 @@ public class ChallengeIntegrationTest {
         Long challengeId = 3L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
+
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.challengeCount").value(3));
@@ -146,6 +148,7 @@ public class ChallengeIntegrationTest {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
+
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.challengeCount").value(2));
@@ -182,6 +185,18 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SUCCESS"));
+
+        mockMvc.perform(get("/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.achievementGuage").value(5000));
+        mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.continueCount").value(3))
+                .andExpect(jsonPath("$.totalCount").value(5))
+                .andExpect(jsonPath("$.currentContinueCount").value(3));
+        mockMvc.perform(get("/users/me/weeklyStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weeklyStatus[3].achievedChallenges").value(1));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.goolbitg.api.controller;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.security.AuthUtil;
+import com.goolbitg.api.service.TimeService;
 import com.goolbitg.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,8 @@ public class UserController implements UserApi {
 
     @Autowired
     private final UserService userService;
+    @Autowired
+    private final TimeService timeService;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -46,7 +50,6 @@ public class UserController implements UserApi {
     @Override
     public ResponseEntity<UserDto> getMyInfo() throws Exception {
         UserDto dto = userService.getUser(AuthUtil.getLoginUserId());
-        log.info("User DTO: " + dto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -54,55 +57,71 @@ public class UserController implements UserApi {
     public ResponseEntity<NicknameCheckResponseDto> checkNickname(
             @Valid NicknameCheckRequestDto nicknameCheckRequestDto) throws Exception {
         NicknameCheckResponseDto response = userService.isNicknameExist(nicknameCheckRequestDto);
-        log.info("Nickname Check: " + response);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Void> postChecklistInfo(@Valid UserChecklistDto userChecklistDto) throws Exception {
-        userService.updateChecklistInfo(AuthUtil.getLoginUserId(), userChecklistDto);
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.updateChecklistInfo(userId, userChecklistDto);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> postHabitInfo(@Valid UserHabitDto userHabitDto) throws Exception {
-        userService.updateHabitinfo(AuthUtil.getLoginUserId(), userHabitDto);
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.updateHabitinfo(userId, userHabitDto);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> postPatternInfo(@Valid UserPatternDto userPatternDto) throws Exception {
-        userService.updatePatternInfo(AuthUtil.getLoginUserId(), userPatternDto);
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.updatePatternInfo(userId, userPatternDto);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> postUserInfo(@Valid UserInfoDto userInfoDto) throws Exception {
-        userService.updateUserInfo(AuthUtil.getLoginUserId(), userInfoDto);
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.updateUserInfo(userId, userInfoDto);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<UserRegisterStatusDto> getRegisterStatus() throws Exception {
-        UserRegisterStatusDto result = userService.getRegisterStatus(AuthUtil.getLoginUserId());
+        String userId = AuthUtil.getLoginUserId();
+
+        UserRegisterStatusDto result = userService.getRegisterStatus(userId);
         return ResponseEntity.ok(result);
     }
 
     @Override
     public ResponseEntity<Void> postPushNotificationAgreement() throws Exception {
-        userService.postPushNotificationAgreement(AuthUtil.getLoginUserId());
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.postPushNotificationAgreement(userId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> postUserAgreement(@Valid UserAgreementDto userAgreementDto) throws Exception {
-        userService.updateAgreementInfo(AuthUtil.getLoginUserId(), userAgreementDto);
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.updateAgreementInfo(userId, userAgreementDto);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<UserWeeklyStatusDto> getWeeklyStatus() throws Exception {
-        UserWeeklyStatusDto result = userService.getWeeklyStatus(AuthUtil.getLoginUserId());
+        String userId = AuthUtil.getLoginUserId();
+        LocalDate date = timeService.getToday();
+
+        UserWeeklyStatusDto result = userService.getWeeklyStatus(userId, date);
         return ResponseEntity.ok(result);
     }
 

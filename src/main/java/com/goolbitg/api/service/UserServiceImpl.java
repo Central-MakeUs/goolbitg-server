@@ -3,7 +3,6 @@ package com.goolbitg.api.service;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.SecureRandom;
-import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -76,8 +75,6 @@ public class UserServiceImpl implements UserService {
     private final DailyRecordRepository dailyRecordRepository;
     @Autowired
     private final JwtManager jwtManager;
-    @Autowired
-    private final Clock clock;
 
     private int idSeq = 2;
 
@@ -309,16 +306,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserWeeklyStatusDto getWeeklyStatus(String userId) {
+    public UserWeeklyStatusDto getWeeklyStatus(String userId, LocalDate date) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
         UserStat stat = userStatsRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
-        LocalDate today = getToday();
-        DayOfWeek todayOfWeek = today.getDayOfWeek();
+
+        DayOfWeek todayOfWeek = date.getDayOfWeek();
         int todayIndex = todayOfWeek.getValue() - 1;
-        LocalDate monday = today.minusDays(todayIndex);
-        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, monday, today);
+        LocalDate monday = date.minusDays(todayIndex);
+        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, monday, date);
         LocalDate dateOffset = monday;
         for (int i = 0; i < 7; i++) {
             if (records.size() < i + 1 || !records.get(i).getDate().equals(dateOffset)) {
@@ -468,10 +465,6 @@ public class UserServiceImpl implements UserService {
             return 4L;
 
         return 5L;
-    }
-
-    private LocalDate getToday() {
-        return LocalDate.now(clock);
     }
 
 }

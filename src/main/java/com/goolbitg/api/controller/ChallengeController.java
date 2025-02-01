@@ -21,6 +21,7 @@ import com.goolbitg.api.model.PaginatedChallengeDto;
 import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 import com.goolbitg.api.security.AuthUtil;
 import com.goolbitg.api.service.ChallengeService;
+import com.goolbitg.api.service.TimeService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,11 +34,15 @@ public class ChallengeController implements ChallengeApi {
 
     @Autowired
     private final ChallengeService challengeService;
+    @Autowired
+    private final TimeService timeService;
 
     @Override
     public ResponseEntity<ChallengeTrippleDto> getChallengeTripple(Long challengeId) throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        ChallengeTrippleDto result = challengeService.getChallengeTripple(userId, challengeId);
+        LocalDate date = timeService.getToday();
+
+        ChallengeTrippleDto result = challengeService.getChallengeTripple(userId, challengeId, date);
         return ResponseEntity.ok(result);
     }
 
@@ -50,21 +55,27 @@ public class ChallengeController implements ChallengeApi {
     @Override
     public ResponseEntity<Void> cancelChallenge(Long challengeId) throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        challengeService.cancelChallenge(userId, challengeId);
+        LocalDate date = timeService.getToday();
+
+        challengeService.cancelChallenge(userId, challengeId, date);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<ChallengeRecordDto> checkChallenge(Long challengeId) throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        ChallengeRecordDto result = challengeService.checkChallenge(userId, challengeId);
+        LocalDate date = timeService.getToday();
+
+        ChallengeRecordDto result = challengeService.checkChallenge(userId, challengeId, date);
         return ResponseEntity.ok(result);
     }
 
     @Override
     public ResponseEntity<Void> enrollChallenge(Long challengeId) throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        challengeService.enrollChallenge(userId, challengeId);
+        LocalDate date = timeService.getToday();
+
+        challengeService.enrollChallenge(userId, challengeId, date);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -72,6 +83,8 @@ public class ChallengeController implements ChallengeApi {
     public ResponseEntity<ChallengeRecordDto> getChallengeRecord(Long challengeId, @Valid LocalDate date)
             throws Exception {
         String userId = AuthUtil.getLoginUserId();
+        if (date == null) date = timeService.getToday();
+
         ChallengeRecordDto result = challengeService.getChallengeRecord(userId, challengeId, date);
         return ResponseEntity.ok(result);
     }
@@ -80,6 +93,8 @@ public class ChallengeController implements ChallengeApi {
     public ResponseEntity<PaginatedChallengeRecordDto> getChallengeRecords(@Valid Integer page, @Valid Integer size,
             @Valid LocalDate date, @Valid ChallengeRecordStatus status) throws Exception {
         String userId = AuthUtil.getLoginUserId();
+        if (date == null) date = timeService.getToday();
+
         PaginatedChallengeRecordDto result = challengeService.getChallengeRecords(userId, page, size, date, status);
         return ResponseEntity.ok(result);
     }
@@ -87,6 +102,7 @@ public class ChallengeController implements ChallengeApi {
     @Override
     public ResponseEntity<ChallengeStatDto> getChallengeStat(Long challengeId) throws Exception {
         String userId = AuthUtil.getLoginUserId();
+
         ChallengeStatDto result = challengeService.getChallengeStat(userId, challengeId);
         return ResponseEntity.ok(result);
     }

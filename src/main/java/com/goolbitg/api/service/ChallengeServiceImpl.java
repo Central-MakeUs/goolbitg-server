@@ -90,8 +90,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public void cancelChallenge(String userId, Long challengeId) {
-        LocalDate date = getToday();
+    public void cancelChallenge(String userId, Long challengeId, LocalDate date) {
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
 
@@ -111,8 +110,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public ChallengeRecordDto checkChallenge(String userId, Long challengeId) {
-        LocalDate date = getToday();
+    public ChallengeRecordDto checkChallenge(String userId, Long challengeId, LocalDate date) {
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
         ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
@@ -141,15 +139,15 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public void enrollChallenge(String userId, Long challengeId) {
+    public void enrollChallenge(String userId, Long challengeId, LocalDate date) {
         UserStat userStat = userStatRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
-        DailyRecordId dailyRecordId = new DailyRecordId(userId, getToday());
+        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
         DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
                 .orElseGet(() -> {
             DailyRecord entity = new DailyRecord();
             entity.setUserId(userId);
-            entity.setDate(getToday());
+            entity.setDate(date);
             entity.setSaving(0);
             entity.setTotalChallenges(0);
             entity.setAchievedChallenges(0);
@@ -159,7 +157,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeStat challengeStat = challengeStatRepository.findById(id)
                 .orElse(new ChallengeStat());
 
-        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, getToday());
+        ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
         int startDay = 0;
         if (recordResult.isPresent()) {
@@ -185,12 +183,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         challengeStatRepository.save(challengeStat);
 
         for (int i = 0; i < 3; i++) {
-            LocalDate date = getToday();
-            date = date.plusDays(i + startDay);
             ChallengeRecord record = new ChallengeRecord();
             record.setChallengeId(challengeId);
             record.setUserId(userId);
-            record.setDate(date);
+            record.setDate(date.plusDays(i + startDay));
             record.setStatus(ChallengeRecordStatus.WAIT);
             record.setLocation(i + 1);
             challengeRecordRepository.save(record);
@@ -204,9 +200,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeRecordDto getChallengeRecord(String userId, Long challengeId, LocalDate date) {
-        if (date == null) {
-            date = getToday();
-        }
+        if (date == null)
+            throw new IllegalArgumentException("Date should not be null");
+
         ChallengeRecordId id = new ChallengeRecordId(challengeId, userId, date);
         Optional<ChallengeRecord> result = challengeRecordRepository.findById(id);
 
@@ -221,9 +217,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     public PaginatedChallengeRecordDto getChallengeRecords(String userId, Integer page, Integer size, LocalDate date, ChallengeRecordStatus status) {
         PageRequest pageReq = PageRequest.of(page, size);
-        if (date == null) {
-            date = getToday();
-        }
+        if (date == null)
+            throw new IllegalArgumentException("Date should not be null");
 
         Page<ChallengeRecord> result;
         if (status == null) {
@@ -245,8 +240,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public ChallengeTrippleDto getChallengeTripple(String userId, Long challengeId) {
-        LocalDate date = getToday();
+    public ChallengeTrippleDto getChallengeTripple(String userId, Long challengeId, LocalDate date) {
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)
                 .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
@@ -337,14 +331,6 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setCheck3(records.get(2).getStatus());
         dto.setLocation(currentRecord.getLocation());
         return dto;
-    }
-
-
-
-    /* ----------- Helper Methods -------------- */
-
-    private LocalDate getToday() {
-        return LocalDate.now(clock);
     }
 
 }
