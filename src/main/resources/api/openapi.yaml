@@ -1384,7 +1384,7 @@ components:
         postCount:
           type: integer
           description: 총 작성글 수
-        achivementGuage:
+        achievementGuage:
           type: integer
           description: 달성 게이지
       required:
@@ -1404,7 +1404,7 @@ components:
         - avgSpendingPerMonth
         - challengeCount
         - postCount
-        - achivementGuage
+        - achievementGuage
       example:
         id: "id0001"
         nickname: 굴비왕
@@ -1429,7 +1429,7 @@ components:
           peopleCount: 20
         challengeCount: 14
         postCount: 4
-        achivementGuage: 2000
+        achievementGuage: 2000
     UserRegisterStatusDto:
       type: object
       properties:
@@ -1453,13 +1453,10 @@ components:
         continueCount:
           type: integer
           description: 연속 달성 일수 (전체)
-        chickenCount:
-          type: integer
-          description: 아낀 치킨 개수
-        weekStatus:
+        weeklyStatus:
           type: array
           items:
-            $ref: '#/components/schemas/ChallengeRecordStatus'
+            $ref: '#/components/schemas/UserDailyStatusDto'
           description: 주간 성공 기록
         todayIndex:
           type: integer
@@ -1470,16 +1467,31 @@ components:
         nickname: 바쁜굴비
         saving: 50000
         continueCount: 3
-        chickenCount: 2
-        weekStatus:
-          - SUCCESS
-          - SUCCESS
-          - SUCCESS
-          - WAIT
-          - WAIT
-          - WAIT
-          - WAIT
+        weeklyStatus:
+          - totalChallenges: 5
+            achievedChallenges: 5
+          - totalChallenges: 5
+            achievedChallenges: 5
+          - totalChallenges: 5
+            achievedChallenges: 3
+          - totalChallenges: 5
+            achievedChallenges: 0
+          - totalChallenges: 3
+            achievedChallenges: 0
+          - totalChallenges: 3
+            achievedChallenges: 0
+          - totalChallenges: 0
+            achievedChallenges: 0
         todayIndex: 3
+    UserDailyStatusDto:
+      type: object
+      properties:
+        totalChallenges:
+          type: integer
+          description: 달성해야 할 총 챌린지 개수
+        achievedChallenges:
+          type: integer
+          description: 달성한 총 챌린지 개수
     SpendingTypeDto:
       type: object
       properties:
@@ -1691,11 +1703,11 @@ components:
         participantCount:
           type: integer
           description: 챌린지 참여인원
-        avgAchiveRatio:
+        avgAchieveRatio:
           type: number
           format: float
           description: 챌린지 평균 달성률
-        maxAchiveDays:
+        maxAchieveDays:
           type: integer
           description: 가장 오래 진행된 챌린지 일수
       required:
@@ -1704,16 +1716,16 @@ components:
         - imageUrl
         - isPrivate
         - participantCount
-        - avgAchiveRatio
-        - maxAchiveDays
+        - avgAchieveRatio
+        - maxAchieveDays
       example:
         id: 0
         title: 커피 안마시기
         imageUrl: "http://localhost/images/ch01"
         reward: 2000
         participantCount: 23
-        avgAchiveRatio: 50.0
-        maxAchiveDays: 63
+        avgAchieveRatio: 50.0
+        maxAchieveDays: 63
     ChallengeProgressDto:
       type: object
       properties:
@@ -1734,7 +1746,7 @@ components:
         inProgress:
           type: boolean
           description: 챌린지가 진행중인지 여부
-        achiveDays:
+        achieveDays:
           type: integer
           minimum: 0
           maximum: 3
@@ -1744,13 +1756,13 @@ components:
         - participantId
         - startDateTime
         - inProgress
-        - achiveDays
+        - achieveDays
       example:
         challengeId: ch10001
         participantId: id2003952
         startDateTime: 2024-01-07
         inProgress: true
-        achiveDays: 2
+        achieveDays: 2
     NoticeDto:
       type: object
       properties:
@@ -2102,8 +2114,8 @@ components:
         imageUrl: http://localhost:8080/image/ch1
         isPrivate: false
         participantCount: 124
-        avgAchiveRatio: 58.6
-        maxAchiveDays: 24
+        avgAchieveRatio: 58.6
+        maxAchieveDays: 24
     GroupChallenge:
       value:
         id: ch10002
@@ -2111,8 +2123,8 @@ components:
         imageUrl: http://localhost:8080/image/ch2
         isPrivate: true
         participantCount: 1539
-        avgAchiveRatio: 39.6
-        maxAchiveDays: 52
+        avgAchieveRatio: 39.6
+        maxAchieveDays: 52
     RegisterInfoUrl:
       value:
         required: true
