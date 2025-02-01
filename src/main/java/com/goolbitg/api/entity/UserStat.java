@@ -3,20 +3,19 @@ package com.goolbitg.api.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * UserStats
+ * UserStat
  */
 @Entity
 @Getter
 @Setter
 @Table(name = "user_stats")
-public class UserStats {
+public class UserStat {
 
     @Id
     @Column(name = "user_id")
@@ -28,8 +27,8 @@ public class UserStats {
     @Column(name = "post_count")
     private Integer postCount;
 
-    @Column(name = "achivement_guage")
-    private Integer achivementGuage;
+    @Column(name = "achievement_guage")
+    private Integer achievementGuage;
 
     @Column(name = "continue_count")
     private Integer continueCount;

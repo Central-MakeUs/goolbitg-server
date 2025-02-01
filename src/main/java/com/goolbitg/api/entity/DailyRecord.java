@@ -36,8 +36,10 @@ public class DailyRecord {
     @Column(name = "saving")
     private Integer saving;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private ChallengeRecordStatus status;
+    @Column(name = "total_challenges")
+    private Integer totalChallenges;
+
+    @Column(name = "achieved_challenges")
+    private Integer achievedChallenges;
 
 }

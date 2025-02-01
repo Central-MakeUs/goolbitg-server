@@ -21,13 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.goolbitg.api.entity.DailyRecord;
 import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.User;
-import com.goolbitg.api.entity.UserStats;
+import com.goolbitg.api.entity.UserStat;
 import com.goolbitg.api.entity.UserSurvey;
 import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
-import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.LoginType;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
@@ -35,6 +34,7 @@ import com.goolbitg.api.model.SpendingTypeDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
+import com.goolbitg.api.model.UserDailyStatusDto;
 import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.model.UserHabitDto;
 import com.goolbitg.api.model.UserInfoDto;
@@ -44,7 +44,7 @@ import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UserRepository;
-import com.goolbitg.api.repository.UserStatsRepository;
+import com.goolbitg.api.repository.UserStatRepository;
 import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.JwtManager;
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final UserSurveyRepository userSurveyRepository;
     @Autowired
-    private final UserStatsRepository userStatsRepository;
+    private final UserStatRepository userStatsRepository;
     @Autowired
     private final UserTokenRepository tokenRepository;
     @Autowired
@@ -81,8 +81,6 @@ public class UserServiceImpl implements UserService {
 
     private int idSeq = 2;
 
-    private final int CHICKEN_PRICE = 15000;
-
 
     /* --------------- API Implements ----------------------*/
 
@@ -93,10 +91,10 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> UserException.userNotExist(userId));
         UserSurvey survey = userSurveyRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
-        UserStats stats = userStatsRepository.findById(userId)
+        UserStat stat = userStatsRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
 
-        return getUserDto(user, survey, stats);
+        return getUserDto(user, survey, stat);
     }
 
     @Override
@@ -145,12 +143,12 @@ public class UserServiceImpl implements UserService {
         survey.setUserId(userId);
         userSurveyRepository.save(survey);
 
-        UserStats stats = new UserStats();
-        stats.setUserId(userId);
-        stats.setPostCount(0);
-        stats.setChallengeCount(0);
-        stats.setAchivementGuage(0);
-        userStatsRepository.save(stats);
+        UserStat stat = new UserStat();
+        stat.setUserId(userId);
+        stat.setPostCount(0);
+        stat.setChallengeCount(0);
+        stat.setAchievementGuage(0);
+        userStatsRepository.save(stat);
     }
 
     @Override
@@ -314,21 +312,28 @@ public class UserServiceImpl implements UserService {
     public UserWeeklyStatusDto getWeeklyStatus(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
-        UserStats stats = userStatsRepository.findById(userId)
+        UserStat stat = userStatsRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
         LocalDate today = getToday();
         DayOfWeek todayOfWeek = today.getDayOfWeek();
         int todayIndex = todayOfWeek.getValue() - 1;
-        LocalDate sunday = today.minusDays(todayIndex + 1);
-        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, sunday, today);
+        LocalDate monday = today.minusDays(todayIndex);
+        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, monday, today);
+        LocalDate dateOffset = monday;
+        for (int i = 0; i < 7; i++) {
+            if (records.size() < i + 1 || !records.get(i).getDate().equals(dateOffset)) {
+                records.add(i, null);
+            }
+            dateOffset = dateOffset.plusDays(1);
+        }
 
-        return getWeeklyStatusDto(user, stats, todayIndex, records);
+        return getWeeklyStatusDto(user, stat, todayIndex, records);
     }
 
 
     /* ------------ DTO Mappers ------------- */
 
-    private UserDto getUserDto(User user, UserSurvey survey, UserStats stats) {
+    private UserDto getUserDto(User user, UserSurvey survey, UserStat stat) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
         dto.setNickname(user.getNickname());
@@ -343,9 +348,9 @@ public class UserServiceImpl implements UserService {
         dto.setAvgIncomePerMonth(survey.getAvgIncomePerMonth());
         dto.setAvgSpendingPerMonth(survey.getAvgSpendingPerMonth());
         dto.setSpendingHabitScore(survey.getSpendingHabitScore());
-        dto.setPostCount(stats.getPostCount());
-        dto.setChallengeCount(stats.getChallengeCount());
-        dto.setAchivementGuage(stats.getAchivementGuage());
+        dto.setPostCount(stat.getPostCount());
+        dto.setChallengeCount(stat.getChallengeCount());
+        dto.setAchievementGuage(stat.getAchievementGuage());
 
         if (user.getSpendingTypeId() != null) {
             SpendingType spendingType = 
@@ -367,24 +372,27 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
-    private UserWeeklyStatusDto getWeeklyStatusDto(User user, UserStats stats, int todayIndex, List<DailyRecord> records) {
+    private UserWeeklyStatusDto getWeeklyStatusDto(User user, UserStat stat, int todayIndex, List<DailyRecord> records) {
         int saving = 0;
         UserWeeklyStatusDto dto = new UserWeeklyStatusDto();
-        List<ChallengeRecordStatus> weekStatus = new ArrayList<>();
+        List<UserDailyStatusDto> weeklyStatus = new ArrayList<>();
         for (DailyRecord record : records) {
+            UserDailyStatusDto dailyStatus = new UserDailyStatusDto();
             if (record == null) {
-                weekStatus.add(ChallengeRecordStatus.FAIL);
+                dailyStatus.setTotalChallenges(0);
+                dailyStatus.setAchievedChallenges(0);
             } else {
-                weekStatus.add(record.getStatus());
+                dailyStatus.setTotalChallenges(record.getTotalChallenges());
+                dailyStatus.setAchievedChallenges(record.getAchievedChallenges());
                 saving += record.getSaving();
             }
+            weeklyStatus.add(dailyStatus);
         }
         dto.setNickname(user.getNickname());
-        dto.setContinueCount(stats.getContinueCount());
+        dto.setContinueCount(stat.getContinueCount());
         dto.setSaving(saving);
-        dto.setChickenCount((int)(saving / CHICKEN_PRICE));
         dto.setTodayIndex(todayIndex);
-        dto.setWeekStatus(weekStatus);
+        dto.setWeeklyStatus(weeklyStatus);
         return dto;
     }
 

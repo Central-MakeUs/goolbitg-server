@@ -144,8 +144,7 @@ public class UserIntegrationTest {
         updateAgreement();
         mockMvc.perform(get("/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.saving").value(8000))
-                .andExpect(jsonPath("$.chickenCount").value(0))
+                .andExpect(jsonPath("$.saving").value(6000))
                 .andExpect(jsonPath("$.todayIndex").value(3))
                 .andExpect(jsonPath("$.continueCount").value(2));
     }

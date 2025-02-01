@@ -36,10 +36,10 @@ public class Challenge {
     @Column(name = "participant_count")
     private Integer participantCount;
 
-    @Column(name = "avg_achive_ratio")
-    private Float avgAchiveRatio;
+    @Column(name = "avg_achieve_ratio")
+    private Float avgAchieveRatio;
 
-    @Column(name = "max_achive_days")
-    private Integer maxAchiveDays;
+    @Column(name = "max_achieve_days")
+    private Integer maxAchieveDays;
 
 }

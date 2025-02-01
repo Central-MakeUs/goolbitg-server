@@ -44,7 +44,7 @@ CREATE TABLE user_stats (
   user_id VARCHAR(50),
   challenge_count INT DEFAULT 0,
   post_count INT DEFAULT 0,
-  achivement_guage INT DEFAULT 0,
+  achievement_guage INT DEFAULT 0,
   continue_count INT DEFAULT 0,
   PRIMARY KEY (user_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -54,7 +54,8 @@ CREATE TABLE daily_records (
   user_id VARCHAR(50),
   date DATE NOT NULL,
   saving INT DEFAULT 0,
-  status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
+  total_challenges INT DEFAULT 0,
+  achieved_challenges INT DEFAULT 0,
   PRIMARY KEY (user_id, date),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -65,8 +66,8 @@ CREATE TABLE challenges (
   image_url VARCHAR(50) NOT NULL,
   reward INT NOT NULL,
   participant_count INT DEFAULT 0,
-  avg_achive_ratio FLOAT DEFAULT 0.0,
-  max_achive_days INT DEFAULT 0,
+  avg_achieve_ratio FLOAT DEFAULT 0.0,
+  max_achieve_days INT DEFAULT 0,
   PRIMARY KEY (id)
 );
 
@@ -128,8 +129,8 @@ CREATE TABLE challenge_groups (
   max_size INT NOT NULL,
   people_count INT DEFAULT 1,
   participant_count INT DEFAULT 0,
-  avg_achive_ratio FLOAT DEFAULT 0.0,
-  max_achive_days INT DEFAULT 0,
+  avg_achieve_ratio FLOAT DEFAULT 0.0,
+  max_achieve_days INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP AS CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

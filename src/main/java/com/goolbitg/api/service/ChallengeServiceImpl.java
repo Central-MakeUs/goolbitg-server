@@ -19,7 +19,11 @@ import com.goolbitg.api.entity.ChallengeRecord;
 import com.goolbitg.api.entity.ChallengeRecordId;
 import com.goolbitg.api.entity.ChallengeStat;
 import com.goolbitg.api.entity.ChallengeStatId;
+import com.goolbitg.api.entity.DailyRecord;
+import com.goolbitg.api.entity.DailyRecordId;
+import com.goolbitg.api.entity.UserStat;
 import com.goolbitg.api.exception.ChallengeException;
+import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.ChallengeDto;
 import com.goolbitg.api.model.ChallengeRecordDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
@@ -30,6 +34,8 @@ import com.goolbitg.api.model.PaginatedChallengeRecordDto;
 import com.goolbitg.api.repository.ChallengeRecordRepository;
 import com.goolbitg.api.repository.ChallengeRepository;
 import com.goolbitg.api.repository.ChallengeStatRepository;
+import com.goolbitg.api.repository.DailyRecordRepository;
+import com.goolbitg.api.repository.UserStatRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +53,10 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeRecordRepository challengeRecordRepository;
     @Autowired
     private final ChallengeStatRepository challengeStatRepository;
+    @Autowired
+    private final UserStatRepository userStatRepository;
+    @Autowired
+    private final DailyRecordRepository dailyRecordRepository;
     @Autowired
     private final Clock clock;
 
@@ -132,9 +142,23 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public void enrollChallenge(String userId, Long challengeId) {
+        UserStat userStat = userStatRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        DailyRecordId dailyRecordId = new DailyRecordId(userId, getToday());
+        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
+                .orElseGet(() -> {
+            DailyRecord entity = new DailyRecord();
+            entity.setUserId(userId);
+            entity.setDate(getToday());
+            entity.setSaving(0);
+            entity.setTotalChallenges(0);
+            entity.setAchievedChallenges(0);
+            return entity;
+        });
         ChallengeStatId id = new ChallengeStatId(challengeId, userId);
-        ChallengeStat stat = challengeStatRepository.findById(id)
+        ChallengeStat challengeStat = challengeStatRepository.findById(id)
                 .orElse(new ChallengeStat());
+
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, getToday());
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
         int startDay = 0;
@@ -146,15 +170,19 @@ public class ChallengeServiceImpl implements ChallengeService {
             }
         }
 
-        stat.setUserId(userId);
-        stat.setChallengeId(challengeId);
-        Integer prevEnrollCount = stat.getEnrollCount();
-        if (prevEnrollCount == null) prevEnrollCount = 0;
-        stat.setEnrollCount(prevEnrollCount + 1);
-        if (stat.getTotalCount() == null) stat.setTotalCount(0);
-        if (stat.getContinueCount() == null) stat.setContinueCount(0);
+        challengeStat.setUserId(userId);
+        challengeStat.setChallengeId(challengeId);
+        Integer prevEnrollCount = challengeStat.getEnrollCount();
+        if (prevEnrollCount == null) {
+            // New Enrollment
+            prevEnrollCount = 0;
+            userStat.setChallengeCount(userStat.getChallengeCount() + 1);
+        }
+        challengeStat.setEnrollCount(prevEnrollCount + 1);
+        if (challengeStat.getTotalCount() == null) challengeStat.setTotalCount(0);
+        if (challengeStat.getContinueCount() == null) challengeStat.setContinueCount(0);
 
-        challengeStatRepository.save(stat);
+        challengeStatRepository.save(challengeStat);
 
         for (int i = 0; i < 3; i++) {
             LocalDate date = getToday();
@@ -167,6 +195,11 @@ public class ChallengeServiceImpl implements ChallengeService {
             record.setLocation(i + 1);
             challengeRecordRepository.save(record);
         }
+
+        userStatRepository.save(userStat);
+
+        dailyRecord.setTotalChallenges(dailyRecord.getTotalChallenges() + 1);
+        dailyRecordRepository.save(dailyRecord);
     }
 
     @Override
@@ -240,8 +273,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setTitle(challenge.getTitle());
         dto.setImageUrl(URI.create(challenge.getImageUrl()));
         dto.setReward(challenge.getReward());
-        dto.setMaxAchiveDays(challenge.getMaxAchiveDays());
-        dto.setAvgAchiveRatio(challenge.getAvgAchiveRatio());
+        dto.setMaxAchieveDays(challenge.getMaxAchieveDays());
+        dto.setAvgAchieveRatio(challenge.getAvgAchieveRatio());
         dto.setParticipantCount(challenge.getParticipantCount());
         return dto;
     }

@@ -33,18 +33,19 @@ INSERT INTO user_surveys (
     3600000, 30000, 'FRIDAY', '20:00:00' );
 
 INSERT INTO user_stats (
-    user_id, challenge_count, post_count, achivement_guage, continue_count
-) VALUES ( 'id0001', 2, 1, 2000, 2 );
+    user_id, challenge_count, post_count, achievement_guage, continue_count
+) VALUES ( 'id0001', 2, 1, 2000, 2 ),
+        ( 'id0003', 1, 0, 0, 1 );
 
 INSERT INTO daily_records (
-    user_id, date, saving, status
-) VALUES ( 'id0001', '2025-01-19', 2000, 'SUCCESS' ),
-        ( 'id0001', '2025-01-21', 3000, 'SUCCESS' ),
-        ( 'id0001', '2025-01-22', 3000, 'SUCCESS' ),
-        ( 'id0001', '2025-01-23', 0, 'WAIT' );
+    user_id, date, saving, total_challenges, achieved_challenges
+) VALUES ( 'id0001', '2025-01-19', 2000, 1, 1 ),
+        ( 'id0001', '2025-01-21', 3000, 1, 1 ),
+        ( 'id0001', '2025-01-22', 3000, 1, 1 ),
+        ( 'id0001', '2025-01-23', 0, 1, 0 );
 
 INSERT INTO challenges (
-    title, image_url, reward, participant_count, avg_achive_ratio, max_achive_days
+    title, image_url, reward, participant_count, avg_achieve_ratio, max_achieve_days
 ) VALUES ( '커피 안마시기', 'exmaple_url', 2000, 1, 100, 3 ),
         ( '대중교통 이용하기', 'exmaple_url', 3000, 2, 0.56, 2 ),
         ( '외식하지 않기', 'exmaple_url', 3000, 0, 0, 0 ),
@@ -84,7 +85,7 @@ INSERT INTO buyornot_votes (
 ) VALUES ( 1, 'id0001', 'GOOD' );
 
 INSERT INTO challenge_groups (
-    owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achive_ratio, max_achive_days
+    owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achieve_ratio, max_achieve_days
 ) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 2000, 6, 1, 23, 50, 63 );
 
 INSERT INTO notices (
