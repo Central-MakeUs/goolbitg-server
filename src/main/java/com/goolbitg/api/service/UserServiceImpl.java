@@ -268,10 +268,13 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> UserException.userNotExist(userId));
         UserSurvey survey = userSurveyRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
-        int status = getRegisterStatusInner(user, survey);
+        UserStat stat = userStatsRepository.findById(userId)
+            .orElseThrow(() -> UserException.userNotExist(userId));
+        int status = getRegisterStatusInner(user, survey, stat);
+        boolean requiredInfoCompleted = getRequiredInfoCompleted(user, survey, stat);
         UserRegisterStatusDto dto = new UserRegisterStatusDto();
         dto.setStatus(status);
-        dto.setRequiredInfoCompleted(status >= 4);
+        dto.setRequiredInfoCompleted(requiredInfoCompleted);
         return dto;
     }
 
@@ -396,13 +399,22 @@ public class UserServiceImpl implements UserService {
 
     /* ------------- Helper Methods ------------- */
 
-    private int getRegisterStatusInner(User user, UserSurvey survey) {
+    private int getRegisterStatusInner(User user, UserSurvey survey, UserStat stat) {
         if (user.getAgreement1() == null) return 0;
         if (user.getNickname() == null) return 1;
         if (survey.getCheck1() == null) return 2;
         if (survey.getAvgIncomePerMonth() == null) return 3;
         if (survey.getPrimeUseDay() == null) return 4;
-        return 5;
+        if (stat.getChallengeCount() == 0) return 5;
+        return 6;
+    }
+
+    private boolean getRequiredInfoCompleted(User user, UserSurvey survey, UserStat stat) {
+        return (user.getAgreement1() != null &&
+            user.getNickname() != null &&
+            survey.getCheck1() != null &&
+            survey.getAvgIncomePerMonth() != null &&
+            stat.getChallengeCount() > 0);
     }
 
     private String createRefreshToken(String userId) {

@@ -88,6 +88,7 @@ public class UserIntegrationTest {
     @Transactional
     @WithMockUser(NEW_USER_ID)
     void update_info_and_check_status() throws Exception {
+        Long challengeId = 3L;
         updateAgreement();
         mockMvc.perform(get("/users/me/registerStatus"))
                 .andExpect(status().isOk())
@@ -124,7 +125,7 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(4))
-                .andExpect(jsonPath("$.requiredInfoCompleted").value(true));
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
 
         updatePattern();
         mockMvc.perform(get("/users/me"))
@@ -134,6 +135,13 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(5))
+                .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
+
+        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+                .andExpect(status().isCreated());
+        mockMvc.perform(get("/users/me/registerStatus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(6))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(true));
     }
 
