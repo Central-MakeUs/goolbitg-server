@@ -293,10 +293,12 @@ paths:
       summary: 주간 기록 보기
       description: > 
         주간 기록 통계를 반환합니다.<br><br>
-        홈 페이지의 상단 부분에 필요한 정보입니다.
+        홈 페이지와 챌린지 페이지 상단 뷰에 필요한 정보입니다.
       operationId: getWeeklyStatus
       tags:
         - User
+      parameters:
+        - $ref: '#/components/parameters/dateParam'
       responses:
         '200':
           description: 주간 기록 반환
@@ -563,13 +565,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/sizeParam'
-        - name: date
-          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
-          in: query
-          schema:
-            type: string
-            format: date
-            nullable: true
+        - $ref: '#/components/parameters/dateParam'
         - name: status
           description: 필터링할 챌린지 상태입니다. 제공되지 않으면 모든 챌린지를 가져옵니다.
           in: query
@@ -591,12 +587,7 @@ paths:
         - Challenge
       parameters:
         - $ref: '#/components/parameters/challengeIdParam'
-        - name: date
-          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
-          in: query
-          schema:
-            type: string
-            format: date
+        - $ref: '#/components/parameters/dateParam'
       responses:
         '200':
           description: 챌린지 기록 반환
@@ -922,13 +913,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/sizeParam'
-        - name: date
-          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다.
-          in: query
-          schema:
-            type: string
-            format: date
-            example: '2025-01-14'
+        - $ref: '#/components/parameters/dateParam'
         - name: status
           description: 필터링할 챌린지 상태입니다. 제공되지 않으면 모든 상태를 가져옵니다.
           in: query
@@ -957,13 +942,7 @@ paths:
         - ChallengeGroup
       parameters:
         - $ref: '#/components/parameters/groupIdParam'
-        - name: date
-          description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 확인합니다.
-          in: query
-          schema:
-            type: string
-            format: date
-            example: '2025-01-14'
+        - $ref: '#/components/parameters/dateParam'
       responses:
         '200':
           description: 챌린지 그룹 기록 반환
@@ -2314,6 +2293,14 @@ components:
         type: integer
         format: int64
         default: 1
+    dateParam:
+      name: date
+      description: 기록을 확인할 날짜입니다. 제공되지 않으면 오늘 기록을 가져옵니다. yyyy-MM-dd 형식입니다.
+      in: query
+      schema:
+        type: string
+        format: date
+        nullable: true
   requestBodies:
     RegisterReq:
       required: true

@@ -117,9 +117,10 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<UserWeeklyStatusDto> getWeeklyStatus() throws Exception {
+    public ResponseEntity<UserWeeklyStatusDto> getWeeklyStatus(@Valid LocalDate date) throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        LocalDate date = timeService.getToday();
+        if (date == null)
+            date = timeService.getToday();
 
         UserWeeklyStatusDto result = userService.getWeeklyStatus(userId, date);
         return ResponseEntity.ok(result);
