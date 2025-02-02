@@ -64,9 +64,9 @@ public class ChallengeIntegrationTest {
             .param("size", size.toString())
             .param("spendingTypeId", id.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.items.length()").value(2))
-                .andExpect(jsonPath("$.items[0].title").value("대중교통 이용하기"));
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.items.length()").value(10))
+                .andExpect(jsonPath("$.items[0].id").value(5));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class ChallengeIntegrationTest {
 
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.achievementGuage").value(5000));
+                .andExpect(jsonPath("$.achievementGuage").value(9000));
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.continueCount").value(3))

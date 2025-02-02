@@ -76,7 +76,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final JwtManager jwtManager;
 
-    private int idSeq = 2;
+    // 1 ~ 9 is reserved for default user
+    private int idSeq = 10;
 
 
     /* --------------- API Implements ----------------------*/

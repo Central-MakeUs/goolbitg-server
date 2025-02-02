@@ -17,4 +17,8 @@ public interface ChallengeRecordRepository extends JpaRepository<ChallengeRecord
 
     Page<ChallengeRecord> findAllByUserIdAndDate(Pageable pageable, String userId, LocalDate date);
     Page<ChallengeRecord> findAllByUserIdAndDateAndStatus(Pageable pageable, String userId, LocalDate date, ChallengeRecordStatus status);
+    Iterable<ChallengeRecord> findAllByDateAndStatus(LocalDate yesterday, ChallengeRecordStatus status);
+    int countByChallengeIdAndDate(Long challengeId, LocalDate date);
+    int countByUserIdAndDate(String id, LocalDate today);
+
 }

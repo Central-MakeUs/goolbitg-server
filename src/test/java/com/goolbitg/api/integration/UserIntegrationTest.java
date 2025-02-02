@@ -47,7 +47,7 @@ public class UserIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.nickname").value("굴비왕"))
             .andExpect(jsonPath("$.spendingType.id").value(5))
-            .andExpect(jsonPath("$.spendingType.peopleCount").value(2))
+            .andExpect(jsonPath("$.spendingType.peopleCount").value(3))
             .andExpect(jsonPath("$.spendingType.goal").isEmpty())
             .andExpect(jsonPath("$.postCount").value(1));
     }
@@ -98,7 +98,7 @@ public class UserIntegrationTest {
         updateUserInfo();
         mockMvc.perform(get("/users/me"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.nickname").value("굴비노예"))
+            .andExpect(jsonPath("$.nickname").value("굴비시민"))
             .andExpect(jsonPath("$.birthday").value("1999-03-01"))
             .andExpect(jsonPath("$.gender").value("FEMALE"));
         mockMvc.perform(get("/users/me/registerStatus"))
@@ -173,7 +173,7 @@ public class UserIntegrationTest {
 
     private void updateUserInfo() throws JsonProcessingException, Exception {
         UserInfoDto requestBody = new UserInfoDto();
-        requestBody.setNickname("굴비노예");
+        requestBody.setNickname("굴비시민");
         requestBody.setBirthday(LocalDate.parse("1999-03-01"));
         requestBody.setGender(Gender.FEMALE);
 

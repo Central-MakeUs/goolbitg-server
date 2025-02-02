@@ -163,6 +163,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         userStatRepository.save(userStat);
         dailyRecordRepository.save(dailyRecord);
 
+        challenge.setAchievedRecords(challenge.getAchievedRecords() + 1);
+        challengeRepository.save(challenge);
+
         return getChallengeRecordDto(challenge, record);
     }
 
@@ -181,6 +184,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public void enrollChallenge(String userId, Long challengeId, LocalDate date) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
         UserStat userStat = userStatRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
         DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
@@ -228,19 +233,14 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         dailyRecord.setTotalChallenges(dailyRecord.getTotalChallenges() + 1);
         dailyRecordRepository.save(dailyRecord);
+
+        challenge.setTotalRecords(challenge.getTotalRecords() + 3);
+        challengeRepository.save(challenge);
     }
 
     private DailyRecord findOrCreateDailyRecord(String userId, LocalDate date, DailyRecordId dailyRecordId) {
         DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
-                .orElseGet(() -> {
-            DailyRecord entity = new DailyRecord();
-            entity.setUserId(userId);
-            entity.setDate(date);
-            entity.setSaving(0);
-            entity.setTotalChallenges(0);
-            entity.setAchievedChallenges(0);
-            return entity;
-        });
+                .orElseGet(() -> DailyRecord.getDefault(userId, date));
         return dailyRecord;
     }
 
@@ -308,6 +308,25 @@ public class ChallengeServiceImpl implements ChallengeService {
         return getChallengeTrippleDto(challenge, records, currentRecord, stat);
     }
 
+    @Override
+    @Transactional
+    public void calculateChallengeStat(Long challengeId, LocalDate date) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
+        int participantCount = challengeRecordRepository.countByChallengeIdAndDate(challengeId, date);
+        int maxAchieveDays = challengeStatRepository.getMaxContinueCountByChallengeId(challengeId);
+
+        challenge.setParticipantCount(participantCount);
+        challenge.setMaxAchieveDays(maxAchieveDays);
+    }
+
+    @Override
+    @Transactional
+    public void calculateAllChallengeStat(LocalDate date) {
+        for (Long challengeId : challengeRepository.findAllIds()) {
+            calculateChallengeStat(challengeId, date);
+        }
+    }
 
 
     /*  --------------- DTO Mappers ------------- */
@@ -316,7 +335,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeDto dto = new ChallengeDto();
         dto.setId(challenge.getId());
         dto.setTitle(challenge.getTitle());
-        dto.setImageUrl(URI.create(challenge.getImageUrl()));
+        dto.setImageUrlLarge(URI.create(challenge.getImageUrlLarge()));
+        dto.setImageUrlSmall(URI.create(challenge.getImageUrlSmall()));
         dto.setReward(challenge.getReward());
         dto.setMaxAchieveDays(challenge.getMaxAchieveDays());
         dto.setAvgAchieveRatio(challenge.getAvgAchieveRatio());

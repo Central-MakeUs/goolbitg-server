@@ -27,8 +27,11 @@ public class Challenge {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "image_url_small")
+    private String imageUrlSmall;
+
+    @Column(name = "image_url_large")
+    private String imageUrlLarge;
 
     @Column(name = "reward")
     private Integer reward;
@@ -36,10 +39,19 @@ public class Challenge {
     @Column(name = "participant_count")
     private Integer participantCount;
 
-    @Column(name = "avg_achieve_ratio")
-    private Float avgAchieveRatio;
-
     @Column(name = "max_achieve_days")
     private Integer maxAchieveDays;
+
+    @Column(name = "total_records")
+    private Integer totalRecords;
+
+    @Column(name = "achieved_records")
+    private Integer achievedRecords;
+
+    public Float getAvgAchieveRatio() {
+        if (totalRecords == null || achievedRecords == null) return null;
+        if (achievedRecords == 0) return 0f;
+        return (float)totalRecords / achievedRecords * 100;
+    }
 
 }

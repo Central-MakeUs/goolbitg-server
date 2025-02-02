@@ -1,7 +1,5 @@
 package com.goolbitg.api.repository;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,12 +16,15 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     @Query("""
         SELECT c
         FROM Challenge c
-        JOIN ChallengeRecord r ON c.id = r.challengeId
-        JOIN User u ON r.userId = u.id
+        JOIN ChallengeStat s ON c.id = s.challengeId
+        JOIN User u ON s.userId = u.id
         WHERE u.spendingTypeId = :spendingTypeId
         GROUP BY c
-        ORDER BY COUNT(r) DESC
+        ORDER BY SUM(s.enrollCount) DESC
         """)
     Page<Challenge> findAllBySpendingTypeId(@Param("spendingTypeId") Long spendingTypeId, Pageable pageable);
+
+    @Query("SELECT c.id FROM Challenge c")
+    Iterable<Long> findAllIds();
 
 }

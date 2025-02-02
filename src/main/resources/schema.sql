@@ -63,11 +63,13 @@ CREATE TABLE daily_records (
 CREATE TABLE challenges (
   id BIGINT AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
-  image_url VARCHAR(50) NOT NULL,
+  image_url_large VARCHAR(100) NOT NULL,
+  image_url_small VARCHAR(100) NOT NULL,
   reward INT NOT NULL,
   participant_count INT DEFAULT 0,
-  avg_achieve_ratio FLOAT DEFAULT 0.0,
   max_achieve_days INT DEFAULT 0,
+  total_records INT DEFAULT 0,
+  achieved_records INT DEFAULT 0,
   PRIMARY KEY (id)
 );
 

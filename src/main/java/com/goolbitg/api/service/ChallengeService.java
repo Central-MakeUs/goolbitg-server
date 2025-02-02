@@ -24,4 +24,7 @@ public interface ChallengeService {
     PaginatedChallengeRecordDto getChallengeRecords(String userId, Integer page, Integer size, LocalDate date, ChallengeRecordStatus status);
     ChallengeStatDto getChallengeStat(String userId, Long challengeId);
     ChallengeTrippleDto getChallengeTripple(String userId, Long challengeId, LocalDate date);
+    void calculateChallengeStat(Long challengeId, LocalDate date);
+    void calculateAllChallengeStat(LocalDate date);
+
 }

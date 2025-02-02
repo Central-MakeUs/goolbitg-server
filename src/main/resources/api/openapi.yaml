@@ -27,6 +27,8 @@ info:
 servers:
   - url: https://api.goolbitg.site/v1
     description: 메인 서버
+  - url: http://localhost:8080/v1
+    description: 로컬호스트 서버
 paths:
   /health:
     get:
@@ -1670,7 +1672,11 @@ components:
           minimum: 1
           maximum: 100 # TODO: Set maximum title length
           description: 챌린지 이름
-        imageUrl:
+        imageUrlSmall:
+          type: string
+          format: uri
+          description: 챌린지 대표 이미지 URL
+        imageUrlLarge:
           type: string
           format: uri
           description: 챌린지 대표 이미지 URL
