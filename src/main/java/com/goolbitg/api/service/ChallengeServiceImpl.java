@@ -214,6 +214,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             userStat.setChallengeCount(userStat.getChallengeCount() + 1);
         }
         challengeStat.setEnrollCount(prevEnrollCount + 1);
+        challengeStat.setCurrentContinueCount(0);
         if (challengeStat.getTotalCount() == null) challengeStat.setTotalCount(0);
         if (challengeStat.getContinueCount() == null) challengeStat.setContinueCount(0);
 
