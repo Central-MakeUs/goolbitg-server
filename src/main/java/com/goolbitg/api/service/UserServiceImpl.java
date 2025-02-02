@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.DailyRecord;
 import com.goolbitg.api.entity.SpendingType;
+import com.goolbitg.api.entity.UnregisterHistory;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStat;
 import com.goolbitg.api.entity.UserSurvey;
@@ -31,6 +32,7 @@ import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
 import com.goolbitg.api.model.SpendingTypeDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
+import com.goolbitg.api.model.UnregisterDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserDailyStatusDto;
@@ -42,6 +44,7 @@ import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
+import com.goolbitg.api.repository.UnregisterHistoryRepository;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatRepository;
 import com.goolbitg.api.repository.UserSurveyRepository;
@@ -73,6 +76,8 @@ public class UserServiceImpl implements UserService {
     private final SpendingTypeRepository spendingTypeRepository;
     @Autowired
     private final DailyRecordRepository dailyRecordRepository;
+    @Autowired
+    private final UnregisterHistoryRepository unregisterHistoryRepository;
     @Autowired
     private final JwtManager jwtManager;
 
@@ -254,10 +259,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void unregister(String userId) {
+    public void unregister(String userId, UnregisterDto request, LocalDate date) {
         if (userRepository.findById(userId).isEmpty()) {
             throw UserException.userNotExist(userId);
         }
+
+        UnregisterHistory history = new UnregisterHistory();
+        history.setUserId(userId);
+        history.setReason(request.getReason());
+        history.setUnregisterDate(date);
+
+        unregisterHistoryRepository.save(history);
         userSurveyRepository.deleteById(userId);
         userStatsRepository.deleteById(userId);
         userRepository.deleteById(userId);

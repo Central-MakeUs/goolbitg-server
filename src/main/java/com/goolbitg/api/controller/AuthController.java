@@ -1,5 +1,6 @@
 package com.goolbitg.api.controller;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
@@ -14,7 +15,9 @@ import com.goolbitg.api.AuthApi;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
+import com.goolbitg.api.model.UnregisterDto;
 import com.goolbitg.api.security.AuthUtil;
+import com.goolbitg.api.service.TimeService;
 import com.goolbitg.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,8 @@ public class AuthController implements AuthApi {
 
     @Autowired
     private final UserService userService;
+    @Autowired
+    private final TimeService timeService;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -48,12 +53,6 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<Void> unregister() throws Exception {
-        userService.unregister(AuthUtil.getLoginUserId());
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
     public ResponseEntity<Void> logout() throws Exception {
         String userId = AuthUtil.getLoginUserId();
         userService.logout(userId);
@@ -66,6 +65,15 @@ public class AuthController implements AuthApi {
         AuthResponseDto response = userService.getAccessToken(tokenRefreshRequestDto);
         log.info("AuthResponse: " + response);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Void> unregister(@Valid UnregisterDto unregisterDto) throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+        LocalDate date = timeService.getToday();
+
+        userService.unregister(userId, unregisterDto, date);
+        return ResponseEntity.ok().build();
     }
 
 }

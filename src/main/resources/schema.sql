@@ -171,3 +171,9 @@ CREATE TABLE challenge_group_stats (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE unregister_histories (
+  user_id VARCHAR(50),
+  unregister_date DATETIME NOT NULL,
+  reason VARCHAR(50) NOT NULL,
+  PRIMARY KEY (user_id)
+)

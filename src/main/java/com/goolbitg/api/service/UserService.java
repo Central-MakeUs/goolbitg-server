@@ -7,6 +7,7 @@ import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
+import com.goolbitg.api.model.UnregisterDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserDto;
@@ -23,7 +24,7 @@ public interface UserService {
 
     UserDto getUser(String userId) throws Exception;
     void register(AuthRequestDto request);
-    void unregister(String userId);
+    void unregister(String userId, UnregisterDto request, LocalDate date);
     AuthResponseDto login(AuthRequestDto request);
     AuthResponseDto getAccessToken(TokenRefreshRequestDto request);
     void logout(String userId);

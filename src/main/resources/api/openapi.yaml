@@ -1,4 +1,5 @@
 openapi: 3.0.3
+
 info:
   title: 🎣 굴비잇기 API 서버
   description: >
@@ -24,11 +25,13 @@ info:
     [에러코드 목록](https://github.com/Central-MakeUs/goolbitg-server/blob/spec/v1/docs/errors.md)
   termsOfService: http://localhost:8080/terms-of-service
   version: 1.0.3
+
 servers:
   - url: https://api.goolbitg.site/v1
     description: 메인 서버
   - url: http://localhost:8080/v1
     description: 로컬호스트 서버
+
 paths:
   /health:
     get:
@@ -95,6 +98,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseDto'
+
   /auth/register:
     post:
       summary: 회원가입
@@ -246,12 +250,20 @@ paths:
       operationId: unregister
       description: > 
         회원을 탈퇴합니다.<br><br>
-        현재 로그인된 상태여야 합니다.
+        현재 로그인된 상태여야 합니다.<br><br>
+        탈퇴시 사유를 등록해야 합니다.
       tags:
         - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnregisterDto'
       responses:
         '200':
           description: 회원탈퇴 완료
+
   /users/me:
     get:
       summary: 현재 로그인한 유저 정보 반환
@@ -470,6 +482,7 @@ paths:
               examples:
                 이전 단계 미완료:
                   $ref: '#/components/examples/Error_PreviousStepNotCompleted'
+
   /challenges:
     get:
       summary: 챌린지 목록 가져오기
@@ -729,6 +742,7 @@ paths:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
                 이미 완료한 챌린지:
                   $ref: '#/components/examples/Error_ChallengeAlreadyChecked'
+
   /challengeGroups:
     get:
       summary: 챌린지 그룹 목록 가져오기
@@ -1019,6 +1033,7 @@ paths:
               examples:
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
+
   /buyOrNots:
     get:
       summary: 살까말까 포스트 목록 가져오기
@@ -1184,6 +1199,7 @@ paths:
               examples:
                 내가 작성한 포스트:
                   $ref: '#/components/examples/Error_CannotVoteMyPost'
+
   /notices:
     get:
       summary: 내 알림 목록 가져오기
@@ -1238,6 +1254,7 @@ paths:
                   $ref: '#/components/examples/Error_NoticeNotExist'
                 이미 읽음표시 됨:
                   $ref: '#/components/examples/Error_AlreadyRead'
+
 components:
   schemas:
     PaginatedNoticeDto:
@@ -1424,6 +1441,14 @@ components:
         requiredInfoCompleted:
           type: boolean
           description: 필수정보 입력 완료 여부
+    UnregisterDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: 탈퇴 사유
+      example:
+        reason: 앱을 자주 사용하지 않아요
     UserWeeklyStatusDto:
       type: object
       properties:
@@ -2089,6 +2114,7 @@ components:
       properties:
         duplicated:
           type: boolean
+
   examples:
     PrivateChallenge:
       value:
@@ -2259,6 +2285,7 @@ components:
         productImageUrl: "http://localhost:8080/image/bn2"
         goodReason: "후드티 안산지 벌써 2년 다됨"
         badReason: "집에 후드티 12장 있음 ㅋㅋ"
+
   parameters:
     pageParam:
       name: page
@@ -2309,6 +2336,7 @@ components:
         type: string
         format: date
         nullable: true
+
   requestBodies:
     RegisterReq:
       required: true
@@ -2316,6 +2344,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AuthRequestDto'
+
   responses:
     NotFound:
       description: 컨텐츠를 찾을 수 없음
@@ -2354,13 +2383,16 @@ components:
               $ref: '#/components/examples/Error_NoAuthorzation'
             로그아웃된 유저:
               $ref: '#/components/examples/Error_LoggedOut'
+
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
 security:
   - bearerAuth: []
+
 tags:
   - name: ETC
     description: 기타
