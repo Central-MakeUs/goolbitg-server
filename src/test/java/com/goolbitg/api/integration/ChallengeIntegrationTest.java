@@ -266,4 +266,22 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.location").value(2));
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(NORMAL_USER)
+    void enroll_check_cancel_get_tripple() throws Exception {
+        Long challengeId = 1L;
+        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
+                .andExpect(status().isOk());
+        mockMvc.perform(delete("/challengeRecords/{challengeId}", challengeId))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.check1").value("SUCCESS"))
+                .andExpect(jsonPath("$.check2").value("FAIL"))
+                .andExpect(jsonPath("$.check3").value("FAIL"));
+    }
+
 }
