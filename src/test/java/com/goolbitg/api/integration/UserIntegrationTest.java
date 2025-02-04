@@ -157,6 +157,19 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.continueCount").value(2));
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(ROOT_USER_ID)
+    void get_weekly_status_at_monday() throws Exception {
+        updateAgreement();
+        mockMvc.perform(get("/users/me/weeklyStatus")
+            .param("date", "2025-01-20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.saving").value(6000))
+                .andExpect(jsonPath("$.todayIndex").value(0))
+                .andExpect(jsonPath("$.continueCount").value(2));
+    }
+
     private void updateAgreement() throws JsonProcessingException, Exception {
         UserAgreementDto requestBody = new UserAgreementDto();
         requestBody.setAgreement1(true);

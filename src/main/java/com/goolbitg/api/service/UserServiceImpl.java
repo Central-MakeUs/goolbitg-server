@@ -331,7 +331,8 @@ public class UserServiceImpl implements UserService {
         DayOfWeek todayOfWeek = date.getDayOfWeek();
         int todayIndex = todayOfWeek.getValue() - 1;
         LocalDate monday = date.minusDays(todayIndex);
-        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, monday, date);
+        LocalDate sunday = date.plusDays(6 - todayIndex);
+        List<DailyRecord> records = dailyRecordRepository.findByUserIdAndDateBetween(userId, monday, sunday);
         LocalDate dateOffset = monday;
         for (int i = 0; i < 7; i++) {
             if (records.size() < i + 1 || !records.get(i).getDate().equals(dateOffset)) {
