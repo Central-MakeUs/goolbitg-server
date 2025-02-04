@@ -300,19 +300,23 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeStat stat = challengeStatRepository.findById(statId).get();
 
         List<ChallengeRecord> records = new ArrayList<>();
+        boolean canceled = false;
         date = date.minusDays(currentRecord.getLocation() - 1);
         for (int i = 0; i < 3; i++) {
             recordId = new ChallengeRecordId(challengeId, userId, date);
-            records.add(challengeRecordRepository.findById(recordId).orElseGet(
-                () -> {
-                    ChallengeRecord emptyRecord = new ChallengeRecord();
-                    emptyRecord.setStatus(ChallengeRecordStatus.FAIL);
-                    return emptyRecord;
-                }
-            ));
+            Optional<ChallengeRecord> result = challengeRecordRepository.findById(recordId);
+            ChallengeRecord record;
+            if (result.isEmpty()) {
+                record = new ChallengeRecord();
+                record.setStatus(ChallengeRecordStatus.FAIL);
+                canceled = true;
+            } else {
+                record = result.get();
+            }
+            records.add(record);
             date = date.plusDays(1);
         }
-        return getChallengeTrippleDto(challenge, records, currentRecord, stat);
+        return getChallengeTrippleDto(challenge, records, currentRecord, stat, canceled);
     }
 
     @Override
@@ -398,7 +402,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-    private ChallengeTrippleDto getChallengeTrippleDto(Challenge challenge, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat) {
+    private ChallengeTrippleDto getChallengeTrippleDto(Challenge challenge, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat, boolean canceled) {
         ChallengeTrippleDto dto = new ChallengeTrippleDto();
         dto.setChallenge(getChallengeDto(challenge));
         if (currentRecord.getStatus() == ChallengeRecordStatus.WAIT)
@@ -409,6 +413,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setCheck2(records.get(1).getStatus());
         dto.setCheck3(records.get(2).getStatus());
         dto.setLocation(currentRecord.getLocation());
+        dto.setCanceled(canceled);
         return dto;
     }
 

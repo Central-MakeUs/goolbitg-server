@@ -263,7 +263,8 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.check1").value("SUCCESS"))
                 .andExpect(jsonPath("$.check2").value("WAIT"))
                 .andExpect(jsonPath("$.check3").value("WAIT"))
-                .andExpect(jsonPath("$.location").value(2));
+                .andExpect(jsonPath("$.location").value(2))
+                .andExpect(jsonPath("$.canceled").value(false));
     }
 
     @Test
@@ -281,7 +282,8 @@ public class ChallengeIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.check1").value("SUCCESS"))
                 .andExpect(jsonPath("$.check2").value("FAIL"))
-                .andExpect(jsonPath("$.check3").value("FAIL"));
+                .andExpect(jsonPath("$.check3").value("FAIL"))
+                .andExpect(jsonPath("$.canceled").value(true));
     }
 
 }
