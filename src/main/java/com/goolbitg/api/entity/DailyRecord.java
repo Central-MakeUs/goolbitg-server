@@ -38,6 +38,10 @@ public class DailyRecord {
     @Column(name = "achieved_challenges")
     private Integer achievedChallenges;
 
+    public void achieve(int reward) {
+        saving += reward;
+        achievedChallenges += 1;
+    }
 
     public static DailyRecord getDefault(String userId, LocalDate date) {
         DailyRecord entity = new DailyRecord();

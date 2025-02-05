@@ -39,4 +39,29 @@ public class ChallengeStat {
     @Column(name = "enroll_count")
     private Integer enrollCount;
 
+    public void increaseCount() {
+        totalCount += 1;
+        currentContinueCount += 1;
+        continueCount = Math.max(currentContinueCount, continueCount);
+    }
+
+    public void enroll() {
+        enrollCount += 1;
+    }
+
+    public void cancel() {
+        enrollCount -= 1;
+        continueCount = 0;
+    }
+
+    public static ChallengeStat getDefault(Long challengeId, String userId) {
+        ChallengeStat stat = new ChallengeStat();
+        stat.setChallengeId(challengeId);
+        stat.setUserId(userId);
+        stat.setContinueCount(0);
+        stat.setCurrentContinueCount(0);
+        stat.setTotalCount(0);
+        stat.setEnrollCount(0);
+        return stat;
+    }
 }
