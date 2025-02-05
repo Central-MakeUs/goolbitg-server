@@ -251,7 +251,8 @@ paths:
       description: > 
         회원을 탈퇴합니다.<br><br>
         현재 로그인된 상태여야 합니다.<br><br>
-        탈퇴시 사유를 등록해야 합니다.
+        탈퇴시 사유를 등록해야 합니다.<br><br>
+        애플 로그인 사용자는 추가로 authorization code를 제출해야 합니다.
       tags:
         - Auth
       requestBody:
@@ -263,6 +264,17 @@ paths:
       responses:
         '200':
           description: 회원탈퇴 완료
+        '422':
+          description: 회원탈퇴 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples: 
+                인가코드 없음:
+                  $ref: '#/components/examples/Error_AuthorizationCodeNotExist'
+                APPLE 로그인 인증 오류:
+                  $ref: '#/components/examples/Error_AppleLoginAuthError'
 
   /users/me:
     get:
@@ -2187,6 +2199,14 @@ components:
       value:
         code: 2005
         message: 로그아웃된 유저입니다.
+    Error_AuthorizationCodeNotExist:
+      value:
+        code: 2006
+        message: Authorization code가 없습니다.
+    Error_AppleLoginAuthError:
+      value:
+        code: 2007
+        message: APPLE 로그인 인증 과정에서 오류가 발생했습니다. (message)
     Error_AlreadyRegistered:
       value:
         code: 3001
