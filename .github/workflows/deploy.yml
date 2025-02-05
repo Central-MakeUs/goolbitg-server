@@ -35,6 +35,13 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > ec2_key.pem
           chmod 600 ec2_key.pem
+
+      - name: Prepare Apple Login Auth Key
+        env:
+          APPLE_AUTH_KEY: ${{ secrets.APPLE_AUTH_KEY }}
+          APPLE_AUTH_KEY_NAME: ${{ secrets.APPLE_AUTH_KEY_NAME }}
+        run: |
+          echo "$APPLE_AUTH_KEY" > src/main/resources/$APPLE_AUTH_KEY_NAME
       
       - name: Transfer JAR to EC2
         env:
