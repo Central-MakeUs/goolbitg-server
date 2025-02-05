@@ -198,7 +198,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
         int startDay = 0;
         if (recordResult.isPresent()) {
-            if (recordResult.get().getStatus() == ChallengeRecordStatus.SUCCESS) {
+            if (recordResult.get().getStatus() == ChallengeRecordStatus.SUCCESS &&
+                recordResult.get().getLocation() == 3) {
                 startDay = 1;
             } else {
                 throw ChallengeException.alreadyEnrolled(challengeId);

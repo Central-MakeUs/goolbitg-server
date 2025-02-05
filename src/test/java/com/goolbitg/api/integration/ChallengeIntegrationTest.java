@@ -286,4 +286,16 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.canceled").value(true));
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(NORMAL_USER)
+    void enroll_check_enroll_again_fail() throws Exception {
+        Long challengeId = 1L;
+        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+                .andExpect(status().isUnprocessableEntity());
+    }
 }
