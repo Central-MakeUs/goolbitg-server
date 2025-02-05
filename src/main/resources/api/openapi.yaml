@@ -1447,8 +1447,14 @@ components:
         reason:
           type: string
           description: 탈퇴 사유
+        authorizationCode:
+          type: string
+          description: 탈퇴할 회원의 Authorization Code. Apple 로그인 전용.
+      required:
+        - reason
       example:
         reason: 앱을 자주 사용하지 않아요
+        authorizationCode: <authorization_code>
     UserWeeklyStatusDto:
       type: object
       properties:

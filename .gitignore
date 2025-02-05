@@ -13,3 +13,7 @@ bin/
 .settings/
 .csettings/
 .factorypath
+
+# Crypt
+**/*.p8
+**/*.jks

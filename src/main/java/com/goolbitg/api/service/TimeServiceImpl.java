@@ -1,7 +1,10 @@
 package com.goolbitg.api.service;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,17 @@ public class TimeServiceImpl implements TimeService {
     @Override
     public LocalDate getToday() {
         return LocalDate.now(clock);
+    }
+
+    @Override
+    public LocalDateTime getNow() {
+        return LocalDateTime.now(clock);
+    }
+
+    @Override
+    public Instant getNowInstant() {
+        LocalDateTime now = getNow();
+        return now.toInstant(ZoneOffset.UTC);
     }
 
 }

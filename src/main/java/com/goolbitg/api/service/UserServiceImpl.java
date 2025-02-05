@@ -49,6 +49,7 @@ import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatRepository;
 import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.repository.UserTokenRepository;
+import com.goolbitg.api.security.AppleLoginManager;
 import com.goolbitg.api.security.JwtManager;
 import com.goolbitg.api.util.FormatUtil;
 
@@ -80,6 +81,8 @@ public class UserServiceImpl implements UserService {
     private final UnregisterHistoryRepository unregisterHistoryRepository;
     @Autowired
     private final JwtManager jwtManager;
+    @Autowired
+    private final AppleLoginManager appleLoginManager;
 
     // 1 ~ 9 is reserved for default user
     private int idSeq = 10;
@@ -260,8 +263,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void unregister(String userId, UnregisterDto request, LocalDate date) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw UserException.userNotExist(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+
+        if (user.getAppleId() != null && request.getAuthorizationCode() != null) {
+            try {
+                appleLoginManager.unregisterUser(request.getAuthorizationCode());
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("APPLE 회원 탈퇴 실패");
+            }
         }
 
         UnregisterHistory history = new UnregisterHistory();
