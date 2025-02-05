@@ -266,12 +266,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
 
-        if (user.getAppleId() != null && request.getAuthorizationCode() != null) {
+        if (user.getAppleId() != null) {
+            if (request.getAuthorizationCode() == null)
+                throw AuthException.authorizationCodeNotExist();
+
             try {
                 appleLoginManager.unregisterUser(request.getAuthorizationCode());
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException("APPLE 회원 탈퇴 실패");
+                throw AuthException.appleLoginAuthError(e.getMessage());
             }
         }
 

@@ -34,5 +34,17 @@ public abstract class AuthException {
             "로그아웃된 유저입니다.",
             HttpStatus.FORBIDDEN);
     }
+    public static CommonException authorizationCodeNotExist() {
+        return new CommonException(
+            2006,
+            "Authorization code가 없습니다.",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    public static CommonException appleLoginAuthError(String message) {
+        return new CommonException(
+            2007,
+            "APPLE 로그인 인증 과정에서 오류가 발생했습니다. (" + message + ")",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
 }
