@@ -12,8 +12,10 @@ import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.ChallengeRecordStatus;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * ChallengeRecord
@@ -22,7 +24,9 @@ import lombok.Setter;
 @Table(name = "challenge_records")
 @IdClass(ChallengeRecordId.class)
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChallengeRecord {
 
     @Id
@@ -44,4 +48,21 @@ public class ChallengeRecord {
     @Column(name = "location")
     private Integer location;
 
+    public void success() {
+        if (status != ChallengeRecordStatus.WAIT)
+            throw new IllegalStateException("challenge status is not wait");
+        status = ChallengeRecordStatus.SUCCESS;
+    }
+
+    public void fail() {
+        if (status != ChallengeRecordStatus.WAIT)
+            throw new IllegalStateException("challenge status is not wait");
+        status = ChallengeRecordStatus.FAIL;
+    }
+
+    public static ChallengeRecord getEmpty() {
+        return ChallengeRecord.builder()
+                .status(ChallengeRecordStatus.FAIL)
+                .build();
+    }
 }

@@ -8,8 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * DailyRecord
@@ -18,7 +20,9 @@ import lombok.Setter;
 @Table(name = "daily_records")
 @IdClass(DailyRecordId.class)
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DailyRecord {
 
     @Id
@@ -38,19 +42,27 @@ public class DailyRecord {
     @Column(name = "achieved_challenges")
     private Integer achievedChallenges;
 
+    public void enroll() {
+        totalChallenges += 1;
+    }
+
     public void achieve(int reward) {
         saving += reward;
         achievedChallenges += 1;
     }
 
+    public void cancel() {
+        totalChallenges -= 1;
+    }
+
     public static DailyRecord getDefault(String userId, LocalDate date) {
-        DailyRecord entity = new DailyRecord();
-        entity.setUserId(userId);
-        entity.setDate(date);
-        entity.setSaving(0);
-        entity.setTotalChallenges(0);
-        entity.setAchievedChallenges(0);
-        return entity;
+        return DailyRecord.builder()
+            .userId(userId)
+            .date(date)
+            .saving(0)
+            .totalChallenges(0)
+            .achievedChallenges(0)
+            .build();
     }
 
 }

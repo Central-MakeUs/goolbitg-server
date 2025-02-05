@@ -6,8 +6,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * ChallengeUserStat
@@ -16,7 +18,9 @@ import lombok.Setter;
 @Table(name = "challenge_stats")
 @IdClass(ChallengeStatId.class)
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChallengeStat {
 
     @Id
@@ -55,13 +59,13 @@ public class ChallengeStat {
     }
 
     public static ChallengeStat getDefault(Long challengeId, String userId) {
-        ChallengeStat stat = new ChallengeStat();
-        stat.setChallengeId(challengeId);
-        stat.setUserId(userId);
-        stat.setContinueCount(0);
-        stat.setCurrentContinueCount(0);
-        stat.setTotalCount(0);
-        stat.setEnrollCount(0);
-        return stat;
+        return ChallengeStat.builder()
+                .challengeId(challengeId)
+                .userId(userId)
+                .continueCount(0)
+                .currentContinueCount(0)
+                .totalCount(0)
+                .enrollCount(0)
+                .build();
     }
 }

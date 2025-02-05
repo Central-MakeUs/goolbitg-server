@@ -7,8 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * Challenge
@@ -16,7 +18,9 @@ import lombok.Setter;
 @Entity
 @Table(name = "challenges")
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Challenge {
 
     @Id
@@ -52,6 +56,19 @@ public class Challenge {
         if (totalRecords == null || achievedRecords == null) return null;
         if (achievedRecords == 0) return 0f;
         return (float)totalRecords / achievedRecords * 100;
+    }
+
+    public void enroll() {
+        totalRecords += 3;
+    }
+
+    public void achieve() {
+        achievedRecords += 1;
+    }
+
+    public void updateStats(int participantCount, int maxAchieveDays) {
+        this.participantCount = participantCount;
+        this.maxAchieveDays = maxAchieveDays;
     }
 
 }

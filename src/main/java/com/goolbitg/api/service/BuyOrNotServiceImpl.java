@@ -87,13 +87,14 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     @Override
     @Transactional
     public BuyOrNotDto createBuyOrNot(String userId, BuyOrNotDto request) {
-        BuyOrNot post = new BuyOrNot();
-        post.setWriterId(userId);
-        post.setProductName(request.getProductName());
-        post.setProductPrice(request.getProductPrice());
-        post.setProductImageUrl(request.getProductImageUrl().toString());
-        post.setGoodReason(request.getGoodReason());
-        post.setBadReason(request.getBadReason());
+        BuyOrNot post = BuyOrNot.builder()
+                .writerId(userId)
+                .productName(request.getProductName())
+                .productPrice(request.getProductPrice())
+                .productImageUrl(request.getProductImageUrl().toString())
+                .goodReason(request.getGoodReason())
+                .badReason(request.getBadReason())
+                .build();
         BuyOrNot created = buyOrNotRepository.save(post);
 
         return getBuyOrNotDto(created);
@@ -138,12 +139,7 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
             throw BuyOrNotException.postNotExist(postId);
         BuyOrNotVoteId id = new BuyOrNotVoteId(postId, userId);
         BuyOrNotVote vote = buyOrNotVoteRepository.findById(id)
-                .orElseGet(() -> {
-            BuyOrNotVote newVote = new BuyOrNotVote();
-            newVote.setPostId(postId);
-            newVote.setVoterId(userId);
-            return newVote;
-        });
+                .orElseGet(() -> BuyOrNotVote.getDefault(postId, userId));
         vote.setVote(request.getVote());
         buyOrNotVoteRepository.save(vote);
 

@@ -107,7 +107,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         if (record.getStatus() == ChallengeRecordStatus.WAIT) {
             challengeRecordRepository.delete(record);
-            dailyRecord.setTotalChallenges(dailyRecord.getTotalChallenges() - 1);
+            dailyRecord.cancel();
         }
 
         for (int i = 1; i < 3; i++) {
@@ -153,11 +153,11 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
 
-        record.setStatus(ChallengeRecordStatus.SUCCESS);
+        record.success();
         challengeStat.increaseCount();
         increaseAchievementGuage(challenge, user, userStat);
         dailyRecord.achieve(challenge.getReward());
-        challenge.setAchievedRecords(challenge.getAchievedRecords() + 1);
+        challenge.achieve();
 
         userRepository.save(user);
         userStatRepository.save(userStat);
@@ -214,25 +214,26 @@ public class ChallengeServiceImpl implements ChallengeService {
         Integer prevEnrollCount = challengeStat.getEnrollCount();
         if (prevEnrollCount == 0) {
             // New Enrollment
-            userStat.setChallengeCount(userStat.getChallengeCount() + 1);
+            userStat.increaseChallengeCount();
         }
         challengeStat.enroll();
 
         challengeStatRepository.save(challengeStat);
 
         for (int i = 0; i < 3; i++) {
-            ChallengeRecord record = new ChallengeRecord();
-            record.setChallengeId(challengeId);
-            record.setUserId(userId);
-            record.setDate(date.plusDays(i + startDay));
-            record.setStatus(ChallengeRecordStatus.WAIT);
-            record.setLocation(i + 1);
+            ChallengeRecord record = ChallengeRecord.builder()
+                    .challengeId(challengeId)
+                    .userId(userId)
+                    .date(date.plusDays(i + startDay))
+                    .status(ChallengeRecordStatus.WAIT)
+                    .location(i + 1)
+                    .build();
             challengeRecordRepository.save(record);
         }
 
 
-        dailyRecord.setTotalChallenges(dailyRecord.getTotalChallenges() + 1);
-        challenge.setTotalRecords(challenge.getTotalRecords() + 3);
+        dailyRecord.enroll();
+        challenge.enroll();
 
         dailyRecordRepository.save(dailyRecord);
         userStatRepository.save(userStat);
@@ -308,8 +309,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             Optional<ChallengeRecord> result = challengeRecordRepository.findById(recordId);
             ChallengeRecord record;
             if (result.isEmpty()) {
-                record = new ChallengeRecord();
-                record.setStatus(ChallengeRecordStatus.FAIL);
+                record = ChallengeRecord.getEmpty();
                 canceled = true;
             } else {
                 record = result.get();
@@ -328,8 +328,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         int participantCount = challengeRecordRepository.countByChallengeIdAndDate(challengeId, date);
         int maxAchieveDays = challengeStatRepository.getMaxContinueCountByChallengeId(challengeId);
 
-        challenge.setParticipantCount(participantCount);
-        challenge.setMaxAchieveDays(maxAchieveDays);
+        challenge.updateStats(participantCount, maxAchieveDays);
     }
 
     @Override

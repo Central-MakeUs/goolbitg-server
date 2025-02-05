@@ -48,14 +48,16 @@ public class CronJobExecutor {
         log.info("Finishing the day: " + yesterday.toString());
         // 1. Create daily records for all users
         for (User user : userRepository.findAll()) {
-            DailyRecord dailyRecord = DailyRecord.getDefault(user.getId(), today);
             int totalChallenges = challengeRecordRepository.countByUserIdAndDate(user.getId(), today);
-            dailyRecord.setTotalChallenges(totalChallenges);
-            dailyRecordRepository.save(dailyRecord);
+            dailyRecordRepository.save(DailyRecord.builder()
+                    .userId(user.getId())
+                    .date(today)
+                    .totalChallenges(totalChallenges)
+                    .build());
         }
         // 2. Turn status to FAIL for all uncompleted challenges
         for (ChallengeRecord record : challengeRecordRepository.findAllByDateAndStatus(yesterday, ChallengeRecordStatus.WAIT)) {
-            record.setStatus(ChallengeRecordStatus.FAIL);
+            record.fail();
             try {
                 // NOTE: Mabye I should use other method to cancel leftovers,
                 // cause cancelChallenge method declines enroll count.
