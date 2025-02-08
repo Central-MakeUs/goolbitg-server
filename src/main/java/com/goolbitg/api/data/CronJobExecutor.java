@@ -53,6 +53,8 @@ public class CronJobExecutor {
                     .userId(user.getId())
                     .date(today)
                     .totalChallenges(totalChallenges)
+                    .saving(0)
+                    .achievedChallenges(0)
                     .build());
         }
         // 2. Turn status to FAIL for all uncompleted challenges
