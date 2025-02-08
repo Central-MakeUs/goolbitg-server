@@ -388,6 +388,11 @@ public class ChallengeServiceImpl implements ChallengeService {
             Challenge c = challengeRepository.findById(e.getChallengeId()).get();
             return getChallengeRecordDto(c, e);
         }).toList());
+        int totalReward = 0;
+        for (ChallengeRecordDto cr : dto.getItems()) {
+            totalReward += cr.getChallenge().getReward();
+        }
+        dto.setTotalReward(totalReward);
 
         return dto;
     }

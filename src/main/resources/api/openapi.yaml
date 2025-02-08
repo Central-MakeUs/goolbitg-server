@@ -1313,6 +1313,9 @@ components:
         - $ref: '#/components/schemas/PaginatedResponseDto'
         - type: object
           properties:
+            totalReward:
+              type: integer
+              description: 총 챌린지 리워드
             items:
               type: array
               items:

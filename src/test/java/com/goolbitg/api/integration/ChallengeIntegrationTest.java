@@ -85,6 +85,7 @@ public class ChallengeIntegrationTest {
     void get_challenge_records() throws Exception {
         mockMvc.perform(get("/challengeRecords"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalReward").value(7000))
                 .andExpect(jsonPath("$.size").value(1));
     }
 
