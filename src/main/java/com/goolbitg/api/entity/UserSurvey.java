@@ -11,16 +11,20 @@ import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.Day;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * UserSurvey
  */
 @Entity
-@Getter
-@Setter
 @Table(name = "user_surveys")
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserSurvey {
 
     @Id
@@ -76,5 +80,40 @@ public class UserSurvey {
         if (avgIncomePerMonth == null || avgSpendingPerMonth == null)
             return null;
         return (int)(100.0 - ((float)avgSpendingPerMonth / avgIncomePerMonth) * 100.0);
+    }
+
+    public void updateChecklist(
+        boolean check1,
+        boolean check2,
+        boolean check3,
+        boolean check4,
+        boolean check5,
+        boolean check6
+    ) {
+        this.check1 = check1;
+        this.check2 = check2;
+        this.check3 = check3;
+        this.check4 = check4;
+        this.check5 = check5;
+        this.check6 = check6;
+    }
+
+    public void updateHabit(
+        int avgIncomePerMonth,
+        int avgSpendingPerMonth
+    ) {
+        this.avgIncomePerMonth = avgIncomePerMonth;
+        this.avgSpendingPerMonth = avgSpendingPerMonth;
+    }
+
+    public void updatePattern(Day primeUseDay, LocalTime primeUseTime) {
+        this.primeUseDay = primeUseDay;
+        this.primeUseTime = primeUseTime;
+    }
+
+    public static UserSurvey getDefault(String userId) {
+        return UserSurvey.builder()
+                .userId(userId)
+                .build();
     }
 }

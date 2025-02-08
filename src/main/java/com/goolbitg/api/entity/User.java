@@ -11,8 +11,10 @@ import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.Gender;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * User
@@ -20,7 +22,9 @@ import lombok.Setter;
 @Entity
 @Table(name = "users")
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -50,7 +54,7 @@ public class User {
     private Long spendingTypeId;
 
     @Column(name = "allow_push_notification")
-    private Boolean allowPushNotification;
+    private Boolean pushNotificationAgreement;
 
     @Column(name = "agreement1")
     private Boolean agreement1;
@@ -64,4 +68,29 @@ public class User {
     @Column(name = "agreement4")
     private Boolean agreement4;
 
+    public void setSpendingTypeId(Long spendingTypeId) {
+        this.spendingTypeId = spendingTypeId;
+    }
+
+    public void updateInfo(String nickname, LocalDate birthday, Gender gender) {
+        this.nickname = nickname;
+        this.birthday = birthday;
+        this.gender = gender;
+    }
+
+    public void updateAgreement(
+        boolean agreement1,
+        boolean agreement2,
+        boolean agreement3,
+        boolean agreement4
+    ) {
+        this.agreement1 = agreement1;
+        this.agreement2 = agreement2;
+        this.agreement3 = agreement3;
+        this.agreement4 = agreement4;
+    }
+
+    public void allowPushNotification() {
+        pushNotificationAgreement = true;
+    }
 }

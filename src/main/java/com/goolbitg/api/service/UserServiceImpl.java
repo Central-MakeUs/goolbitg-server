@@ -83,6 +83,8 @@ public class UserServiceImpl implements UserService {
     private final JwtManager jwtManager;
     @Autowired
     private final AppleLoginManager appleLoginManager;
+    @Autowired
+    private final TimeService timeService;
 
     // 1 ~ 9 is reserved for default user
     private int idSeq = 10;
@@ -134,26 +136,21 @@ public class UserServiceImpl implements UserService {
             throw UserException.alreadyRegistered(result.get().getId());
         }
 
-        User user = new User();
         String userId = String.format("id%04d", idSeq++);
-        user.setId(userId);
+        User.UserBuilder userBuilder = User.builder()
+                .id(userId)
+                .registerDate(timeService.getToday());
         if (request.getType() == LoginType.KAKAO) {
-            user.setKakaoId(jwt.getSubject());
+            userBuilder.kakaoId(jwt.getSubject());
         } else {
-            user.setAppleId(jwt.getSubject());
+            userBuilder.appleId(jwt.getSubject());
         }
-        user.setRegisterDate(LocalDate.now());
-        userRepository.save(user);
+        userRepository.save(userBuilder.build());
 
-        UserSurvey survey = new UserSurvey();
-        survey.setUserId(userId);
+        UserSurvey survey = UserSurvey.getDefault(userId);
         userSurveyRepository.save(survey);
 
-        UserStat stat = new UserStat();
-        stat.setUserId(userId);
-        stat.setPostCount(0);
-        stat.setChallengeCount(0);
-        stat.setAchievementGuage(0);
+        UserStat stat = UserStat.getDefault(userId);
         userStatsRepository.save(stat);
     }
 
@@ -201,9 +198,11 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        user.setNickname(request.getNickname());
-        user.setBirthday(request.getBirthday());
-        user.setGender(request.getGender());
+        user.updateInfo(
+            request.getNickname(),
+            request.getBirthday(),
+            request.getGender()
+        );
         userRepository.save(user);
     }
 
@@ -218,12 +217,14 @@ public class UserServiceImpl implements UserService {
         UserSurvey survey = userSurveyRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
 
-        survey.setCheck1(request.getCheck1());
-        survey.setCheck2(request.getCheck2());
-        survey.setCheck3(request.getCheck3());
-        survey.setCheck4(request.getCheck4());
-        survey.setCheck5(request.getCheck5());
-        survey.setCheck6(request.getCheck6());
+        survey.updateChecklist(
+            request.getCheck1(),
+            request.getCheck2(),
+            request.getCheck3(),
+            request.getCheck4(),
+            request.getCheck5(),
+            request.getCheck6()
+        );
         userSurveyRepository.save(survey);
     }
 
@@ -238,8 +239,10 @@ public class UserServiceImpl implements UserService {
         UserSurvey survey = userSurveyRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
 
-        survey.setAvgIncomePerMonth(request.getAvgIncomePerMonth());
-        survey.setAvgSpendingPerMonth(request.getAvgSpendingPerMonth());
+        survey.updateHabit(
+            request.getAvgIncomePerMonth(),
+            request.getAvgSpendingPerMonth()
+        );
         user.setSpendingTypeId(determineSpendingType(survey));
         userSurveyRepository.save(survey);
         userRepository.save(user);
@@ -248,15 +251,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePatternInfo(String userId, UserPatternDto request) {
-        Optional<UserSurvey> result = userSurveyRepository.findById(userId);
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(userId);
-        }
+        UserSurvey survey = userSurveyRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
 
-        UserSurvey survey = result.get();
-        survey.setPrimeUseDay(request.getPrimeUseDay());
-
-        survey.setPrimeUseTime(FormatUtil.parseTime(request.getPrimeUseTime()));
+        survey.updatePattern(
+            request.getPrimeUseDay(),
+            FormatUtil.parseTime(request.getPrimeUseTime())
+        );
         userSurveyRepository.save(survey);
     }
 
@@ -278,10 +279,11 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        UnregisterHistory history = new UnregisterHistory();
-        history.setUserId(userId);
-        history.setReason(request.getReason());
-        history.setUnregisterDate(date);
+        UnregisterHistory history = UnregisterHistory.builder()
+                .userId(userId)
+                .reason(request.getReason())
+                .unregisterDate(date)
+                .build();
 
         unregisterHistoryRepository.save(history);
         userSurveyRepository.deleteById(userId);
@@ -309,29 +311,25 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateAgreementInfo(String userId, UserAgreementDto request) {
         // TODO: throw error when required agreement is not agreed
-        Optional<User> result = userRepository.findById(userId);
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
 
-        User user = result.get();
-        user.setAgreement1(request.getAgreement1());
-        user.setAgreement2(request.getAgreement2());
-        user.setAgreement3(request.getAgreement3());
-        user.setAgreement4(request.getAgreement4());
+        user.updateAgreement(
+            request.getAgreement1(),
+            request.getAgreement2(),
+            request.getAgreement3(),
+            request.getAgreement4()
+        );
         userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void postPushNotificationAgreement(String userId) {
-        Optional<User> result = userRepository.findById(userId);
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
 
-        User user = result.get();
-        user.setAllowPushNotification(true);
+        user.allowPushNotification();
         userRepository.save(user);
     }
 

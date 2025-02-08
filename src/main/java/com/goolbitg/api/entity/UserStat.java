@@ -5,16 +5,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * UserStat
  */
 @Entity
-@Getter
-@Setter
 @Table(name = "user_stats")
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserStat {
 
     @Id
@@ -32,5 +36,23 @@ public class UserStat {
 
     @Column(name = "continue_count")
     private Integer continueCount;
+
+    public void setAchievementGuage(int achievementGuage) {
+        this.achievementGuage = achievementGuage;
+    }
+
+    public void increaseChallengeCount() {
+        challengeCount += 1;
+    }
+
+    public static UserStat getDefault(String userId) {
+        return UserStat.builder()
+                .userId(userId)
+                .challengeCount(0)
+                .postCount(0)
+                .achievementGuage(0)
+                .continueCount(0)
+                .build();
+    }
 
 }
