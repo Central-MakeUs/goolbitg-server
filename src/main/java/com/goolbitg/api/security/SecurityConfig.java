@@ -107,10 +107,16 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .formLogin(formLogin -> formLogin.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/test").permitAll()
-                .requestMatchers("/token").permitAll()
-                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers(
+                    "/auth/unregister",
+                    "/auth/logout"
+                ).authenticated()
+                .requestMatchers(
+                    "/auth/**",
+                    "test",
+                    "/token",
+                    "/swagger-ui/**"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2ResourceServer -> 
