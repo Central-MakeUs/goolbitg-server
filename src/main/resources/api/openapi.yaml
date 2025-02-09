@@ -1649,6 +1649,9 @@ components:
           description: 기록일
         status:
           $ref: '#/components/schemas/ChallengeRecordStatus'
+        duration:
+          type: integer
+          description: 챌린지 총 진행일수
         location:
           type: integer
           minimum: 0
