@@ -91,12 +91,12 @@ jobs:
             echo 'Wait for 30 seconds for server to startup...'
             sleep 30
 
-            pid=$(lsof -ti :8080)
+            pid=$(lsof -ti :8080 || true)
             if [ -z "$pid" ]; then
               echo "New server startup failed."
               echo 
               echo "========= ERROR LOG =========="
-              cat out.log
+              cat app.log
               echo "========== LOG END ==========="
               echo 
           
