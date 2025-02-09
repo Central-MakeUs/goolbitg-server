@@ -80,7 +80,3 @@ jobs:
             pkill -f server.jar || true
             nohup java -jar /home/$EC2_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
           EOF
-
-              exit 1
-            fi
-          EOF
