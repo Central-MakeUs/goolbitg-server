@@ -1739,8 +1739,7 @@ components:
           type: integer
           description: 챌린지 참여인원
         avgAchieveRatio:
-          type: number
-          format: float
+          type: integer
           description: 챌린지 평균 달성률
         maxAchieveDays:
           type: integer
