@@ -61,6 +61,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'com.auth0:java-jwt:4.3.0'
     testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
 }
 
 tasks.named('test') {
