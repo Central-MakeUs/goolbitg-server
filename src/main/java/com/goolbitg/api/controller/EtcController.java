@@ -34,8 +34,7 @@ public class EtcController implements EtcApi {
 
     @Override
     public ResponseEntity<Void> checkHealth() throws Exception {
-        // NOTE: for test
-        throw AuthException.tokenNotExist();
+        return ResponseEntity.ok().build();
     }
 
     @Override

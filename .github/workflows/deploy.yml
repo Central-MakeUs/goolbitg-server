@@ -87,27 +87,27 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           ssh -i ec2_key.pem -o StrictHostKeyChecking=no \
-            $EC2_USER@$EC2_HOST << EOF
-              echo 'Wait for 30 seconds for server to startup...'
-              sleep 30
+          $EC2_USER@$EC2_HOST << EOF
+            echo 'Wait for 30 seconds for server to startup...'
+            sleep 30
 
-              curl http://localhost:8080
-              if [ $? -ne 0 ]; then
-                echo "New server startup failed."
-                echo 
-                echo "========= ERROR LOG =========="
-                cat out.log
-                echo "========== LOG END ==========="
-                echo 
-            
-                if [ -f "server.bak.jar" ]; then
-                  mv server.bak.jar server.jar
-                  echo "Backup jar recovered."
+            pid=$(lsof -ti :8080)
+            if [ -z "$pid" ]; then
+              echo "New server startup failed."
+              echo 
+              echo "========= ERROR LOG =========="
+              cat out.log
+              echo "========== LOG END ==========="
+              echo 
+          
+              if [ -f "server.bak.jar" ]; then
+                mv server.bak.jar server.jar
+                echo "Backup jar recovered."
 
-                  pkill -f server.jar || true
-                  nohup java -jar /home/$EC2_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
-                fi
-
-                exit 1
+                pkill -f server.jar || true
+                nohup java -jar /home/$EC2_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
               fi
-            EOF
+
+              exit 1
+            fi
+          EOF
