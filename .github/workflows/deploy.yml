@@ -92,6 +92,7 @@ jobs:
             sleep 30
 
             pid=$(lsof -ti :8080 || true)
+            echo "pid: $pid"
             if [ -z "$pid" ]; then
               echo "New server startup failed."
               echo 
