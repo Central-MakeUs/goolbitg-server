@@ -81,32 +81,6 @@ jobs:
             nohup java -jar /home/$EC2_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
           EOF
 
-      - name: Check Application Running Status and Rollback
-        env:
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          ssh -i ec2_key.pem -o StrictHostKeyChecking=no \
-          $EC2_USER@$EC2_HOST << EOF
-            echo 'Wait for 30 seconds for server to startup...'
-            sleep 30
-
-            if [ -z "$(lsof -ti :8080 || true)" ]; then
-              echo "New server startup failed."
-              echo 
-              echo "========= ERROR LOG =========="
-              cat app.log
-              echo "========== LOG END ==========="
-              echo 
-          
-              if [ -f "server.bak.jar" ]; then
-                mv server.bak.jar server.jar
-                echo "Backup jar recovered."
-
-                pkill -f server.jar || true
-                nohup java -jar /home/$EC2_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
-              fi
-
               exit 1
             fi
           EOF
