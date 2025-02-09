@@ -1,10 +1,10 @@
 INSERT INTO spending_types (
     id, title, image_url, goal
-) VALUES ( 1, '거지굴비', 'exmaple_url', 20000 ),
-        ( 2, '우당탕 굴비', 'exmaple_url', 50000 ),
-        ( 3, '룰루굴비', 'exmaple_url', 100000 ),
-        ( 4, '배부른굴비', 'exmaple_url', 200000 ),
-        ( 5, '이로운 굴비', 'exmaple_url', null );
+) VALUES ( 1, '거지굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/01.png', 20000 ),
+        ( 2, '우당탕 굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/02.png', 50000 ),
+        ( 3, '룰루굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/03.png', 100000 ),
+        ( 4, '배부른굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/04.png', 200000 ),
+        ( 5, '이로운 굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/05.png', null );
 
 -- user for registration test
 INSERT INTO users ( id, register_date) 
@@ -59,7 +59,7 @@ INSERT INTO challenges (
 ) VALUES ( '야식 안시켜먹기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge01.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge01.png', 15000, 1, 3, 3, 3 ),
         ( '택시 안타고 대중교통 이용하기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge02.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge02.png', 7000, 0, 0, 0, 0 ),
         ( '아침마다 커피 안마시기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge03.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge03.png', 2000, 0, 0, 0, 0 ),
-        ( '식비 만원 이하로 소비하기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge04.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge04.png', 100000, 0, 0, 0, 0 ),
+        ( '식비 만원 이하로 소비하기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge04.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge04.png', 10000, 0, 0, 0, 0 ),
         ( '배달어플 사용 안하고 요리해서 먹기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge05.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge05.png', 15000, 0, 0, 0, 0 ),
         ( '길거리 음식 안사먹기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge06.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge06.png', 3000, 0, 0, 0, 0 ),
         ( '온라인 쇼핑 줄이기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge07.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge07.png', 30000, 0, 0, 0, 0 ),
