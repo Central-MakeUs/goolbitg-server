@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.DailyRecord;
+import com.goolbitg.api.entity.DailyRecordId;
 import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.UnregisterHistory;
 import com.goolbitg.api.entity.User;
@@ -356,6 +357,25 @@ public class UserServiceImpl implements UserService {
         return getWeeklyStatusDto(user, stat, todayIndex, records);
     }
 
+    @Override
+    @Transactional
+    public void updateUserStat(String userId, LocalDate date) {
+        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
+
+        UserStat stat = userStatsRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
+                .orElseGet(() -> DailyRecord.getDefault(userId, date));
+
+        if (dailyRecord.isCompleted()) {
+            stat.increaseContinueCount();
+        } else {
+            stat.resetContinueCount();
+        }
+
+        userStatsRepository.save(stat);
+    }
+
 
     /* ------------ DTO Mappers ------------- */
 
@@ -415,7 +435,7 @@ public class UserServiceImpl implements UserService {
             weeklyStatus.add(dailyStatus);
         }
         dto.setNickname(user.getNickname());
-        dto.setContinueCount(stat.getContinueCount());
+        dto.setContinueCount(stat.getContinueCount() + 1);
         dto.setSaving(saving);
         dto.setTodayIndex(todayIndex);
         dto.setWeeklyStatus(weeklyStatus);

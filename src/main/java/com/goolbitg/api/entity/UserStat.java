@@ -45,6 +45,14 @@ public class UserStat {
         challengeCount += 1;
     }
 
+    public void increaseContinueCount() {
+        continueCount += 1;
+    }
+
+    public void resetContinueCount() {
+        continueCount = 0;
+    }
+
     public static UserStat getDefault(String userId) {
         return UserStat.builder()
                 .userId(userId)

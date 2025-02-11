@@ -38,5 +38,6 @@ public interface UserService {
     void updatePatternInfo(String userId, UserPatternDto request);
     void postPushNotificationAgreement(String userId);
     UserWeeklyStatusDto getWeeklyStatus(String userId, LocalDate date);
+    void updateUserStat(String userId, LocalDate date);
 
 }

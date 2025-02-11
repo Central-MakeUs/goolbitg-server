@@ -55,6 +55,10 @@ public class DailyRecord {
         totalChallenges -= 1;
     }
 
+    public boolean isCompleted() {
+        return totalChallenges > 0 && achievedChallenges == totalChallenges;
+    }
+
     public static DailyRecord getDefault(String userId, LocalDate date) {
         return DailyRecord.builder()
             .userId(userId)
