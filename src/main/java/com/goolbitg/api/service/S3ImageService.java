@@ -5,12 +5,12 @@ import java.net.URI;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.api.client.util.Value;
 import com.goolbitg.api.exception.CommonException;
 import com.goolbitg.api.exception.EtcException;
 import com.goolbitg.api.model.ImageUploadResponse;
