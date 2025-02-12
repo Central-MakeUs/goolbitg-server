@@ -48,7 +48,7 @@ public class S3ImageService implements ImageService {
         String key = createFilename(contentType);
         PutObjectRequest request = PutObjectRequest.builder()
             .bucket(BUCKET)
-            .key("??")
+            .key(key)
             .contentType(image.getContentType())
             .build();
 
