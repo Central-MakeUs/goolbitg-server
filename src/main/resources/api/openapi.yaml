@@ -2106,8 +2106,6 @@ components:
           $ref: '#/components/schemas/Gender'
       required:
         - nickname
-        - birthday
-        - gender
     Gender:
       type: string
       enum:
