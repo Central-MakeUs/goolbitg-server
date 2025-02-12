@@ -58,7 +58,6 @@ import com.goolbitg.api.security.JwtManager;
 import com.goolbitg.api.util.FormatUtil;
 import com.goolbitg.api.util.RandomIdGenerator;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -67,32 +66,32 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    private final UserSurveyRepository userSurveyRepository;
+    private UserSurveyRepository userSurveyRepository;
     @Autowired
-    private final UserStatRepository userStatsRepository;
+    private UserStatRepository userStatsRepository;
     @Autowired
-    private final UserTokenRepository tokenRepository;
+    private UserTokenRepository tokenRepository;
     @Autowired
-    private final SpendingTypeRepository spendingTypeRepository;
+    private SpendingTypeRepository spendingTypeRepository;
     @Autowired
-    private final DailyRecordRepository dailyRecordRepository;
+    private DailyRecordRepository dailyRecordRepository;
     @Autowired
-    private final UnregisterHistoryRepository unregisterHistoryRepository;
+    private UnregisterHistoryRepository unregisterHistoryRepository;
     @Autowired
-    private final RegistrationTokenRepository registrationTokenRepository;
+    private RegistrationTokenRepository registrationTokenRepository;
     @Autowired
-    private final JwtManager jwtManager;
+    private JwtManager jwtManager;
     @Autowired
-    private final AppleLoginManager appleLoginManager;
+    private AppleLoginManager appleLoginManager;
     @Autowired
-    private final TimeService timeService;
-    private final JdbcTemplate jdbcTemplate;
+    private TimeService timeService;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
 
     /* --------------- API Implements ----------------------*/
@@ -393,6 +392,25 @@ public class UserServiceImpl implements UserService {
         userStatsRepository.save(stat);
     }
 
+    @Override
+    public Long determineSpendingType(UserSurvey survey) {
+        Integer checklistScore = survey.getChecklistScore();
+        Integer spendingHabitScore = survey.getSpendingHabitScore();
+        if (checklistScore == null || spendingHabitScore == null)
+            throw UserException.registrationNotComplete(survey.getUserId());
+
+        if (checklistScore == 3 && spendingHabitScore < 50)
+            return 1L;
+        if (checklistScore >= 2 && spendingHabitScore < 70)
+            return 2L;
+        if (checklistScore >= 1 && spendingHabitScore < 80)
+            return 3L;
+        if (spendingHabitScore < 90)
+            return 4L;
+
+        return 5L;
+    }
+
 
     /* ------------ DTO Mappers ------------- */
 
@@ -523,24 +541,6 @@ public class UserServiceImpl implements UserService {
     private boolean isNicknameExistInner(String nickname) {
         Optional<User> result = userRepository.findByNickname(nickname);
         return result.isPresent();
-    }
-
-    private Long determineSpendingType(UserSurvey survey) {
-        Integer checklistScore = survey.getChecklistScore();
-        Integer spendingHabitScore = survey.getSpendingHabitScore();
-        if (checklistScore == null || spendingHabitScore == null)
-            throw UserException.registrationNotComplete(survey.getUserId());
-
-        if (checklistScore == 3 || spendingHabitScore < 50)
-            return 1L;
-        if (checklistScore == 2 || spendingHabitScore < 70)
-            return 2L;
-        if (checklistScore == 1 || spendingHabitScore < 80)
-            return 3L;
-        if (checklistScore == 0 || spendingHabitScore < 90)
-            return 4L;
-
-        return 5L;
     }
 
     @Transactional
