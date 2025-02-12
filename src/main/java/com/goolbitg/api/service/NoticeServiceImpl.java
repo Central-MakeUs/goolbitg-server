@@ -1,6 +1,9 @@
 package com.goolbitg.api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +13,10 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.goolbitg.api.entity.Notice;
 import com.goolbitg.api.entity.RegistrationToken;
+import com.goolbitg.api.exception.NoticeException;
+import com.goolbitg.api.model.NoticeDto;
 import com.goolbitg.api.model.NoticeType;
+import com.goolbitg.api.model.PaginatedNoticeDto;
 import com.goolbitg.api.repository.NoticeRepository;
 import com.goolbitg.api.repository.RegistrationTokenRepository;
 
@@ -33,6 +39,8 @@ public class NoticeServiceImpl implements NoticeService {
     @Autowired
     private final TimeService timeService;
 
+    /* ------------ Implementations ----------- */
+
     @Override
     @Transactional
     public void sendMessage(String userId, String message, NoticeType type) {
@@ -49,6 +57,61 @@ public class NoticeServiceImpl implements NoticeService {
             sendMessageInner(token.getRegistrationToken(), message);
         }
     }
+
+    @Override
+    public PaginatedNoticeDto getNotices(Integer page, Integer size, String userId, NoticeType type) {
+        Pageable pageReq = PageRequest.of(page, size);
+        Page<Notice> result;
+        if (type == null) {
+            result = noticeRepository.findAllByReceiverId(userId, pageReq);
+        } else {
+            result = noticeRepository.findAllByReceiverIdAndType(userId, type, pageReq);
+        }
+
+        return getPaginatedNoticeDto(result);
+    }
+
+    @Override
+    @Transactional
+    public void readNotice(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+            .orElseThrow(() -> NoticeException.noticeNotExist(noticeId));
+
+        if (notice.getRead())
+            throw NoticeException.readAlready(noticeId);
+
+        notice.read();
+
+        noticeRepository.save(notice);
+    }
+
+    /* ----------- DTO Mappers ------------ */
+
+    private NoticeDto getNoticeDto(Notice notice) {
+        NoticeDto dto = new NoticeDto();
+        dto.setId(notice.getId());
+        dto.setReceiverId(notice.getReceiverId());
+        dto.setMessage(notice.getMessage());
+        dto.setPublishDateTime(notice.getPublishedAt().toString());
+        dto.setRead(notice.getRead());
+        return dto;
+    }
+
+    private PaginatedNoticeDto getPaginatedNoticeDto(Page<Notice> result) {
+        PaginatedNoticeDto dto = new PaginatedNoticeDto();
+        dto.setPage(result.getNumber());
+        dto.setSize((int)result.getNumberOfElements());
+        dto.setTotalSize((int)result.getTotalElements());
+        dto.setTotalPages(result.getTotalPages());
+        dto.setItems(
+            result.getContent().stream().map(i -> getNoticeDto(i)).toList()
+        );
+
+        return dto;
+    }
+
+
+    /* ------------- Utils ---------------- */
 
     private void sendMessageInner(String registrationToken, String message) {
         Message noticeMessage = Message.builder()

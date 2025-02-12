@@ -155,7 +155,9 @@ INSERT INTO challenge_groups (
 INSERT INTO notices (
     receiver_id, message, published_at, type, read
 ) VALUES ( 'id0001', '오늘 아직 챌린지를 달성하지 못했어요.',
-    '2025-01-07 14:26:32', 'CHALLENGE', 0 );
+    '2025-01-07 14:26:32', 'CHALLENGE', 0 ),
+          ( 'id0001', '누군가 내 게시글에 투표했어요.',
+    '2025-01-07 14:26:32', 'VOTE', 0 );
 
 INSERT INTO challenge_group_records (
     group_id, user_id, date, status

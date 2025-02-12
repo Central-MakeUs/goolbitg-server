@@ -1813,7 +1813,6 @@ components:
           description: 메세지 내용
         publishDateTime:
           type: string
-          format: date-time
           description: 알림 발송 날짜
         type:
           $ref: '#/components/schemas/NoticeType'

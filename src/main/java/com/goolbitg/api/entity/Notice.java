@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -12,6 +14,7 @@ import com.goolbitg.api.model.NoticeType;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 /**
@@ -20,6 +23,7 @@ import lombok.NonNull;
 @Entity
 @Table(name = "notices")
 @Getter
+@NoArgsConstructor
 public class Notice {
 
     @Id
@@ -41,6 +45,7 @@ public class Notice {
 
     @Column(name = "type")
     @NonNull
+    @Enumerated(EnumType.STRING)
     private NoticeType type;
 
     @Column(name = "read")
@@ -58,6 +63,10 @@ public class Notice {
         this.publishedAt = publishedAt;
         this.type = type;
         read = false;
+    }
+
+    public void read() {
+        read = true;
     }
 
 }
