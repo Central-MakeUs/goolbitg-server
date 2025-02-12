@@ -54,8 +54,8 @@ public class Challenge {
 
     public Float getAvgAchieveRatio() {
         if (totalRecords == null || achievedRecords == null) return null;
-        if (achievedRecords == 0) return 0f;
-        return (float)totalRecords / achievedRecords * 100;
+        if (totalRecords == 0) return 0f;
+        return ((float)achievedRecords / totalRecords) * 100;
     }
 
     public void enroll() {

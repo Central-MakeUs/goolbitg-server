@@ -16,6 +16,7 @@ import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.service.ChallengeService;
 import com.goolbitg.api.service.TimeService;
+import com.goolbitg.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,9 @@ public class CronJobExecutor {
     private final ChallengeRecordRepository challengeRecordRepository;
     @Autowired
     private final ChallengeService challengeService;
+    @Autowired
+    private final UserService userService;
+
 
     @Transactional
     @Scheduled(cron = "1 0 0 * * ?")
@@ -70,6 +74,10 @@ public class CronJobExecutor {
         }
         // 3. Re-calculate challenge stats
         challengeService.calculateAllChallengeStat(today);
+        // 4. Update user stats
+        for (User user : userRepository.findAll()) {
+            userService.updateUserStat(user.getId(), yesterday);
+        }
     }
 
 }

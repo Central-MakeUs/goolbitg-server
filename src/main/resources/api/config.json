@@ -12,6 +12,7 @@
   "unhandledException": true,
   "useSpringBoot3": true,
   "useSwaggerUI": true,
+  "useBeanValidation": true,
   "importMappings": {
     "ResourceSupport":"org.springframework.hateoas.RepresentationModel",
     "Link": "org.springframework.hateoas.Link"

@@ -166,7 +166,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         challengeRecordRepository.save(record);
         challengeStatRepository.save(challengeStat);
 
-        return getChallengeRecordDto(challenge, record);
+        return getChallengeRecordDto(challenge, record, challengeStat);
     }
 
     private void increaseAchievementGuage(Challenge challenge, User user, UserStat userStat) {
@@ -252,6 +252,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw new IllegalArgumentException("Date should not be null");
 
         ChallengeRecordId challengeRecordId = new ChallengeRecordId(challengeId, userId, date);
+        ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
 
         ChallengeRecord record = challengeRecordRepository.findById(challengeRecordId)
                 .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
@@ -259,7 +260,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
 
-        return getChallengeRecordDto(challenge, record);
+        ChallengeStat stat = challengeStatRepository.findById(statId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
+
+        return getChallengeRecordDto(challenge, record, stat);
     }
 
     @Override
@@ -275,7 +279,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             result = challengeRecordRepository.findAllByUserIdAndDateAndStatus(pageReq, userId, date, status);
         }
 
-        return getPaginatedRecordDto(result);
+        return getPaginatedRecordDto(result, userId);
     }
 
     @Override
@@ -350,7 +354,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setImageUrlSmall(URI.create(challenge.getImageUrlSmall()));
         dto.setReward(challenge.getReward());
         dto.setMaxAchieveDays(challenge.getMaxAchieveDays());
-        dto.setAvgAchieveRatio(challenge.getAvgAchieveRatio());
+        dto.setAvgAchieveRatio(Math.round(challenge.getAvgAchieveRatio()));
         dto.setParticipantCount(challenge.getParticipantCount());
         return dto;
     }
@@ -368,17 +372,18 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
-    private ChallengeRecordDto getChallengeRecordDto(Challenge challenge, ChallengeRecord record) {
+    private ChallengeRecordDto getChallengeRecordDto(Challenge challenge, ChallengeRecord record, ChallengeStat stat) {
         ChallengeRecordDto dto = new ChallengeRecordDto();
         dto.setChallenge(getChallengeDto(challenge));
         dto.setUserId(record.getUserId());
         dto.setStatus(record.getStatus());
         dto.setDate(record.getDate());
         dto.setLocation(record.getLocation());
+        dto.setDuration(stat.getCurrentContinueCount());
         return dto;
     }
 
-    private PaginatedChallengeRecordDto getPaginatedRecordDto(Page<ChallengeRecord> result) {
+    private PaginatedChallengeRecordDto getPaginatedRecordDto(Page<ChallengeRecord> result, String userId) {
         PaginatedChallengeRecordDto dto = new PaginatedChallengeRecordDto();
         dto.setTotalPages(result.getTotalPages());
         dto.setTotalSize((int)result.getTotalElements());
@@ -386,7 +391,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setSize((int)result.get().count());
         dto.setItems(result.map(e -> {
             Challenge c = challengeRepository.findById(e.getChallengeId()).get();
-            return getChallengeRecordDto(c, e);
+            ChallengeStatId statId = new ChallengeStatId(e.getChallengeId(), userId);
+            ChallengeStat s = challengeStatRepository.findById(statId).get();
+            return getChallengeRecordDto(c, e, s);
         }).toList());
         int totalReward = 0;
         for (ChallengeRecordDto cr : dto.getItems()) {

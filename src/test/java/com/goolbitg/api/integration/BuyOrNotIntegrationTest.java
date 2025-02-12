@@ -82,6 +82,8 @@ public class BuyOrNotIntegrationTest {
         request.setProductName("에어팟");
         request.setGoodReason("노래들을때 좋음");
         request.setBadReason("비쌈");
+        request.setProductImageUrl(URI.create("example_url"));
+        request.setProductPrice(100000);
         String jsonBody = mapper.writeValueAsString(request);
 
         mockMvc.perform(put("/buyOrNots/{postId}", postId)

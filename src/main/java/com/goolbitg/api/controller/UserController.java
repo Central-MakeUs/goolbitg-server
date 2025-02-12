@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -61,7 +62,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> postChecklistInfo(@Valid UserChecklistDto userChecklistDto) throws Exception {
+    public ResponseEntity<Void> postChecklistInfo(@Valid @RequestBody UserChecklistDto userChecklistDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         userService.updateChecklistInfo(userId, userChecklistDto);

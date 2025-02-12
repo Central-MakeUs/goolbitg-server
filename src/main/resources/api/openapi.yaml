@@ -962,7 +962,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedChallengeGroupRecordDto'
-                # TODO: 챌린지 기록 전용 뷰 생성
   /challengeGroupRecords/{groupId}:
     get:
       summary: 특정 챌린지 그룹의 기록을 확인
@@ -1649,6 +1648,9 @@ components:
           description: 기록일
         status:
           $ref: '#/components/schemas/ChallengeRecordStatus'
+        duration:
+          type: integer
+          description: 챌린지 총 진행일수
         location:
           type: integer
           minimum: 0
@@ -1719,7 +1721,7 @@ components:
         title:
           type: string
           minimum: 1
-          maximum: 100 # TODO: Set maximum title length
+          maximum: 100
           description: 챌린지 이름
         imageUrlSmall:
           type: string
@@ -1736,8 +1738,7 @@ components:
           type: integer
           description: 챌린지 참여인원
         avgAchieveRatio:
-          type: number
-          format: float
+          type: integer
           description: 챌린지 평균 달성률
         maxAchieveDays:
           type: integer
@@ -1879,8 +1880,6 @@ components:
           type: integer
           description: 말까 투표 개수
       required:
-        - id
-        - writerId
         - productName
         - productPrice
         - productImageUrl
@@ -2060,6 +2059,11 @@ components:
           type: boolean
         agreement4:
           type: boolean
+      required:
+        - agreement1
+        - agreement2
+        - agreement3
+        - agreement4
     UserInfoDto:
       type: object
       properties:
@@ -2073,6 +2077,10 @@ components:
           format: date
         gender:
           $ref: '#/components/schemas/Gender'
+      required:
+        - nickname
+        - birthday
+        - gender
     Gender:
       type: string
       enum:
@@ -2100,6 +2108,13 @@ components:
         check4: false
         check5: true
         check6: false
+      required:
+        - check1
+        - check2
+        - check3
+        - check4
+        - check5
+        - check6
     UserHabitDto:
       type: object
       properties:
@@ -2109,6 +2124,9 @@ components:
         avgSpendingPerMonth:
           type: integer
           example: 2000000
+      required:
+        - avgIncomePerMonth
+        - avgSpendingPerMonth
     UserPatternDto:
       type: object
       properties:
@@ -2117,6 +2135,9 @@ components:
         primeUseTime:
           type: string
           example: '20:30:00'
+      required:
+        - primeUseDay
+        - primeUseTime
     Day:
       type: string
       enum:
@@ -2133,6 +2154,8 @@ components:
         nickname:
           type: string
           example: 굴비킹
+      required:
+        - nickname
     NicknameCheckResponseDto:
       type: object
       properties:

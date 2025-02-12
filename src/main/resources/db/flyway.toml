@@ -1,0 +1,28 @@
+databaseType = "MySql"
+id = "0052a226-0090-4102-8dbf-001dc08284c9"
+name = "goolbitg"
+
+[flyway]
+locations = [ "filesystem:migrations" ]
+mixed = true
+outOfOrder = true
+schemaModelLocation = "schema-model"
+validateMigrationNaming = true
+
+  [flyway.check]
+  majorTolerance = 0
+
+[flywayDesktop]
+developmentEnvironment = "development"
+shadowEnvironment = "shadow"
+
+[redgateCompare]
+filterFile = "filter.rgf"
+
+[redgateCompare.mysql.options.ignores]
+ignoreNewlinesInTextObjects = "off"
+
+[environments.local]
+url = "jdbc:mysql://localhost:3306"
+schemas = [ "goolbitg" ]
+displayName = "Local MySQL"

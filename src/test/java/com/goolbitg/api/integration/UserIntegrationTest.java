@@ -154,7 +154,7 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.saving").value(6000))
                 .andExpect(jsonPath("$.todayIndex").value(3))
-                .andExpect(jsonPath("$.continueCount").value(2));
+                .andExpect(jsonPath("$.continueCount").value(3));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.saving").value(6000))
                 .andExpect(jsonPath("$.todayIndex").value(0))
-                .andExpect(jsonPath("$.continueCount").value(2));
+                .andExpect(jsonPath("$.continueCount").value(3));
     }
 
     private void updateAgreement() throws JsonProcessingException, Exception {
