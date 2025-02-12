@@ -113,10 +113,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public AuthResponseDto login(AuthRequestDto request) {
-        if (request.getRegistrationToken() == null) {
-            throw new IllegalArgumentException("registrationToken이 없습니다.");
-        }
-
         Jwt jwt = extractToken(request);
         Optional<User> result = findUser(jwt, request);
 
@@ -125,12 +121,14 @@ public class UserServiceImpl implements UserService {
         }
         User user = result.get();
 
-        RegistrationToken registrationToken = RegistrationToken.builder()
-            .registrationToken(request.getRegistrationToken())
-            .userId(user.getId())
-            .build();
+        if (request.getRegistrationToken() != null) {
+            RegistrationToken registrationToken = RegistrationToken.builder()
+                .registrationToken(request.getRegistrationToken())
+                .userId(user.getId())
+                .build();
 
-        registrationTokenRepository.save(registrationToken);
+            registrationTokenRepository.save(registrationToken);
+        }
 
         String accessToken = jwtManager.create(user.getId());
         String refreshToken = createRefreshToken(user.getId());
