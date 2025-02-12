@@ -419,6 +419,7 @@ public class UserServiceImpl implements UserService {
             spendingTypeDto.setId(spendingType.getId());
             spendingTypeDto.setTitle(spendingType.getTitle());
             spendingTypeDto.setImageUrl(URI.create(spendingType.getImageUrl()));
+            spendingTypeDto.setProfileUrl(URI.create(spendingType.getProfileUrl()));
             spendingTypeDto.setPeopleCount(peopleCount);
             spendingTypeDto.setGoal(spendingType.getGoal());
             dto.setSpendingType(spendingTypeDto);

@@ -2,6 +2,7 @@ CREATE TABLE spending_types (
   id BIGINT,
   title VARCHAR(100) NOT NULL UNIQUE,
   image_url VARCHAR(100) NOT NULL,
+  profile_url VARCHAR(100) NOT NULL,
   goal INT,
   PRIMARY KEY (id)
 );

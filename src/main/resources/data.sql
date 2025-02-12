@@ -1,10 +1,10 @@
 INSERT INTO spending_types (
-    id, title, image_url, goal
-) VALUES ( 1, '거지굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/01.png', 20000 ),
-        ( 2, '우당탕 굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/02.png', 50000 ),
-        ( 3, '룰루굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/03.png', 100000 ),
-        ( 4, '배부른굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/04.png', 200000 ),
-        ( 5, '이로운 굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/05.png', null );
+    id, title, image_url, profile_url, goal
+) VALUES ( 1, '거지굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/01.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/profile/01.png', 20000 ),
+        ( 2, '우당탕 굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/02.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/profile/02.png', 50000 ),
+        ( 3, '룰루굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/03.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/profile/03.png', 100000 ),
+        ( 4, '배부른굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/04.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/profile/04.png', 200000 ),
+        ( 5, '이로운 굴비', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/spending_type/05.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/profile/05.png', null );
 
 -- user for registration test
 INSERT INTO users ( id, register_date) 

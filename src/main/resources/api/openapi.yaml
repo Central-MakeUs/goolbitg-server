@@ -1541,6 +1541,10 @@ components:
           type: string
           format: uri
           description: 소비유형 대표 이미지
+        profileUrl:
+          type: string
+          format: uri
+          description: 소비유형 프로필 이미지
         goal:
           type: integer
           description: 다음 단계까지 남은 금액
@@ -1551,6 +1555,7 @@ components:
         id: 1
         title: 자린고비 굴비
         imageUrl: http://localhost:8080/image/st1
+        profileUrl: http://localhost:8080/image/st1
         goal: 20000
         peopleCount: 20
     ChallengeGroupStatDto:

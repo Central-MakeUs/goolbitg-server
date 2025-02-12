@@ -25,6 +25,9 @@ public class SpendingType {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "profile_url")
+    private String profileUrl;
+
     @Column(name = "goal")
     private Integer goal;
 
