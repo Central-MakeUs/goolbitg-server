@@ -447,7 +447,7 @@ paths:
     post:
       summary: 4. 소비습관 정보 등록
       operationId: postHabitInfo
-      description: 소비습관 정보를 등록합니니다. 필수 등록 정보입니다.
+      description: 소비습관 정보를 등록합니다. 필수 등록 정보입니다.
       tags:
         - User
       requestBody:
@@ -468,6 +468,8 @@ paths:
               examples:
                 이전 단계 미완료:
                   $ref: '#/components/examples/Error_PreviousStepNotCompleted'
+                저축이 수입보다 높음:
+                  $ref: '#/components/examples/Error_SavingIsGreaterThanIncome'
   /users/me/pattern:
     post:
       summary: 5. 사용자 소비습관 패턴 등록
@@ -2274,6 +2276,10 @@ components:
       value:
         code: 3004
         message: 이전 단계의 정보 입력이 완료되지 않았습니다. (status)
+    Error_SavingIsGreaterThanIncome:
+      value:
+        code: 3005
+        message: 평균 저축은 평균 수입보다 높을 수 없습니다.
     Error_AlreadyEnrolled:
       value:
         code: 4001

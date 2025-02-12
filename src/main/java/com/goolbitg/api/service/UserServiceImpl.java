@@ -245,6 +245,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateHabitinfo(String userId, UserHabitDto request) {
+        if (request.getAvgSavingPerMonth() > request.getAvgIncomePerMonth()) {
+            throw UserException.savingIsGreaterThanIncome();
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
         if (user.getNickname() == null)

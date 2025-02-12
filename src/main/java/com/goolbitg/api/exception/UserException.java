@@ -28,5 +28,11 @@ public abstract class UserException {
             "이전 단계의 정보 입력이 완료되지 않았습니다. (" + status + ")",
             HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    public static CommonException savingIsGreaterThanIncome() {
+        return new CommonException(
+            3005,
+            "평균 저축은 평균 수입보다 높을 수 없습니다.",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
 }
