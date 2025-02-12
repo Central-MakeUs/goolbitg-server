@@ -108,9 +108,9 @@ public class ChallengeController implements ChallengeApi {
     }
 
     @Override
-    public ResponseEntity<PaginatedChallengeDto> getChallenges(@Valid Integer page, @Valid Integer size,
-            @Valid Long spendingTypeId) throws Exception {
-        PaginatedChallengeDto result = challengeService.getChallenges(page, size, spendingTypeId);
+    public ResponseEntity<PaginatedChallengeDto> getChallenges(@Valid Integer page, @Valid Integer size) throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+        PaginatedChallengeDto result = challengeService.getChallenges(page, size, userId);
         return ResponseEntity.ok(result);
     }
 

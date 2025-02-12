@@ -39,30 +39,13 @@ public class ChallengeIntegrationTest {
     @Test
     @Transactional
     @WithMockUser(ROOT_USER)
-    void get_challenges() throws Exception {
+    void get_challenges_for_type() throws Exception {
         Integer page = 0;
-        Integer size = 3;
+        Integer size = 10;
 
         mockMvc.perform(get("/challenges")
             .param("page", page.toString())
             .param("size", size.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(3))
-                .andExpect(jsonPath("$.items.length()").value(3));
-    }
-
-    @Test
-    @Transactional
-    @WithMockUser(ROOT_USER)
-    void get_challenges_for_type() throws Exception {
-        Integer page = 0;
-        Integer size = 10;
-        Long id = 5L;
-
-        mockMvc.perform(get("/challenges")
-            .param("page", page.toString())
-            .param("size", size.toString())
-            .param("spendingTypeId", id.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(10))
                 .andExpect(jsonPath("$.items.length()").value(10))

@@ -522,13 +522,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/sizeParam'
-        - name: spendingTypeId
-          description: 소비유형 ID입니다. 제공되지 않으면 모든 소비유형을 대상으로 합니다.
-          in: query
-          schema:
-            type: integer
-            format: int64
-            nullable: true
       responses:
         '200':
           description: 챌린지 목록 반환

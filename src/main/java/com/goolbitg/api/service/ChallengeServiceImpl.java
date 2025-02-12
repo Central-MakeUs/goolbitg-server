@@ -78,15 +78,12 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public PaginatedChallengeDto getChallenges(Integer page, Integer size, Long spendingTypeId) {
-        Page<Challenge> result;
+    public PaginatedChallengeDto getChallenges(Integer page, Integer size, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
         Pageable pageReq = PageRequest.of(page, size);
 
-        if (spendingTypeId == null) {
-            result = challengeRepository.findAll(pageReq);
-        } else {
-            result = challengeRepository.findAllBySpendingTypeId(spendingTypeId, pageReq);
-        }
+        Page<Challenge> result = challengeRepository.findAllBySpendingTypeId(user.getSpendingTypeId(), pageReq);
 
         return getPaginatedChallengeDto(result);
     }
