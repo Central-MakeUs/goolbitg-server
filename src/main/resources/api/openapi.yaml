@@ -78,12 +78,16 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  url:
-                    type: string
-                    format: uri
-                    description: 업로드한 이미지 url
+                $ref: '#/components/schemas/ImageUploadResponse'
+        '422':
+          description: 업로드 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                허용되지 않은 이미지 타입:
+                  $ref: '#/components/examples/Error_ImageTypeNotAllowed'
   /token:
     get:
       summary: 루트 유저 엑세스 토큰 발급
@@ -1275,6 +1279,13 @@ paths:
 
 components:
   schemas:
+    ImageUploadResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: 업로드한 이미지 url
     PaginatedNoticeDto:
       allOf:
         - $ref: '#/components/schemas/PaginatedResponseDto'
@@ -2303,6 +2314,10 @@ components:
       value:
         code: 6002
         message: 이미 읽은 알림입니다. (notice id)
+    Error_ImageTypeNotAllowed:
+      value:
+        code: 7001
+        message: 허용되지 않는 이미지 타입입니다. (type)
     LoginRequest_KAKAO:
       value:
         type: KAKAO

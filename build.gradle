@@ -66,6 +66,7 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.flywaydb:flyway-core:11.3.1'
     implementation "org.flywaydb:flyway-mysql:11.3.1"
+    implementation 'software.amazon.awssdk:s3:2.30.17'
 }
 
 tasks.named('test') {

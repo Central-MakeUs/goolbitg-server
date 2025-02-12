@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.goolbitg.api.EtcApi;
-import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.model.AuthResponseDto;
+import com.goolbitg.api.model.ImageUploadResponse;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.JwtManager;
+import com.goolbitg.api.service.ImageService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +23,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class EtcController implements EtcApi {
+
+    @Autowired
+    private final ImageService ImageService;
 
     @Autowired
     private final JwtManager jwtManager;
@@ -46,6 +51,12 @@ public class EtcController implements EtcApi {
         dto.setAccessToken(accessToken);
         dto.setRefreshToken(refreshToken);
         return ResponseEntity.ok(dto);
+    }
+
+    @Override
+    public ResponseEntity<ImageUploadResponse> uploadImage(MultipartFile image) throws Exception {
+        ImageUploadResponse result = ImageService.uploadImage(image);
+        return ResponseEntity.ok(result);
     }
 
 }
