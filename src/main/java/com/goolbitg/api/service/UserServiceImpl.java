@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -55,6 +56,7 @@ import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.AppleLoginManager;
 import com.goolbitg.api.security.JwtManager;
 import com.goolbitg.api.util.FormatUtil;
+import com.goolbitg.api.util.RandomIdGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,9 +92,7 @@ public class UserServiceImpl implements UserService {
     private final AppleLoginManager appleLoginManager;
     @Autowired
     private final TimeService timeService;
-
-    // 1 ~ 9 is reserved for default user
-    private int idSeq = 10;
+    private final JdbcTemplate jdbcTemplate;
 
 
     /* --------------- API Implements ----------------------*/
@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
             throw UserException.alreadyRegistered(result.get().getId());
         }
 
-        String userId = String.format("id%04d", idSeq++);
+        String userId = generateId();
         User.UserBuilder userBuilder = User.builder()
                 .id(userId)
                 .registerDate(timeService.getToday());
@@ -537,6 +537,15 @@ public class UserServiceImpl implements UserService {
             return 4L;
 
         return 5L;
+    }
+
+    @Transactional
+    private String generateId() {
+        String select = "SELECT * FROM `sequences` WHERE name = 'id_seq'";
+        String update = "UPDATE `sequences` SET curval = curval + 1 WHERE name = 'id_seq'";
+        int curval = jdbcTemplate.query(select, (rs, rowNum) -> rs.getInt("curval")).get(0);
+        jdbcTemplate.update(update);
+        return RandomIdGenerator.generate(curval);
     }
 
 }
