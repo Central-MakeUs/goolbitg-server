@@ -156,6 +156,10 @@ paths:
         - `KAKAO`: 카카오 로그인
 
         - `APPLE`: 애플 로그인
+
+        ### FCM Registration Token
+        
+        푸시 알람을 위해 로그인시마다 `registrationToken`을 제공해야 합니다.
       tags:
         - Auth
       requestBody:
@@ -171,6 +175,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseDto'
+              examples:
+                카카오 로그인:
+                  $ref: '#/components/examples/LoginRequest_KAKAO'
         '422':
           description: 로그인 실패
           content:
@@ -2025,6 +2032,9 @@ components:
         idToken:
           type: string
           description: id_token
+        registrationToken:
+          type: string
+          description: FCM 레지스트레이션 토큰
       required:
         - type
         - idToken
@@ -2288,6 +2298,11 @@ components:
       value:
         code: 6002
         message: 이미 읽은 알림입니다. (notice id)
+    LoginRequest_KAKAO:
+      value:
+        type: KAKAO
+        idToken: token_value
+        registrationToken: registration_token
     LoginResponse_Complete:
       value:
         accessToken: token

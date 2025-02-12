@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.DailyRecord;
 import com.goolbitg.api.entity.DailyRecordId;
+import com.goolbitg.api.entity.RegistrationToken;
 import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.UnregisterHistory;
 import com.goolbitg.api.entity.User;
@@ -44,6 +45,7 @@ import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.repository.DailyRecordRepository;
+import com.goolbitg.api.repository.RegistrationTokenRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UnregisterHistoryRepository;
 import com.goolbitg.api.repository.UserRepository;
@@ -81,6 +83,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final UnregisterHistoryRepository unregisterHistoryRepository;
     @Autowired
+    private final RegistrationTokenRepository registrationTokenRepository;
+    @Autowired
     private final JwtManager jwtManager;
     @Autowired
     private final AppleLoginManager appleLoginManager;
@@ -109,6 +113,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public AuthResponseDto login(AuthRequestDto request) {
+        if (request.getRegistrationToken() == null) {
+            throw new IllegalArgumentException("registrationToken이 없습니다.");
+        }
+
         Jwt jwt = extractToken(request);
         Optional<User> result = findUser(jwt, request);
 
@@ -116,6 +124,13 @@ public class UserServiceImpl implements UserService {
             throw UserException.userNotExist(jwt.getSubject());
         }
         User user = result.get();
+
+        RegistrationToken registrationToken = RegistrationToken.builder()
+            .registrationToken(request.getRegistrationToken())
+            .userId(user.getId())
+            .build();
+
+        registrationTokenRepository.save(registrationToken);
 
         String accessToken = jwtManager.create(user.getId());
         String refreshToken = createRefreshToken(user.getId());
