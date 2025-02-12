@@ -2146,12 +2146,12 @@ components:
         avgIncomePerMonth:
           type: integer
           example: 3600000
-        avgSpendingPerMonth:
+        avgSavingPerMonth:
           type: integer
           example: 2000000
       required:
         - avgIncomePerMonth
-        - avgSpendingPerMonth
+        - avgSavingPerMonth
     UserPatternDto:
       type: object
       properties:

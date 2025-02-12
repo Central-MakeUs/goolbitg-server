@@ -121,7 +121,7 @@ public class UserIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.avgIncomePerMonth").value(360000))
             .andExpect(jsonPath("$.avgSpendingPerMonth").value(200000))
-            .andExpect(jsonPath("$.spendingType.id").value(1));
+            .andExpect(jsonPath("$.spendingType.id").value(2));
         mockMvc.perform(get("/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(4))
@@ -216,7 +216,7 @@ public class UserIntegrationTest {
     private void updateHabit() throws JsonProcessingException, Exception {
         UserHabitDto requestBody = new UserHabitDto();
         requestBody.setAvgIncomePerMonth(360000);
-        requestBody.setAvgSpendingPerMonth(200000);
+        requestBody.setAvgSavingPerMonth(200000);
 
         String jsonBody = mapper.writeValueAsString(requestBody);
         mockMvc.perform(post("/users/me/habit")

@@ -37,7 +37,7 @@ INSERT INTO users (
 
 INSERT INTO user_surveys (
     user_id, check_1, check_2, check_3, check_4, check_5, check_6,
-    avg_income_per_month, avg_spending_per_month,
+    avg_income_per_month, avg_saving_per_month,
     prime_use_day, prime_use_time
 ) VALUES ( 'id0001', 0, 0, 0, 0, 0, 0,
     3600000, 30000, 'FRIDAY', '20:00:00' );

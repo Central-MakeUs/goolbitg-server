@@ -34,7 +34,7 @@ CREATE TABLE user_surveys (
   check_5 BOOLEAN,
   check_6 BOOLEAN,
   avg_income_per_month INT,
-  avg_spending_per_month INT,
+  avg_saving_per_month INT,
   prime_use_day VARCHAR(10),
   prime_use_time TIME,
   PRIMARY KEY (user_id),

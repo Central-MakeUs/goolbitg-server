@@ -255,7 +255,7 @@ public class UserServiceImpl implements UserService {
 
         survey.updateHabit(
             request.getAvgIncomePerMonth(),
-            request.getAvgSpendingPerMonth()
+            request.getAvgSavingPerMonth()
         );
         user.setSpendingTypeId(determineSpendingType(survey));
         userSurveyRepository.save(survey);
@@ -405,7 +405,7 @@ public class UserServiceImpl implements UserService {
         dto.setCheck5(survey.getCheck5());
         dto.setCheck6(survey.getCheck6());
         dto.setAvgIncomePerMonth(survey.getAvgIncomePerMonth());
-        dto.setAvgSpendingPerMonth(survey.getAvgSpendingPerMonth());
+        dto.setAvgSpendingPerMonth(survey.getAvgSavingPerMonth());
         dto.setSpendingHabitScore(survey.getSpendingHabitScore());
         dto.setPostCount(stat.getPostCount());
         dto.setChallengeCount(stat.getChallengeCount());
