@@ -27,7 +27,7 @@ jobs:
 
       - name: Clone Private Repository
         run: |
-          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Central-MakeUs/goolbitg-credentials.git
+          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git clone https://x-access-token:${{ secrets.MY_GITHUB_PAT }}@github.com/Central-MakeUs/goolbitg-credentials.git
           mv goolbitg-credentials/* src/main/resources
 
       - name: Build JAR
