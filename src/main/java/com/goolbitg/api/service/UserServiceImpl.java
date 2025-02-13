@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -90,15 +89,12 @@ public class UserServiceImpl implements UserService {
     private AppleLoginManager appleLoginManager;
     @Autowired
     private TimeService timeService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
 
     /* --------------- API Implements ----------------------*/
 
     @Override
     public UserDto getUser(String userId) throws Exception {
-        log.info("User id: " + userId);
         User user = userRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
         UserSurvey survey = userSurveyRepository.findById(userId)
@@ -149,7 +145,8 @@ public class UserServiceImpl implements UserService {
             throw UserException.alreadyRegistered(result.get().getId());
         }
 
-        String userId = generateId();
+        String userId = generateUserId();
+
         User.UserBuilder userBuilder = User.builder()
                 .id(userId)
                 .registerDate(timeService.getToday());
@@ -165,6 +162,8 @@ public class UserServiceImpl implements UserService {
 
         UserStat stat = UserStat.getDefault(userId);
         userStatsRepository.save(stat);
+
+        log.info("New User Created - " + userId);
     }
 
     @Override
@@ -306,6 +305,8 @@ public class UserServiceImpl implements UserService {
         userSurveyRepository.deleteById(userId);
         userStatsRepository.deleteById(userId);
         userRepository.deleteById(userId);
+
+        log.info("User Unregisterd - " + userId);
     }
 
     @Override
@@ -543,13 +544,13 @@ public class UserServiceImpl implements UserService {
         return result.isPresent();
     }
 
-    @Transactional
-    private String generateId() {
-        String select = "SELECT * FROM `sequences` WHERE name = 'id_seq'";
-        String update = "UPDATE `sequences` SET curval = curval + 1 WHERE name = 'id_seq'";
-        int curval = jdbcTemplate.query(select, (rs, rowNum) -> rs.getInt("curval")).get(0);
-        jdbcTemplate.update(update);
-        return RandomIdGenerator.generate(curval);
+    private String generateUserId() {
+        String userId = RandomIdGenerator.generate();
+        while (userRepository.existsById(userId)) {
+            userId = RandomIdGenerator.generate();
+        }
+        return userId;
     }
+
 
 }

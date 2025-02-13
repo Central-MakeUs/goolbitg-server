@@ -11,10 +11,9 @@ public class RandomIdGeneratorTest {
 
     @Test
     void get_random_id() {
-        int src = 26;
-        String randomId = RandomIdGenerator.generate(src);
+        String randomId = RandomIdGenerator.generate();
 
-        assertEquals("abaaaaaaaa", randomId);
+        assertEquals(10, randomId.length());
     }
 
 }
