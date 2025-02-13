@@ -27,7 +27,7 @@ jobs:
 
       - name: Clone Rrivate Repository
         run: |
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com:Central-MakeUs/goolbitg-credentials.git
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Central-MakeUs/goolbitg-credentials.git
           mv goolbitg-credentials/* src/main/resources
 
       - name: Build JAR
