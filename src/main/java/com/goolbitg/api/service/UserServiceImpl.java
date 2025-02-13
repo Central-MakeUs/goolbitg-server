@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.DailyRecord;
@@ -44,6 +45,7 @@ import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.model.UserWeeklyStatusDto;
+import com.goolbitg.api.repository.ChallengeRecordRepository;
 import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.RegistrationTokenRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
@@ -83,6 +85,8 @@ public class UserServiceImpl implements UserService {
     private UnregisterHistoryRepository unregisterHistoryRepository;
     @Autowired
     private RegistrationTokenRepository registrationTokenRepository;
+    @Autowired
+    private ChallengeRecordRepository challengeRecordRepository;
     @Autowired
     private JwtManager jwtManager;
     @Autowired
@@ -305,6 +309,7 @@ public class UserServiceImpl implements UserService {
         userSurveyRepository.deleteById(userId);
         userStatsRepository.deleteById(userId);
         userRepository.deleteById(userId);
+        challengeRecordRepository.deleteByUserId(userId);
 
         log.info("User Unregisterd - " + userId);
     }
@@ -375,7 +380,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateUserStat(String userId, LocalDate date) {
         DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
 

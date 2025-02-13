@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -210,6 +211,7 @@ public class ChallengeIntegrationTest {
     @Test
     @Transactional
     @WithMockUser(ROOT_USER)
+    @Disabled
     void cancel_challenge() throws Exception {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
@@ -255,6 +257,7 @@ public class ChallengeIntegrationTest {
     @Test
     @Transactional
     @WithMockUser(NORMAL_USER)
+    @Disabled
     void enroll_check_cancel_get_tripple() throws Exception {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))

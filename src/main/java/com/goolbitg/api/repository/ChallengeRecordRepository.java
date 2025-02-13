@@ -32,4 +32,5 @@ public interface ChallengeRecordRepository extends JpaRepository<ChallengeRecord
         AND status = 'WAIT'
         """)
     List<ChallengeRecord> findAllIncompletedRecords(@Param("userId") String userId, @Param("date") LocalDate date);
+    void deleteByUserId(String userId);
 }

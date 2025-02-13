@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.Challenge;
@@ -89,7 +90,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancelChallenge(String userId, Long challengeId, LocalDate date) {
         ChallengeRecordId challengeRecordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeStatId challengeStatId = new ChallengeStatId(challengeId, userId);
