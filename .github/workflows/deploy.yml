@@ -25,9 +25,9 @@ jobs:
           server-password: ${{ secrets.GITHUB_TOKEN }}
           overwrite-settings: true
 
-      - name: Clone Rrivate Repository
+      - name: Clone Private Repository
         run: |
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Central-MakeUs/goolbitg-credentials.git
+          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Central-MakeUs/goolbitg-credentials.git
           mv goolbitg-credentials/* src/main/resources
 
       - name: Build JAR
