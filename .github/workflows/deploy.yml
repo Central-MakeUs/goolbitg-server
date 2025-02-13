@@ -25,6 +25,13 @@ jobs:
           server-password: ${{ secrets.GITHUB_TOKEN }}
           overwrite-settings: true
 
+      - name: Prepare Jwt Keystore
+        env:
+          JWT_KEYSTORE: ${{ secrets.JWT_KEYSTORE }}
+          JWT_KEYSTORE_NAME: ${{ secrets.JWT_KEYSTORE_NAME }}
+        run: |
+          echo "$JWT_KEYSTORE" > src/main/resources/$JWT_KEYSTORE_NAME
+
       - name: Prepare Apple Login Auth Key
         env:
           APPLE_AUTH_KEY: ${{ secrets.APPLE_AUTH_KEY }}
