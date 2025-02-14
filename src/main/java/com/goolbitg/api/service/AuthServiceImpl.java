@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.goolbitg.api.entity.RegistrationToken;
 import com.goolbitg.api.entity.UnregisterHistory;
 import com.goolbitg.api.entity.User;
-import com.goolbitg.api.entity.UserStat;
-import com.goolbitg.api.entity.UserSurvey;
 import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.AuthRequestDto;
@@ -29,8 +27,6 @@ import com.goolbitg.api.repository.ChallengeRecordRepository;
 import com.goolbitg.api.repository.RegistrationTokenRepository;
 import com.goolbitg.api.repository.UnregisterHistoryRepository;
 import com.goolbitg.api.repository.UserRepository;
-import com.goolbitg.api.repository.UserStatRepository;
-import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.AppleLoginManager;
 import com.goolbitg.api.security.JwtManager;
@@ -47,10 +43,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserSurveyRepository userSurveyRepository;
-    @Autowired
-    private UserStatRepository userStatsRepository;
     @Autowired
     private UserTokenRepository tokenRepository;
     @Autowired
@@ -178,8 +170,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         unregisterHistoryRepository.save(history);
-        userSurveyRepository.deleteById(userId);
-        userStatsRepository.deleteById(userId);
         userRepository.deleteById(userId);
         challengeRecordRepository.deleteByUserId(userId);
 

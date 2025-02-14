@@ -22,19 +22,16 @@ import com.goolbitg.api.model.PaginatedBuyOrNotDto;
 import com.goolbitg.api.repository.BuyOrNotRepository;
 import com.goolbitg.api.repository.BuyOrNotVoteRepository;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * BuyOrNotServiceImpl
  */
 @Service
-@RequiredArgsConstructor
 public class BuyOrNotServiceImpl implements BuyOrNotService {
 
     @Autowired
-    private final BuyOrNotRepository buyOrNotRepository;
+    private BuyOrNotRepository buyOrNotRepository;
     @Autowired
-    private final BuyOrNotVoteRepository buyOrNotVoteRepository;
+    private BuyOrNotVoteRepository buyOrNotVoteRepository;
 
     @Override
     public BuyOrNotDto getBuyOrNot(Long postId) {

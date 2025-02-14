@@ -39,32 +39,26 @@ import com.goolbitg.api.repository.ChallengeStatRepository;
 import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UserRepository;
-import com.goolbitg.api.repository.UserStatRepository;
-
-import lombok.RequiredArgsConstructor;
 
 /**
  * ChallengeServiceImpl
  */
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ChallengeServiceImpl implements ChallengeService {
 
     @Autowired
-    private final ChallengeRepository challengeRepository;
+    private ChallengeRepository challengeRepository;
     @Autowired
-    private final ChallengeRecordRepository challengeRecordRepository;
+    private ChallengeRecordRepository challengeRecordRepository;
     @Autowired
-    private final ChallengeStatRepository challengeStatRepository;
+    private ChallengeStatRepository challengeStatRepository;
     @Autowired
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    private final UserStatRepository userStatRepository;
+    private DailyRecordRepository dailyRecordRepository;
     @Autowired
-    private final DailyRecordRepository dailyRecordRepository;
-    @Autowired
-    private final SpendingTypeRepository spendingTypeRepository;
+    private SpendingTypeRepository spendingTypeRepository;
 
 
 
@@ -146,8 +140,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
 
-        UserStat userStat = userStatRepository.findById(userId)
-                .orElseThrow(() -> UserException.userNotExist(userId));
+        UserStat userStat = user.getStat();
 
         DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
 
@@ -158,7 +151,6 @@ public class ChallengeServiceImpl implements ChallengeService {
         challenge.achieve();
 
         userRepository.save(user);
-        userStatRepository.save(userStat);
         dailyRecordRepository.save(dailyRecord);
         challengeRepository.save(challenge);
         challengeRecordRepository.save(record);
@@ -189,8 +181,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
 
-        UserStat userStat = userStatRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
+        UserStat userStat = user.getStat();
 
         DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
 
@@ -234,7 +227,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         challenge.enroll();
 
         dailyRecordRepository.save(dailyRecord);
-        userStatRepository.save(userStat);
+        userRepository.save(user);
         challengeRepository.save(challenge);
     }
 

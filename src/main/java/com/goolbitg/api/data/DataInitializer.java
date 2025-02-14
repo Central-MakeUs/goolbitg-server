@@ -18,11 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired
-    private final UserService userService;
-    @Autowired
-    private final ChallengeService challengeService;
-
     @Override
     public void run(String... args) throws Exception {
         log.info("Load Initial Data");
