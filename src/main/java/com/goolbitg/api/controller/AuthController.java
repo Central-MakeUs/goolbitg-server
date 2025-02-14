@@ -17,10 +17,9 @@ import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
 import com.goolbitg.api.model.UnregisterDto;
 import com.goolbitg.api.security.AuthUtil;
+import com.goolbitg.api.service.AuthService;
 import com.goolbitg.api.service.TimeService;
-import com.goolbitg.api.service.UserService;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -28,13 +27,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 public class AuthController implements AuthApi {
 
     @Autowired
-    private final UserService userService;
+    private AuthService authService;
     @Autowired
-    private final TimeService timeService;
+    private TimeService timeService;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -43,26 +41,26 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<AuthResponseDto> login(@Valid AuthRequestDto authRequestDto) throws Exception {
-        return ResponseEntity.ok(userService.login(authRequestDto));
+        return ResponseEntity.ok(authService.login(authRequestDto));
     }
 
     @Override
     public ResponseEntity<Void> register(@Valid AuthRequestDto authRequestDto) throws Exception {
-        userService.register(authRequestDto);
+        authService.register(authRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Void> logout() throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        userService.logout(userId);
+        authService.logout(userId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<AuthResponseDto> refresh(@Valid TokenRefreshRequestDto tokenRefreshRequestDto)
             throws Exception {
-        AuthResponseDto response = userService.getAccessToken(tokenRefreshRequestDto);
+        AuthResponseDto response = authService.getAccessToken(tokenRefreshRequestDto);
         log.info("AuthResponse: " + response);
         return ResponseEntity.ok(response);
     }
@@ -72,7 +70,7 @@ public class AuthController implements AuthApi {
         String userId = AuthUtil.getLoginUserId();
         LocalDate date = timeService.getToday();
 
-        userService.unregister(userId, unregisterDto, date);
+        authService.unregister(userId, unregisterDto, date);
         return ResponseEntity.ok().build();
     }
 
