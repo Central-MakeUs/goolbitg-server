@@ -34,8 +34,6 @@ import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.repository.DailyRecordRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UserRepository;
-import com.goolbitg.api.repository.UserStatRepository;
-import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.util.FormatUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,10 +49,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UserSurveyRepository userSurveyRepository;
-    @Autowired
-    private UserStatRepository userStatsRepository;
-    @Autowired
     private SpendingTypeRepository spendingTypeRepository;
     @Autowired
     private DailyRecordRepository dailyRecordRepository;
@@ -66,12 +60,8 @@ public class UserServiceImpl implements UserService {
     public UserDto getUser(String userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
-        UserSurvey survey = userSurveyRepository.findById(userId)
-            .orElseThrow(() -> UserException.userNotExist(userId));
-        UserStat stat = userStatsRepository.findById(userId)
-            .orElseThrow(() -> UserException.userNotExist(userId));
 
-        return getUserDto(user, survey, stat);
+        return getUserDto(user);
     }
 
     @Override
@@ -79,7 +69,7 @@ public class UserServiceImpl implements UserService {
     public void updateUserInfo(String userId, UserInfoDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
-        if (user.getAgreement1() == null)
+        if (user.getAgreement().getAgreement1() == null)
             throw UserException.previousStepNotComplete(0);
 
         if (isNicknameExistInner(request.getNickname())) {
@@ -105,8 +95,7 @@ public class UserServiceImpl implements UserService {
         if (user.getNickname() == null)
             throw UserException.previousStepNotComplete(1);
 
-        UserSurvey survey = userSurveyRepository.findById(userId)
-                .orElseThrow(() -> UserException.userNotExist(userId));
+        UserSurvey survey = user.getSurvey();
 
         survey.updateChecklist(
             request.getCheck1(),
@@ -116,7 +105,7 @@ public class UserServiceImpl implements UserService {
             request.getCheck5(),
             request.getCheck6()
         );
-        userSurveyRepository.save(survey);
+        userRepository.save(user);
     }
 
     @Override
@@ -131,44 +120,39 @@ public class UserServiceImpl implements UserService {
         if (user.getNickname() == null)
             throw UserException.previousStepNotComplete(1);
 
-        UserSurvey survey = userSurveyRepository.findById(userId)
-                .orElseThrow(() -> UserException.userNotExist(userId));
+        UserSurvey survey = user.getSurvey();
 
         survey.updateHabit(
             request.getAvgIncomePerMonth(),
             request.getAvgSavingPerMonth()
         );
-        user.setSpendingTypeId(determineSpendingType(survey));
-        userSurveyRepository.save(survey);
+        SpendingType spendingType = spendingTypeRepository.findById(survey.getSpendingTypeId()).get();
+        user.setSpendingType(spendingType);
         userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void updatePatternInfo(String userId, UserPatternDto request) {
-        UserSurvey survey = userSurveyRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
+        UserSurvey survey = user.getSurvey();
 
         survey.updatePattern(
             request.getPrimeUseDay(),
             FormatUtil.parseTime(request.getPrimeUseTime())
         );
-        userSurveyRepository.save(survey);
+        userRepository.save(user);
     }
 
     @Override
     public UserRegisterStatusDto getRegisterStatus(String userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> UserException.userNotExist(userId));
-        UserSurvey survey = userSurveyRepository.findById(userId)
-            .orElseThrow(() -> UserException.userNotExist(userId));
-        UserStat stat = userStatsRepository.findById(userId)
-            .orElseThrow(() -> UserException.userNotExist(userId));
-        int status = getRegisterStatusInner(user, survey, stat);
-        boolean requiredInfoCompleted = getRequiredInfoCompleted(user, survey, stat);
+
         UserRegisterStatusDto dto = new UserRegisterStatusDto();
-        dto.setStatus(status);
-        dto.setRequiredInfoCompleted(requiredInfoCompleted);
+        dto.setStatus(user.getRegisterStatus());
+        dto.setRequiredInfoCompleted(user.isRequiredInfoCompleted());
         return dto;
     }
 
@@ -194,7 +178,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
 
-        user.allowPushNotification();
+        user.getAgreement().allowPushNotification();
         userRepository.save(user);
     }
 
@@ -202,8 +186,7 @@ public class UserServiceImpl implements UserService {
     public UserWeeklyStatusDto getWeeklyStatus(String userId, LocalDate date) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
-        UserStat stat = userStatsRepository.findById(userId)
-                .orElseThrow(() -> UserException.userNotExist(userId));
+        UserStat stat = user.getStat();
 
         DayOfWeek todayOfWeek = date.getDayOfWeek();
         int todayIndex = todayOfWeek.getValue() - 1;
@@ -225,9 +208,10 @@ public class UserServiceImpl implements UserService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateUserStat(String userId, LocalDate date) {
         DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
-
-        UserStat stat = userStatsRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserException.userNotExist(userId));
+
+        UserStat stat = user.getStat();
         DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
                 .orElseGet(() -> DailyRecord.getDefault(userId, date));
 
@@ -237,26 +221,7 @@ public class UserServiceImpl implements UserService {
             stat.resetContinueCount();
         }
 
-        userStatsRepository.save(stat);
-    }
-
-    @Override
-    public Long determineSpendingType(UserSurvey survey) {
-        Integer checklistScore = survey.getChecklistScore();
-        Integer spendingHabitScore = survey.getSpendingHabitScore();
-        if (checklistScore == null || spendingHabitScore == null)
-            throw UserException.registrationNotComplete(survey.getUserId());
-
-        if (checklistScore == 3 && spendingHabitScore < 50)
-            return 1L;
-        if (checklistScore >= 2 && spendingHabitScore < 70)
-            return 2L;
-        if (checklistScore >= 1 && spendingHabitScore < 80)
-            return 3L;
-        if (spendingHabitScore < 90)
-            return 4L;
-
-        return 5L;
+        userRepository.save(user);
     }
 
     @Override
@@ -269,7 +234,10 @@ public class UserServiceImpl implements UserService {
 
     /* ------------ DTO Mappers ------------- */
 
-    private UserDto getUserDto(User user, UserSurvey survey, UserStat stat) {
+    private UserDto getUserDto(User user) {
+        UserSurvey survey = user.getSurvey();
+        UserStat stat = user.getStat();
+
         UserDto dto = new UserDto();
         dto.setId(user.getId());
         dto.setNickname(user.getNickname());
@@ -288,10 +256,9 @@ public class UserServiceImpl implements UserService {
         dto.setChallengeCount(stat.getChallengeCount());
         dto.setAchievementGuage(stat.getAchievementGuage());
 
-        if (user.getSpendingTypeId() != null) {
-            SpendingType spendingType = 
-                spendingTypeRepository.findById(user.getSpendingTypeId()).get();
-            Integer peopleCount = userRepository.countBySpendingTypeId(user.getSpendingTypeId());
+        if (user.getSpendingType() != null) {
+            SpendingType spendingType = user.getSpendingType();
+            Integer peopleCount = userRepository.countBySpendingTypeId(spendingType.getId());
             SpendingTypeDto spendingTypeDto = new SpendingTypeDto();
             spendingTypeDto.setId(spendingType.getId());
             spendingTypeDto.setTitle(spendingType.getTitle());
@@ -336,23 +303,6 @@ public class UserServiceImpl implements UserService {
 
     /* ------------- Helper Methods ------------- */
 
-    private int getRegisterStatusInner(User user, UserSurvey survey, UserStat stat) {
-        if (user.getAgreement1() == null) return 0;
-        if (user.getNickname() == null) return 1;
-        if (survey.getCheck1() == null) return 2;
-        if (survey.getAvgIncomePerMonth() == null) return 3;
-        if (survey.getPrimeUseDay() == null) return 4;
-        if (stat.getChallengeCount() == 0) return 5;
-        return 6;
-    }
-
-    private boolean getRequiredInfoCompleted(User user, UserSurvey survey, UserStat stat) {
-        return (user.getAgreement1() != null &&
-            user.getNickname() != null &&
-            survey.getCheck1() != null &&
-            survey.getAvgIncomePerMonth() != null &&
-            stat.getChallengeCount() > 0);
-    }
 
     private boolean isNicknameExistInner(String nickname) {
         Optional<User> result = userRepository.findByNickname(nickname);

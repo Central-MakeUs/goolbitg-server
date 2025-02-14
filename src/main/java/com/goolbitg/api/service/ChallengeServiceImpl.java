@@ -84,7 +84,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .orElseThrow(() -> UserException.userNotExist(userId));
         Pageable pageReq = PageRequest.of(page, size);
 
-        Page<Challenge> result = challengeRepository.findAllBySpendingTypeId(user.getSpendingTypeId(), pageReq);
+        Page<Challenge> result = challengeRepository.findAllBySpendingTypeId(user.getSpendingType(), pageReq);
 
         return getPaginatedChallengeDto(result);
     }
@@ -168,13 +168,13 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     private void increaseAchievementGuage(Challenge challenge, User user, UserStat userStat) {
-        SpendingType currentType = spendingTypeRepository.findById(user.getSpendingTypeId()).get();
+        SpendingType currentType = user.getSpendingType();
         int newGuage = userStat.getAchievementGuage() + challenge.getReward();
 
         if (currentType.getGoal() != null && newGuage >= currentType.getGoal()) {
-            SpendingType newType = spendingTypeRepository.findById(user.getSpendingTypeId() + 1).orElseGet(null);
+            SpendingType newType = spendingTypeRepository.findById(currentType.getId() + 1).orElseGet(null);
             newGuage = newGuage - currentType.getGoal();
-            user.setSpendingTypeId(newType.getId());
+            user.setSpendingType(newType);
         }
         userStat.setAchievementGuage(newGuage);
     }

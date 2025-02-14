@@ -29,7 +29,6 @@ public interface UserService {
     void postPushNotificationAgreement(String userId);
     UserWeeklyStatusDto getWeeklyStatus(String userId, LocalDate date);
     void updateUserStat(String userId, LocalDate date);
-    Long determineSpendingType(UserSurvey survey);
     NicknameCheckResponseDto isNicknameExist(NicknameCheckRequestDto nickname);
 
 }

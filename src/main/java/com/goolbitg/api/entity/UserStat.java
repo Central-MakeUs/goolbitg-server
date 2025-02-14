@@ -53,9 +53,8 @@ public class UserStat {
         continueCount = 0;
     }
 
-    public static UserStat getDefault(String userId) {
+    public static UserStat getDefault() {
         return UserStat.builder()
-                .userId(userId)
                 .challengeCount(0)
                 .postCount(0)
                 .achievementGuage(0)

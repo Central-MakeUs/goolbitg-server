@@ -1,7 +1,6 @@
 package com.goolbitg.api.service;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.RegistrationToken;
-import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.UnregisterHistory;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStat;
@@ -25,13 +23,10 @@ import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.LoginType;
-import com.goolbitg.api.model.SpendingTypeDto;
 import com.goolbitg.api.model.TokenRefreshRequestDto;
 import com.goolbitg.api.model.UnregisterDto;
-import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.repository.ChallengeRecordRepository;
 import com.goolbitg.api.repository.RegistrationTokenRepository;
-import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UnregisterHistoryRepository;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.repository.UserStatRepository;
@@ -39,7 +34,6 @@ import com.goolbitg.api.repository.UserSurveyRepository;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.AppleLoginManager;
 import com.goolbitg.api.security.JwtManager;
-import com.goolbitg.api.util.FormatUtil;
 import com.goolbitg.api.util.RandomIdGenerator;
 
 import lombok.extern.slf4j.Slf4j;
@@ -118,21 +112,21 @@ public class AuthServiceImpl implements AuthService {
 
         String userId = generateUserId();
 
-        User.UserBuilder userBuilder = User.builder()
-                .id(userId)
-                .registerDate(timeService.getToday());
+        String kakaoId = null;
+        String appleId = null;
         if (request.getType() == LoginType.KAKAO) {
-            userBuilder.kakaoId(jwt.getSubject());
+            kakaoId = jwt.getSubject();
         } else {
-            userBuilder.appleId(jwt.getSubject());
+            appleId = jwt.getSubject();
         }
-        userRepository.save(userBuilder.build());
 
-        UserSurvey survey = UserSurvey.getDefault(userId);
-        userSurveyRepository.save(survey);
-
-        UserStat stat = UserStat.getDefault(userId);
-        userStatsRepository.save(stat);
+        User user = User.builder()
+                .id(userId)
+                .registerDate(timeService.getToday())
+                .kakaoId(kakaoId)
+                .appleId(appleId)
+                .build();
+        userRepository.save(user);
 
         log.info("New User Created - " + userId);
     }

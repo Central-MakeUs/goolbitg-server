@@ -2,11 +2,17 @@ package com.goolbitg.api.entity;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.Gender;
@@ -50,26 +56,27 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(name = "spending_type_id")
-    private Long spendingTypeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "spending_type_id")
+    private SpendingType spendingType;
 
-    @Column(name = "allow_push_notification")
-    private Boolean pushNotificationAgreement;
+    @Embedded
+    @Builder.Default
+    private Agreement agreement = new Agreement();
 
-    @Column(name = "agreement1")
-    private Boolean agreement1;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    @Builder.Default
+    private UserSurvey survey = UserSurvey.getDefault();
 
-    @Column(name = "agreement2")
-    private Boolean agreement2;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    @Builder.Default
+    private UserStat stat = UserStat.getDefault();
 
-    @Column(name = "agreement3")
-    private Boolean agreement3;
 
-    @Column(name = "agreement4")
-    private Boolean agreement4;
-
-    public void setSpendingTypeId(Long spendingTypeId) {
-        this.spendingTypeId = spendingTypeId;
+    public void setSpendingType(SpendingType spendingType) {
+        this.spendingType = spendingType;
     }
 
     public void updateInfo(String nickname, LocalDate birthday, Gender gender) {
@@ -84,13 +91,31 @@ public class User {
         boolean agreement3,
         boolean agreement4
     ) {
-        this.agreement1 = agreement1;
-        this.agreement2 = agreement2;
-        this.agreement3 = agreement3;
-        this.agreement4 = agreement4;
+        if (agreement == null) {
+            agreement = new Agreement();
+        }
+        agreement.update(agreement1, agreement2, agreement3, agreement4);
     }
 
-    public void allowPushNotification() {
-        pushNotificationAgreement = true;
+    public int getRegisterStatus() {
+
+        if (agreement.getAgreement1() == null) return 0;
+        if (nickname == null) return 1;
+        if (survey.getCheck1() == null) return 2;
+        if (survey.getAvgIncomePerMonth() == null) return 3;
+        if (survey.getPrimeUseDay() == null) return 4;
+        if (stat.getChallengeCount() == 0) return 5;
+        return 6;
+
     }
+
+    public boolean isRequiredInfoCompleted() {
+        return (agreement.getAgreement1() != null &&
+            nickname != null &&
+            survey.getCheck1() != null &&
+            survey.getAvgIncomePerMonth() != null &&
+            stat.getChallengeCount() > 0);
+
+    }
+
 }

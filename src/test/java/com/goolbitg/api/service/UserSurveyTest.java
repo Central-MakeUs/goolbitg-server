@@ -9,9 +9,7 @@ import com.goolbitg.api.entity.UserSurvey;
 /**
  * UserServiceTest
  */
-public class UserServiceTest {
-
-    UserService userService = new UserServiceImpl();
+public class UserSurveyTest {
 
     @Test
     void determine_spending_type() {
@@ -61,10 +59,10 @@ public class UserServiceTest {
                 .avgSavingPerMonth(900_000)
                 .build();
         
-        assertEquals(1L, userService.determineSpendingType(survey1));
-        assertEquals(2L, userService.determineSpendingType(survey2));
-        assertEquals(3L, userService.determineSpendingType(survey3));
-        assertEquals(4L, userService.determineSpendingType(survey4));
-        assertEquals(5L, userService.determineSpendingType(survey5));
+        assertEquals(1L, survey1.getSpendingTypeId());
+        assertEquals(2L, survey2.getSpendingTypeId());
+        assertEquals(3L, survey3.getSpendingTypeId());
+        assertEquals(4L, survey4.getSpendingTypeId());
+        assertEquals(5L, survey5.getSpendingTypeId());
     }
 }

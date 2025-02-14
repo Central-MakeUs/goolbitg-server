@@ -80,6 +80,26 @@ public class UserSurvey {
             return null;
         return Math.round(100.0f - ((float)avgIncomePerMonth - avgSavingPerMonth) / (float)avgIncomePerMonth * 100.0f);
     }
+    
+    public Long getSpendingTypeId() {
+        Integer checklistScore = getChecklistScore();
+        Integer spendingHabitScore = getSpendingHabitScore();
+
+        if (checklistScore == null || spendingHabitScore == null)
+            return null;
+
+        if (checklistScore == 3 && spendingHabitScore < 50)
+            return 1L;
+        if (checklistScore >= 2 && spendingHabitScore < 70)
+            return 2L;
+        if (checklistScore >= 1 && spendingHabitScore < 80)
+            return 3L;
+        if (spendingHabitScore < 90)
+            return 4L;
+
+        return 5L;
+
+    }
 
     public void updateChecklist(
         boolean check1,
@@ -110,9 +130,8 @@ public class UserSurvey {
         this.primeUseTime = primeUseTime;
     }
 
-    public static UserSurvey getDefault(String userId) {
+    public static UserSurvey getDefault() {
         return UserSurvey.builder()
-                .userId(userId)
                 .build();
     }
 }
