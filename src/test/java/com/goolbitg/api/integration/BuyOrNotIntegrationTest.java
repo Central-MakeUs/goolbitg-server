@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goolbitg.api.model.BuyOrNotDto;
+import com.goolbitg.api.model.BuyOrNotReportRequest;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
 import com.goolbitg.api.model.BuyOrNotVoteType;
 
@@ -34,7 +35,7 @@ public class BuyOrNotIntegrationTest {
     private  ObjectMapper mapper;
 
     private final String ROOT_USER_ID = "id0001";
-    private final String NORMAL_USER_ID = "id0002";
+    private final String NORMAL_USER_ID = "id0003";
 
     @Test
     @Transactional
@@ -125,6 +126,21 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.goodVoteCount").value(0))
                 .andExpect(jsonPath("$.badVoteCount").value(1));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(NORMAL_USER_ID)
+    void report_post() throws Exception {
+        Long postId = 1L;
+        BuyOrNotReportRequest request = new BuyOrNotReportRequest();
+        request.setReason("잘못된 정보");
+        String jsonBody = mapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/buyOrNots/{postId}/report", postId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonBody))
+                .andExpect(status().isOk());
     }
 
 }

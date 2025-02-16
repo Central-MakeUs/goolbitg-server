@@ -122,6 +122,15 @@ CREATE TABLE buyornot_votes (
   FOREIGN KEY (voter_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE buyornot_reports (
+  post_id BIGINT NOT NULL,
+  reporter_id VARCHAR(50) NOT NULL,
+  reason VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP AS CURRENT_TIMESTAMP,
+  PRIMARY KEY (post_id, reporter_id)
+);
+
 CREATE TABLE challenge_groups (
   id BIGINT AUTO_INCREMENT,
   owner_id VARCHAR(50) NOT NULL,

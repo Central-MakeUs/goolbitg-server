@@ -16,5 +16,6 @@ public interface BuyOrNotService {
     BuyOrNotDto updateBuyOrNot(String userId, Long postId, BuyOrNotDto request);
     void deleteBuyOrNot(String userId, Long postId);
     BuyOrNotVoteChangeDto voteBuyOrNot(String userId, Long postId, BuyOrNotVoteDto request);
+    void reportBuyOrNot(String userId, Long postId, String reason);
 
 }

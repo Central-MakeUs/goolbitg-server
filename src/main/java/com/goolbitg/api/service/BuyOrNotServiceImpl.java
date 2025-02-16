@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.BuyOrNot;
+import com.goolbitg.api.entity.BuyOrNotReport;
+import com.goolbitg.api.entity.BuyOrNotReportId;
 import com.goolbitg.api.entity.BuyOrNotVote;
 import com.goolbitg.api.entity.BuyOrNotVoteId;
 import com.goolbitg.api.exception.AuthException;
@@ -19,6 +21,7 @@ import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
 import com.goolbitg.api.model.BuyOrNotVoteType;
 import com.goolbitg.api.model.PaginatedBuyOrNotDto;
+import com.goolbitg.api.repository.BuyOrNotReportRepository;
 import com.goolbitg.api.repository.BuyOrNotRepository;
 import com.goolbitg.api.repository.BuyOrNotVoteRepository;
 
@@ -32,6 +35,8 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     private BuyOrNotRepository buyOrNotRepository;
     @Autowired
     private BuyOrNotVoteRepository buyOrNotVoteRepository;
+    @Autowired
+    private BuyOrNotReportRepository buyOrNotReportRepository;
 
     @Override
     public BuyOrNotDto getBuyOrNot(Long postId) {
@@ -150,6 +155,27 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
         dto.setGoodVoteCount(goodCount);
         dto.setBadVoteCount(badCount);
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public void reportBuyOrNot(String userId, Long postId, String reason) {
+        BuyOrNotReportId reportId = new BuyOrNotReportId(postId, userId);
+
+        if (!buyOrNotRepository.existsById(postId))
+            throw BuyOrNotException.postNotExist(postId);
+
+        if (buyOrNotReportRepository.existsById(reportId)) {
+            throw BuyOrNotException.postAlreadyReported(postId);
+        }
+
+        BuyOrNotReport report = BuyOrNotReport.builder()
+                .postId(postId)
+                .reporterId(userId)
+                .reason(reason)
+                .build();
+
+        buyOrNotReportRepository.save(report);
     }
 
 }

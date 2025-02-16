@@ -12,6 +12,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.BuyOrNotApi;
 import com.goolbitg.api.model.BuyOrNotDto;
+import com.goolbitg.api.model.BuyOrNotReportRequest;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
 import com.goolbitg.api.model.PaginatedBuyOrNotDto;
@@ -78,6 +79,14 @@ public class BuyOrNotController implements BuyOrNotApi {
         String userId = AuthUtil.getLoginUserId();
         BuyOrNotVoteChangeDto result = buyOrNotService.voteBuyOrNot(userId, postId, buyOrNotVoteDto);
         return ResponseEntity.ok(result);
+    }
+
+    @Override
+    public ResponseEntity<Void> buyOrNotReport(Long postId, @Valid BuyOrNotReportRequest buyOrNotReportRequest)
+            throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+        buyOrNotService.reportBuyOrNot(userId, postId, buyOrNotReportRequest.getReason());
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -16,5 +16,17 @@ public abstract class BuyOrNotException {
             "포스트가 존재하지 않습니다. (" + id + ")",
             HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    public static CommonException postAlreadyVoted(Long id) {
+        return new CommonException(
+            5003,
+            "내가 작성한 포스트는 투표할 수 없습니다. (" + id + ")",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    public static CommonException postAlreadyReported(Long id) {
+        return new CommonException(
+            5004,
+            "이미 신고한 포스트입니다. (" + id + ")",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
 }
