@@ -52,7 +52,7 @@ public class BuyOrNotIntegrationTest {
     void get_buy_or_not_list() throws Exception {
         mockMvc.perform(get("/buyOrNots"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSize").value(1));
+                .andExpect(jsonPath("$.totalSize").value(2));
     }
 
     @Test
@@ -71,7 +71,7 @@ public class BuyOrNotIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(2));
+                .andExpect(jsonPath("$.id").value(3));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(status().isOk());
         mockMvc.perform(get("/buyOrNots"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSize").value(0));
+                .andExpect(jsonPath("$.totalSize").value(1));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(status().isOk());
         mockMvc.perform(get("/buyOrNots"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalSize").value(0));
+            .andExpect(jsonPath("$.totalSize").value(1));
     }
 
 }

@@ -16,7 +16,7 @@ public interface BuyOrNotRepository extends JpaRepository<BuyOrNot, Long> {
     @Query("""
         SELECT p
         FROM BuyOrNot p
-        JOIN BuyOrNotReport r ON p.id = r.postId
+        LEFT JOIN BuyOrNotReport r ON p.id = r.postId
         GROUP BY p.id
         HAVING COUNT(*) < 3
         """)
@@ -25,7 +25,7 @@ public interface BuyOrNotRepository extends JpaRepository<BuyOrNot, Long> {
     @Query("""
         SELECT p
         FROM BuyOrNot p
-        JOIN BuyOrNotReport r ON p.id = r.postId
+        LEFT JOIN BuyOrNotReport r ON p.id = r.postId
         WHERE p.writerId = :writer_id
         GROUP BY p.id
         HAVING COUNT(p) < 3

@@ -142,6 +142,8 @@ INSERT INTO buyornots (
     writer_id, product_name, product_price, product_image_url,
     good_reason, bad_reason
 ) VALUES ( 'id0001', 'Tecket 후드티', 97000, 'exmaple_url',
+    '후드티 안산지 벌써 2년 다됨', '집에 후드티만 10장 있긴함' ),
+        ( 'id0001', 'Tecket 후드티', 97000, 'exmaple_url',
     '후드티 안산지 벌써 2년 다됨', '집에 후드티만 10장 있긴함' );
 
 INSERT INTO buyornot_votes (
