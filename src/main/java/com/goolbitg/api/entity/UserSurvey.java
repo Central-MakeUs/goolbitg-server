@@ -7,6 +7,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.Day;
@@ -30,6 +33,11 @@ public class UserSurvey {
     @Id
     @Column(name = "user_id")
     private String userId;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "check_1")
     private Boolean check1;
@@ -130,8 +138,9 @@ public class UserSurvey {
         this.primeUseTime = primeUseTime;
     }
 
-    public static UserSurvey getDefault() {
+    public static UserSurvey getDefault(User user) {
         return UserSurvey.builder()
+                .user(user)
                 .build();
     }
 }

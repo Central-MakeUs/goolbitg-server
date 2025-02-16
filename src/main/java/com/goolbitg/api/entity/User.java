@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.Gender;
@@ -66,13 +67,21 @@ public class User {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "user_id")
-    @Builder.Default
-    private UserSurvey survey = UserSurvey.getDefault();
+    private UserSurvey survey;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "user_id")
-    @Builder.Default
-    private UserStat stat = UserStat.getDefault();
+    private UserStat stat;
+
+    @PrePersist
+    public void initializeStatAndSurvey() {
+        if (stat == null) {
+            stat = UserStat.getDefault(this);
+        }
+        if (survey == null) {
+            survey = UserSurvey.getDefault(this);
+        }
+    }
 
 
     public void setSpendingType(SpendingType spendingType) {

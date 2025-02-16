@@ -3,6 +3,9 @@ package com.goolbitg.api.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +27,11 @@ public class UserStat {
     @Id
     @Column(name = "user_id")
     private String userId;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "challenge_count")
     private Integer challengeCount;
@@ -53,8 +61,9 @@ public class UserStat {
         continueCount = 0;
     }
 
-    public static UserStat getDefault() {
+    public static UserStat getDefault(User user) {
         return UserStat.builder()
+                .user(user)
                 .challengeCount(0)
                 .postCount(0)
                 .achievementGuage(0)
