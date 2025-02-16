@@ -143,4 +143,22 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @Transactional
+    @WithMockUser(NORMAL_USER_ID)
+    void get_filtered_result() throws Exception {
+        Long postId = 1L;
+        BuyOrNotReportRequest request = new BuyOrNotReportRequest();
+        request.setReason("잘못된 정보");
+        String jsonBody = mapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/buyOrNots/{postId}/report", postId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonBody))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/buyOrNots"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalSize").value(0));
+    }
+
 }

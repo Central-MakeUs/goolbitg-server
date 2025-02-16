@@ -148,6 +148,11 @@ INSERT INTO buyornot_votes (
     post_id, voter_id, vote
 ) VALUES ( 1, 'id0001', 'GOOD' );
 
+INSERT INTO buyornot_reports (
+    post_id, reporter_id, reason
+) VALUES ( 1, 'id0005', 'reason1' ),
+        ( 1, 'id0006', 'reason1' );
+
 INSERT INTO challenge_groups (
     owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achieve_ratio, max_achieve_days
 ) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 2000, 6, 1, 23, 50, 63 );

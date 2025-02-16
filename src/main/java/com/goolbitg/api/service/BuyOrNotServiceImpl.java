@@ -68,9 +68,9 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
         Pageable pageReq = PageRequest.of(page, size);
         Page<BuyOrNot> result;
         if (writerId != null) {
-            result = buyOrNotRepository.findAllByWriterId(writerId, pageReq);
+            result = buyOrNotRepository.findAllByWriterIdFiltered(writerId, pageReq);
         } else {
-            result = buyOrNotRepository.findAll(pageReq);
+            result = buyOrNotRepository.findAllFiltered(pageReq);
         }
 
         return getPaginatedBuyOrNotDto(result);
