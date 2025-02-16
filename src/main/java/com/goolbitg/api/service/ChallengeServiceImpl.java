@@ -223,7 +223,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
 
-        dailyRecord.enroll();
+        if (startDay == 0) dailyRecord.enroll();
         challenge.enroll();
 
         dailyRecordRepository.save(dailyRecord);

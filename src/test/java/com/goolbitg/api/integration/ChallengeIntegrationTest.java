@@ -194,6 +194,8 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.status").value("SUCCESS"));
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
+        mockMvc.perform(get("/users/me/weeklyStatus"))
+                .andExpect(jsonPath("$.weeklyStatus[3].totalChallenges").value(1));
         mockMvc.perform(get("/challengeRecords")
             .param("date", "2025-01-24"))
                 .andExpect(status().isOk())
