@@ -108,7 +108,7 @@ public class User {
 
     public int getRegisterStatus() {
 
-        if (agreement.getAgreement1() == null) return 0;
+        if (agreement == null || agreement.getAgreement1() == null) return 0;
         if (nickname == null) return 1;
         if (survey.getCheck1() == null) return 2;
         if (survey.getAvgIncomePerMonth() == null) return 3;
@@ -119,7 +119,8 @@ public class User {
     }
 
     public boolean isRequiredInfoCompleted() {
-        return (agreement.getAgreement1() != null &&
+        return (agreement != null && 
+            agreement.getAgreement1() != null &&
             nickname != null &&
             survey.getCheck1() != null &&
             survey.getAvgIncomePerMonth() != null &&
