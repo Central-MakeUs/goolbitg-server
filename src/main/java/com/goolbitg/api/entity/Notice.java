@@ -49,7 +49,7 @@ public class Notice {
     @Enumerated(EnumType.STRING)
     private NoticeType type;
 
-    @Column(name = "read")
+    @Column(name = "is_read")
     private Boolean read;
 
     @Builder

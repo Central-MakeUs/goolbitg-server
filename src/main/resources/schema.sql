@@ -155,7 +155,7 @@ CREATE TABLE notices (
   message VARCHAR(100) NOT NULL,
   published_at DATETIME NOT NULL,
   type VARCHAR(9) DEFAULT 'CHALLENGE' CHECK (type IN ('CHALLENGE', 'VOTE', 'CHAT')),
-  read TINYINT DEFAULT 0,
+  is_read TINYINT DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
