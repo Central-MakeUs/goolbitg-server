@@ -1,0 +1,2 @@
+ALTER TABLE `notices` MODIFY COLUMN `message` TEXT NOT NULL;
+
