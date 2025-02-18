@@ -113,6 +113,7 @@ public class SecurityConfig {
                 ).authenticated()
                 .requestMatchers(
                     "/auth/**",
+                    "/admin/**",
                     "test",
                     "/token",
                     "/swagger-ui/**"

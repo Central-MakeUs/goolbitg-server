@@ -2,35 +2,41 @@ package com.goolbitg.api.controller;
 
 import java.util.Optional;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.goolbitg.api.EtcApi;
+import com.goolbitg.api.data.CronJobExecutor;
 import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.ImageUploadResponse;
 import com.goolbitg.api.repository.UserTokenRepository;
 import com.goolbitg.api.security.JwtManager;
+import com.goolbitg.api.service.AdminService;
 import com.goolbitg.api.service.ImageService;
-
-import lombok.RequiredArgsConstructor;
 
 /**
  * ImageController
  */
 @RestController
-@RequiredArgsConstructor
 public class EtcController implements EtcApi {
 
     @Autowired
-    private final ImageService ImageService;
-
+    private ImageService ImageService;
     @Autowired
-    private final JwtManager jwtManager;
+    private JwtManager jwtManager;
     @Autowired
-    private final UserTokenRepository userTokenRepository;
+    private UserTokenRepository userTokenRepository;
+    @Autowired
+    private AdminService adminService;
+    @Autowired
+    private CronJobExecutor cronJobExecutor;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -51,6 +57,14 @@ public class EtcController implements EtcApi {
         dto.setAccessToken(accessToken);
         dto.setRefreshToken(refreshToken);
         return ResponseEntity.ok(dto);
+    }
+
+    @Override
+    @Profile({ "dev", "local" })
+    public ResponseEntity<Void> sendChallengeNotice(@NotNull @Valid String password) throws Exception {
+        adminService.authenticateAdmin(password);
+        cronJobExecutor.sendChallengeAlarm();
+        return ResponseEntity.ok().build();
     }
 
     @Override

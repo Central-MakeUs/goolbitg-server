@@ -46,5 +46,11 @@ public abstract class AuthException {
             "APPLE 로그인 인증 과정에서 오류가 발생했습니다. (" + message + ")",
             HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    public static CommonException authenticationFailed() {
+        return new CommonException(
+            2007,
+            "인증에 실패했습니다.",
+            HttpStatus.UNAUTHORIZED);
+    }
 
 }

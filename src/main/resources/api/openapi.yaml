@@ -120,7 +120,7 @@ paths:
           required: true
           in: query
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: 알림 전송 성공
