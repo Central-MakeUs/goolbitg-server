@@ -104,7 +104,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseDto'
-
+  /admin/sendChallengeNotice:
+    post:
+      summary: 미완료 챌린지 안내 알림 전송
+      operationId: sendChallengeNotice
+      description: > 
+        미완료 챌린지를 안내하는 알림을 모든 유저에게 전송합니다.
+        <br><br>
+        admin password를 제공해야 합니다.
+      tags:
+        - ETC
+      parameters:
+        - name: password
+          description: admin password
+          required: true
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 알림 전송 성공
   /auth/register:
     post:
       summary: 회원가입
