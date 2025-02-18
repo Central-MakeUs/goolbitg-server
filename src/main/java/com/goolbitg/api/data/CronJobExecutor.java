@@ -103,7 +103,7 @@ public class CronJobExecutor {
             List<ChallengeRecord> imcompleted = challengeRecordRepository.findAllIncompletedRecords(userId, today);
             if (imcompleted.size() > 0) {
 
-                Challenge challenge = challengeRepository.findById(imcompleted.get(1).getChallengeId())
+                Challenge challenge = challengeRepository.findById(imcompleted.get(0).getChallengeId())
                     .orElseThrow(() -> new IllegalStateException("챌린지 없음"));
 
                 log.info("챌린지 미완료 알림 전송", userId);
