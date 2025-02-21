@@ -1,8 +1,9 @@
 CREATE TABLE spending_types (
   id BIGINT,
   title VARCHAR(100) NOT NULL UNIQUE,
-  image_url VARCHAR(100) NOT NULL,
-  profile_url VARCHAR(100) NOT NULL,
+  image_url VARCHAR(255) NOT NULL,
+  profile_url VARCHAR(255) NOT NULL,
+  onboarding_result_url VARCHAR(255) NOT NULL,
   goal INT,
   PRIMARY KEY (id)
 );

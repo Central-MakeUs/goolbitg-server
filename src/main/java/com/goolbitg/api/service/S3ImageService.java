@@ -26,7 +26,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
  */
 @Service
 @RequiredArgsConstructor
-@Profile("dev")
+@Profile({"dev", "prod"})
 public class S3ImageService implements ImageService {
 
     @Autowired
@@ -34,9 +34,10 @@ public class S3ImageService implements ImageService {
 
     @Value("${aws.s3.host}")
     private String s3Host;
-
-    private final String BUCKET = "goolbitg-bucket";
-    private final String DIR_ROOT = "upload";
+    @Value("${aws.s3.bucket}")
+    private String bucket;
+    @Value("${aws.s3.upload-root}")
+    private String uploadRoot;
 
     @Override
     public ImageUploadResponse uploadImage(MultipartFile image) {
@@ -47,7 +48,7 @@ public class S3ImageService implements ImageService {
 
         String key = createFilename(contentType);
         PutObjectRequest request = PutObjectRequest.builder()
-            .bucket(BUCKET)
+            .bucket(bucket)
             .key(key)
             .contentType(image.getContentType())
             .build();
@@ -68,7 +69,7 @@ public class S3ImageService implements ImageService {
 
     private String createFilename(String contentType) {
         String extension = contentType.split("\\/")[1];
-        return DIR_ROOT + "/" + UUID.randomUUID() + "." + extension;
+        return uploadRoot + "/" + UUID.randomUUID() + "." + extension;
     }
 
     private boolean validateImageType(String contentType) {

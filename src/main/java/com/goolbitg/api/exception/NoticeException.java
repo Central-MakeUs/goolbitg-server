@@ -16,5 +16,11 @@ public abstract class NoticeException {
             "이미 읽은 알림입니다. (" + id + ")",
             HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    public static CommonException registrationTokenAlreadyRegistered(String token) {
+        return new CommonException(
+            6003,
+            "이미 등록된 레지스트레이션 토큰입니다. (" + token + ")",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
 }

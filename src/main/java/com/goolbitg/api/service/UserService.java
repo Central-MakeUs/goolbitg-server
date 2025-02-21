@@ -2,9 +2,9 @@ package com.goolbitg.api.service;
 
 import java.time.LocalDate;
 
-import com.goolbitg.api.entity.UserSurvey;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
+import com.goolbitg.api.model.RegistrationTokenRegisterDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserDto;
@@ -30,5 +30,6 @@ public interface UserService {
     UserWeeklyStatusDto getWeeklyStatus(String userId, LocalDate date);
     void updateUserStat(String userId, LocalDate date);
     NicknameCheckResponseDto isNicknameExist(NicknameCheckRequestDto nickname);
+    void addRegistrationToken(String userId, RegistrationTokenRegisterDto registrationToken);
 
 }

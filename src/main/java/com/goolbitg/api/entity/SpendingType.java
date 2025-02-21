@@ -28,6 +28,9 @@ public class SpendingType {
     @Column(name = "profile_url")
     private String profileUrl;
 
+    @Column(name = "onboarding_result_url")
+    private String onboardingResultUrl;
+
     @Column(name = "goal")
     private Integer goal;
 

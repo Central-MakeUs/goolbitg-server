@@ -73,15 +73,6 @@ public class AuthServiceImpl implements AuthService {
         }
         User user = result.get();
 
-        if (request.getRegistrationToken() != null) {
-            RegistrationToken registrationToken = RegistrationToken.builder()
-                .registrationToken(request.getRegistrationToken())
-                .userId(user.getId())
-                .build();
-
-            registrationTokenRepository.save(registrationToken);
-        }
-
         String accessToken = jwtManager.create(user.getId());
         String refreshToken = createRefreshToken(user.getId());
 

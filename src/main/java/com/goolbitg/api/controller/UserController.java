@@ -15,6 +15,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import com.goolbitg.api.UserApi;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
+import com.goolbitg.api.model.RegistrationTokenRegisterDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
 import com.goolbitg.api.model.UserDto;
@@ -59,6 +60,15 @@ public class UserController implements UserApi {
             @Valid NicknameCheckRequestDto nicknameCheckRequestDto) throws Exception {
         NicknameCheckResponseDto response = userService.isNicknameExist(nicknameCheckRequestDto);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Void> postRegistrationToken(@Valid RegistrationTokenRegisterDto registrationTokenRegisterDto)
+            throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+
+        userService.addRegistrationToken(userId, registrationTokenRegisterDto);
+        return ResponseEntity.ok().build();
     }
 
     @Override
