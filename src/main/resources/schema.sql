@@ -186,4 +186,22 @@ CREATE TABLE unregister_histories (
   unregister_date DATETIME NOT NULL,
   reason VARCHAR(50) NOT NULL,
   PRIMARY KEY (user_id)
-)
+);
+
+CREATE TABLE admin_users (
+  email VARCHAR(320) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP AS CURRENT_TIMESTAMP,
+  PRIMARY KEY (email)
+);
+
+CREATE TABLE admin_user_roles (
+  email VARCHAR(320) NOT NULL,
+  role VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP AS CURRENT_TIMESTAMP,
+  PRIMARY KEY (email),
+  FOREIGN KEY (email) REFERENCES admin_users(email) ON DELETE CASCADE
+);
+
