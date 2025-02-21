@@ -21,6 +21,9 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -105,7 +108,9 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable())
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
-            .formLogin(formLogin -> formLogin.disable())
+            .formLogin(formLogin -> {
+                // TODO: configure admin login page
+            })
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/auth/unregister",
@@ -126,6 +131,17 @@ public class SecurityConfig {
                 )
             );
         return http.build();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        // TODO: implement user details service by database table
+        return null;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     private Converter<Jwt, AbstractAuthenticationToken> getJwtAuthenticationConverter() {
