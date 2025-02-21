@@ -1,0 +1,80 @@
+name: Deploy Java Application to PROD
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          java-package: jdk
+          check-latest: false
+          server-id: github
+          server-username: ${{ github.actor }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          overwrite-settings: true
+
+      - name: Clone Private Repository
+        run: |
+          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git clone https://x-access-token:${{ secrets.MY_GITHUB_PAT }}@github.com/Central-MakeUs/goolbitg-credentials.git
+          mv goolbitg-credentials/* src/main/resources
+
+      - name: Build JAR
+        run: |
+          ./gradlew clean build
+
+      - name: Prepare SSH Key
+        env:
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          echo "$PROD_SSH_KEY" > ec2_key.pem
+          chmod 600 ec2_key.pem
+
+      - name: Backup Previous Artifect and Log
+        env:
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          ssh -i ec2_key.pem -o StrictHostKeyChecking=no \
+          $PROD_USER@$PROD_HOST << EOF
+            if [ -f server.jar ]; then
+              sudo mv server.jar server.bak.jar
+              echo "server.bak.jar created."
+            fi
+
+            if [ -f app.log ]; then
+              sudo mv app.log app.bak.log
+              echo "app.bak.log created."
+            fi
+          EOF
+      
+      - name: Transfer JAR to PROD
+        env:
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          scp -i ec2_key.pem -o StrictHostKeyChecking=no \
+          build/libs/api-0.0.1-SNAPSHOT.jar $PROD_USER@$PROD_HOST:/home/$PROD_USER/server.jar
+          # TODO: The name of jar file might change. Need other way to handle this.
+
+      - name: Deploy Application on PROD
+        env:
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          ssh -i ec2_key.pem -o StrictHostKeyChecking=no \
+          $PROD_USER@$PROD_HOST << EOF
+            pkill -f server.jar || true
+            nohup java -jar /home/$PROD_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
+          EOF
