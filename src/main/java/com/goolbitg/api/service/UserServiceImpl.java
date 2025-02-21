@@ -238,6 +238,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void addRegistrationToken(String userId, RegistrationTokenRegisterDto registrationToken) {
         String tokenValue = registrationToken.getRegistrationToken();
         if (registrationTokenRepository.existsById(tokenValue)) {
