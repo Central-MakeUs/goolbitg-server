@@ -183,10 +183,6 @@ paths:
         - `KAKAO`: 카카오 로그인
 
         - `APPLE`: 애플 로그인
-
-        ### FCM Registration Token
-        
-        푸시 알람을 위해 로그인시마다 `registrationToken`을 제공해야 합니다.
       tags:
         - Auth
       requestBody:
