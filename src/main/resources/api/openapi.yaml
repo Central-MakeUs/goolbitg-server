@@ -27,6 +27,8 @@ info:
   version: 1.0.3
 
 servers:
+  - url: https://dev.goolbitg.site/v1
+    description: 개발 서버
   - url: https://api.goolbitg.site/v1
     description: 메인 서버
   - url: http://localhost:8080/v1
