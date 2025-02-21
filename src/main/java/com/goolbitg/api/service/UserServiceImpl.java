@@ -14,13 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.entity.DailyRecord;
 import com.goolbitg.api.entity.DailyRecordId;
+import com.goolbitg.api.entity.RegistrationToken;
 import com.goolbitg.api.entity.SpendingType;
 import com.goolbitg.api.entity.User;
 import com.goolbitg.api.entity.UserStat;
 import com.goolbitg.api.entity.UserSurvey;
+import com.goolbitg.api.exception.NoticeException;
 import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.NicknameCheckRequestDto;
 import com.goolbitg.api.model.NicknameCheckResponseDto;
+import com.goolbitg.api.model.RegistrationTokenRegisterDto;
 import com.goolbitg.api.model.SpendingTypeDto;
 import com.goolbitg.api.model.UserAgreementDto;
 import com.goolbitg.api.model.UserChecklistDto;
@@ -32,6 +35,7 @@ import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.model.UserWeeklyStatusDto;
 import com.goolbitg.api.repository.DailyRecordRepository;
+import com.goolbitg.api.repository.RegistrationTokenRepository;
 import com.goolbitg.api.repository.SpendingTypeRepository;
 import com.goolbitg.api.repository.UserRepository;
 import com.goolbitg.api.util.FormatUtil;
@@ -52,6 +56,8 @@ public class UserServiceImpl implements UserService {
     private SpendingTypeRepository spendingTypeRepository;
     @Autowired
     private DailyRecordRepository dailyRecordRepository;
+    @Autowired
+    private RegistrationTokenRepository registrationTokenRepository;
 
 
     /* --------------- API Implements ----------------------*/
@@ -229,6 +235,21 @@ public class UserServiceImpl implements UserService {
         NicknameCheckResponseDto dto = new NicknameCheckResponseDto();
         dto.setDuplicated(isNicknameExistInner(nickname.getNickname()));
         return dto;
+    }
+
+    @Override
+    public void addRegistrationToken(String userId, RegistrationTokenRegisterDto registrationToken) {
+        String tokenValue = registrationToken.getRegistrationToken();
+        if (registrationTokenRepository.existsById(tokenValue)) {
+            throw NoticeException.registrationTokenAlreadyRegistered(tokenValue);
+        }
+
+        RegistrationToken token = RegistrationToken.builder()
+                .registrationToken(tokenValue)
+                .userId(userId)
+                .build();
+
+        registrationTokenRepository.save(token);
     }
 
 
