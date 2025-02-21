@@ -12,3 +12,9 @@ bin/
 .project
 .settings/
 .csettings/
+.factorypath
+
+# Crypt
+**/*.p8
+**/*.jks
+**/google-services.json

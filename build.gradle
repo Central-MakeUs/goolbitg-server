@@ -1,16 +1,13 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.1'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'org.hidetake.swagger.generator' version '2.19.2'
+    id 'jacoco'
 }
 
 group = 'com.goolbitg'
 version = '0.0.1-SNAPSHOT'
-
-processResources {
-  dependsOn(generateSwaggerCode)
-}
 
 swaggerSources {
     def typeMappings = 'URI=URI'
@@ -24,7 +21,7 @@ swaggerSources {
             language = 'spring'
             configFile = file(configJson)
             rawOptions = ['--ignore-file-override', ignoreFile, '--type-mappings',
-                          typeMappings, '--import-mappings', importMappings] as List<String>
+                typeMappings, '--import-mappings', importMappings] as List<String>
             components = [models: true, apis: true, supportingFiles: 'ApiUtil.java']
             dependsOn validation
         }
@@ -36,29 +33,61 @@ sourceSets.main.java.srcDir "${swaggerSources.goolbitg.code.outputDir}/src/main/
 sourceSets.main.resources.srcDir "${swaggerSources.goolbitg.code.outputDir}/src/main/resources"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     swaggerCodegen 'org.openapitools:openapi-generator-cli:6.2.1'
+    swaggerUI 'org.webjars:swagger-ui:3.52.5'
     compileOnly 'io.swagger:swagger-annotations:1.6.4'
-    compileOnly 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.openapitools:jackson-databind-nullable:0.2.3'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     implementation 'io.springfox:springfox-oas:3.0.0'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'com.auth0:java-jwt:4.3.0'
+    testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.flywaydb:flyway-core:11.3.1'
+    implementation "org.flywaydb:flyway-mysql:11.3.1"
+    implementation 'software.amazon.awssdk:s3:2.30.17'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+build.dependsOn generateSwaggerUI
+
+processResources {
+    dependsOn generateSwaggerCode 
+    dependsOn generateSwaggerUI
+    from("${swaggerSources.goolbitg.ui.outputDir}") {
+        into 'static/swagger-ui'
+    }
 }
