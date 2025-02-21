@@ -18,10 +18,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,14 +30,12 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
     @Value("${app.security.jwt.keystore-location}")
     private String keyStorePath;
@@ -108,9 +106,7 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable())
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
-            .formLogin(formLogin -> {
-                // TODO: configure admin login page
-            })
+            .formLogin(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/auth/unregister",
@@ -131,12 +127,6 @@ public class SecurityConfig {
                 )
             );
         return http.build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        // TODO: implement user details service by database table
-        return null;
     }
 
     @Bean
