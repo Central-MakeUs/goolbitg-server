@@ -11,7 +11,7 @@ import com.goolbitg.api.exception.CommonException;
  * AdminServiceImpl
  */
 @Service
-@Profile({ "local", "dev" })
+@Profile({ "local", "dev", "prod" })
 public class AdminServiceImpl implements AdminService {
 
     @Value("${admin.password}")
