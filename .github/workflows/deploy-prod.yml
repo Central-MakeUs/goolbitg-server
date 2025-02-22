@@ -76,5 +76,5 @@ jobs:
           ssh -i ec2_key.pem -o StrictHostKeyChecking=no \
           $PROD_USER@$PROD_HOST << EOF
             pkill -f server.jar || true
-            nohup java -jar /home/$PROD_USER/server.jar --spring.profiles.active=dev > app.log 2>&1 &
+            nohup java -jar /home/$PROD_USER/server.jar > app.log 2>&1 &
           EOF
