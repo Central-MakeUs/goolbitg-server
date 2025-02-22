@@ -10,7 +10,7 @@ import com.goolbitg.api.model.ImageUploadResponse;
  * LocalImageService
  */
 @Service
-@Profile("!dev")
+@Profile({ "!dev", "!prod" })
 public class LocalImageService implements ImageService {
 
     @Override
