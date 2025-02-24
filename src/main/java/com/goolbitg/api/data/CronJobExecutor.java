@@ -74,9 +74,7 @@ public class CronJobExecutor {
         for (ChallengeRecord record : challengeRecordRepository.findAllByDateAndStatus(yesterday, ChallengeRecordStatus.WAIT)) {
             record.fail();
             try {
-                // NOTE: Mabye I should use other method to cancel leftovers,
-                // cause cancelChallenge method declines enroll count.
-                challengeService.cancelChallenge(record.getUserId(), record.getChallengeId(), today);
+                challengeService.failChallenge(record.getUserId(), record.getChallengeId(), today);
             } catch (Exception e) {
                 log.error("Canceling challenge failed: ", e);
             }

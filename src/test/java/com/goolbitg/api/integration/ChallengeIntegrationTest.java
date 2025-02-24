@@ -1,32 +1,46 @@
 package com.goolbitg.api.integration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.Disabled;
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+
+import com.goolbitg.api.model.ChallengeRecordDto;
+import com.goolbitg.api.model.ChallengeRecordStatus;
+import com.goolbitg.api.model.ChallengeStatDto;
+import com.goolbitg.api.service.ChallengeService;
+import com.goolbitg.api.service.TimeService;
 
 /**
  * ChallengeIntegrationTest
  */
 @CustomIntegrationTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ChallengeIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private TimeService timeService;
+    @Autowired
+    private ChallengeService challengeService;
 
     private final String ROOT_USER = "id0001";
     private final String NORMAL_USER = "id0003";
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void get_a_challenge() throws Exception {
         Long challengeId = 1L;
@@ -38,7 +52,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void get_challenges_for_type() throws Exception {
         Integer page = 0;
@@ -54,7 +67,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void get_a_challenge_record_today() throws Exception {
         Long challengeId = 2L;
@@ -65,7 +77,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void get_challenge_records() throws Exception {
         mockMvc.perform(get("/challengeRecords"))
@@ -75,7 +86,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void get_challenge_records_of_specific_status() throws Exception {
         mockMvc.perform(get("/challengeRecords")
@@ -86,7 +96,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void enroll_challenge() throws Exception {
         Long challengeId = 1L;
@@ -108,7 +117,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void enroll_new_challenge() throws Exception {
         Long challengeId = 3L;
@@ -128,7 +136,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void enroll_experienced_challenge() throws Exception {
         Long challengeId = 1L;
@@ -141,8 +148,8 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(NORMAL_USER)
+    @Order(1)
     void reject_enroll_when_already_enrolled() throws Exception {
         Long challengeId = 2L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
@@ -151,7 +158,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void stat_update_when_check() throws Exception {
         Long challengeId = 2L;
@@ -164,7 +170,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void check_challenge() throws Exception {
         Long challengeId = 2L;
@@ -185,7 +190,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void check_and_enroll_challenge() throws Exception {
         Long challengeId = 2L;
@@ -211,18 +215,29 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
-    @Disabled
     void cancel_challenge() throws Exception {
         Long challengeId = 1L;
+        LocalDate today = timeService.getToday();
+
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
         mockMvc.perform(delete("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
-                .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
+            .param("date", today.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAIL"));
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
+            .param("date", today.plusDays(1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAIL"));
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
+            .param("date", today.plusDays(2).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAIL"));
+
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enrollCount").value(1));
@@ -232,7 +247,6 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(ROOT_USER)
     void get_challenge_stat() throws Exception {
         Long challengeId = 1L;
@@ -242,8 +256,8 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(NORMAL_USER)
+    @Order(1)
     void get_challenge_tripple() throws Exception {
         Long challengeId = 2L;
         mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
@@ -257,9 +271,8 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(NORMAL_USER)
-    @Disabled
+    @Order(1)
     void enroll_check_cancel_get_tripple() throws Exception {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
@@ -277,8 +290,8 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(NORMAL_USER)
+    @Order(1)
     void enroll_check_enroll_again_fail() throws Exception {
         Long challengeId = 1L;
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
@@ -287,5 +300,43 @@ public class ChallengeIntegrationTest {
                 .andExpect(status().isOk());
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @Order(10)
+    void fail_challenge() throws Exception {
+        Long challengeId = 2L;
+        LocalDate date = timeService.getToday();
+
+        challengeService.failChallenge(NORMAL_USER, challengeId, date);
+
+        ChallengeRecordDto todayRecord = challengeService.getChallengeRecord(NORMAL_USER, challengeId, date);
+        ChallengeRecordDto tomorrowRecord = challengeService.getChallengeRecord(NORMAL_USER, challengeId, date.plusDays(1));
+        ChallengeStatDto challengeStat = challengeService.getChallengeStat(NORMAL_USER, challengeId);
+
+        assertTrue(todayRecord.getStatus().equals(ChallengeRecordStatus.FAIL));
+        assertTrue(tomorrowRecord.getStatus().equals(ChallengeRecordStatus.FAIL));
+        assertTrue(challengeStat.getContinueCount().equals(0));
+    }
+
+    @Test
+    void enroll_cancel_enroll_again() {
+        Long challengeId = 4L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+        challengeService.cancelChallenge(ROOT_USER, challengeId, today);
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+
+        ChallengeRecordDto day1 = challengeService.getChallengeRecord(ROOT_USER, challengeId, today);
+        ChallengeRecordDto day2 = challengeService.getChallengeRecord(ROOT_USER, challengeId, today.plusDays(1));
+        ChallengeRecordDto day3 = challengeService.getChallengeRecord(ROOT_USER, challengeId, today.plusDays(2));
+
+        assertTrue(day1.getStatus().equals(ChallengeRecordStatus.WAIT));
+        assertTrue(day1.getLocation().equals(1));
+        assertTrue(day2.getStatus().equals(ChallengeRecordStatus.WAIT));
+        assertTrue(day2.getLocation().equals(2));
+        assertTrue(day3.getStatus().equals(ChallengeRecordStatus.WAIT));
+        assertTrue(day3.getLocation().equals(3));
     }
 }
