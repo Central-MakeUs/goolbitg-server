@@ -247,12 +247,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeRecordId challengeRecordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
 
-        ChallengeRecord record = challengeRecordRepository.findById(challengeRecordId)
-                .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
-
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
-
+        ChallengeRecord record = challengeRecordRepository.findById(challengeRecordId)
+                .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
         ChallengeStat stat = challengeStatRepository.findById(statId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
 

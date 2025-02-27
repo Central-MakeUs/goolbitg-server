@@ -9,14 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.goolbitg.api.data.CronJobExecutor;
 import com.goolbitg.api.model.ChallengeRecordDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.ChallengeStatDto;
@@ -27,7 +26,6 @@ import com.goolbitg.api.service.TimeService;
  * ChallengeIntegrationTest
  */
 @CustomIntegrationTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ChallengeIntegrationTest {
 
     @Autowired
@@ -36,6 +34,8 @@ public class ChallengeIntegrationTest {
     private TimeService timeService;
     @Autowired
     private ChallengeService challengeService;
+    @Autowired
+    private CronJobExecutor cronJobExecutor;
 
     private final String ROOT_USER = "id0001";
     private final String NORMAL_USER = "id0003";
@@ -68,8 +68,28 @@ public class ChallengeIntegrationTest {
 
     @Test
     @WithMockUser(ROOT_USER)
-    void get_a_challenge_record_today() throws Exception {
-        Long challengeId = 2L;
+    void get_a_challenge_record_today_just_enrolled() throws Exception {
+        Long challengeId = 1L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("WAIT"))
+                .andExpect(jsonPath("$.duration").value(0));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_a_challenge_record_today_in_progress() throws Exception {
+        Long challengeId = 1L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today.minusDays(2));
+        challengeService.checkChallenge(ROOT_USER, challengeId, today.minusDays(2));
+        challengeService.checkChallenge(ROOT_USER, challengeId, today.minusDays(1));
+
         mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("WAIT"))
@@ -78,21 +98,53 @@ public class ChallengeIntegrationTest {
 
     @Test
     @WithMockUser(ROOT_USER)
-    void get_challenge_records() throws Exception {
-        mockMvc.perform(get("/challengeRecords"))
+    void get_a_challenge_record_yesterday() throws Exception {
+        Long challengeId = 1L;
+        LocalDate yesterday = timeService.getToday().minusDays(1);
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, yesterday);
+        challengeService.checkChallenge(ROOT_USER, challengeId, yesterday);
+
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
+            .param("date", yesterday.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalReward").value(7000))
-                .andExpect(jsonPath("$.size").value(1));
+                .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
 
     @Test
     @WithMockUser(ROOT_USER)
-    void get_challenge_records_of_specific_status() throws Exception {
-        mockMvc.perform(get("/challengeRecords")
-            .param("date", "2025-01-17")
-            .param("status", "SUCCESS"))
+    void throws_when_requesting_not_enrolled_challenge_record() throws Exception {
+        Long challengeId = 1L;
+
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("code").value("4006"));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void throws_when_challenge_is_not_exist() throws Exception {
+        Long challengeId = 9999L;
+
+        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("code").value("4004"));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_records() throws Exception {
+        Long challengeId1 = 1L;
+        Long challengeId2 = 2L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId1, today);
+        challengeService.enrollChallenge(ROOT_USER, challengeId2, today);
+
+        mockMvc.perform(get("/challengeRecords"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(1));
+                .andExpect(jsonPath("$.totalReward").value(22000))
+                .andExpect(jsonPath("$.size").value(2));
     }
 
     @Test
@@ -105,7 +157,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challengeRecords")
             .param("date", "2025-01-23"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size").value(2));
+                .andExpect(jsonPath("$.size").value(1));
         mockMvc.perform(get("/challengeRecords")
             .param("date", "2025-01-24"))
                 .andExpect(status().isOk())
@@ -125,14 +177,14 @@ public class ChallengeIntegrationTest {
 
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.challengeCount").value(3));
+                .andExpect(jsonPath("$.challengeCount").value(1));
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enrollCount").value(1));
         mockMvc.perform(get("/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weeklyStatus.length()").value(7))
-                .andExpect(jsonPath("$.weeklyStatus[3].totalChallenges").value(2));
+                .andExpect(jsonPath("$.weeklyStatus[3].totalChallenges").value(1));
     }
 
     @Test
@@ -144,7 +196,7 @@ public class ChallengeIntegrationTest {
 
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.challengeCount").value(2));
+                .andExpect(jsonPath("$.challengeCount").value(1));
     }
 
     @Test
@@ -152,6 +204,10 @@ public class ChallengeIntegrationTest {
     @Order(1)
     void reject_enroll_when_already_enrolled() throws Exception {
         Long challengeId = 2L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(NORMAL_USER, challengeId, today);
+
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.code").value("4001"));
@@ -161,29 +217,36 @@ public class ChallengeIntegrationTest {
     @WithMockUser(ROOT_USER)
     void stat_update_when_check() throws Exception {
         Long challengeId = 2L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
         mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCount").value(5))
-                .andExpect(jsonPath("$.continueCount").value(3));
+                .andExpect(jsonPath("$.totalCount").value(1))
+                .andExpect(jsonPath("$.continueCount").value(1));
     }
 
     @Test
     @WithMockUser(ROOT_USER)
     void check_challenge() throws Exception {
         Long challengeId = 2L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+
         mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SUCCESS"));
 
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.achievementGuage").value(9000));
+                .andExpect(jsonPath("$.achievementGuage").value(7000));
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.continueCount").value(3))
-                .andExpect(jsonPath("$.totalCount").value(5));
+                .andExpect(jsonPath("$.continueCount").value(1))
+                .andExpect(jsonPath("$.totalCount").value(1));
         mockMvc.perform(get("/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weeklyStatus[3].achievedChallenges").value(1));
@@ -193,6 +256,13 @@ public class ChallengeIntegrationTest {
     @WithMockUser(ROOT_USER)
     void check_and_enroll_challenge() throws Exception {
         Long challengeId = 2L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today.minusDays(2));
+        challengeService.checkChallenge(ROOT_USER, challengeId, today.minusDays(2));
+        challengeService.checkChallenge(ROOT_USER, challengeId, today.minusDays(1));
+        cronJobExecutor.finishTheDay();
+
         mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SUCCESS"));
@@ -240,26 +310,37 @@ public class ChallengeIntegrationTest {
 
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.enrollCount").value(1));
+                .andExpect(jsonPath("$.enrollCount").value(0));
         mockMvc.perform(get("/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.weeklyStatus[3].totalChallenges").value(1));
+                .andExpect(jsonPath("$.weeklyStatus[3].totalChallenges").value(0));
     }
 
     @Test
     @WithMockUser(ROOT_USER)
     void get_challenge_stat() throws Exception {
         Long challengeId = 1L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+
         mockMvc.perform(get("/challengeStat/{challengeId}", challengeId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.challengeId").value(challengeId));
+                .andExpect(jsonPath("$.challengeId").value(challengeId))
+                .andExpect(jsonPath("$.enrollCount").value(1))
+                .andExpect(jsonPath("$.totalCount").value(0))
+                .andExpect(jsonPath("$.continueCount").value(0));
     }
 
     @Test
     @WithMockUser(NORMAL_USER)
-    @Order(1)
     void get_challenge_tripple() throws Exception {
         Long challengeId = 2L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(NORMAL_USER, challengeId, today.minusDays(1));
+        challengeService.checkChallenge(NORMAL_USER, challengeId, today.minusDays(1));
+
         mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.challenge.id").value(challengeId))
@@ -272,9 +353,9 @@ public class ChallengeIntegrationTest {
 
     @Test
     @WithMockUser(NORMAL_USER)
-    @Order(1)
     void enroll_check_cancel_get_tripple() throws Exception {
         Long challengeId = 1L;
+
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
         mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
@@ -291,9 +372,9 @@ public class ChallengeIntegrationTest {
 
     @Test
     @WithMockUser(NORMAL_USER)
-    @Order(1)
     void enroll_check_enroll_again_fail() throws Exception {
         Long challengeId = 1L;
+
         mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
         mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
@@ -303,15 +384,16 @@ public class ChallengeIntegrationTest {
     }
 
     @Test
-    @Order(10)
     void fail_challenge() throws Exception {
         Long challengeId = 2L;
-        LocalDate date = timeService.getToday();
+        LocalDate today = timeService.getToday();
 
-        challengeService.failChallenge(NORMAL_USER, challengeId, date);
+        challengeService.enrollChallenge(NORMAL_USER, challengeId, today.minusDays(1));
+        challengeService.checkChallenge(NORMAL_USER, challengeId, today.minusDays(1));
+        challengeService.failChallenge(NORMAL_USER, challengeId, today);
 
-        ChallengeRecordDto todayRecord = challengeService.getChallengeRecord(NORMAL_USER, challengeId, date);
-        ChallengeRecordDto tomorrowRecord = challengeService.getChallengeRecord(NORMAL_USER, challengeId, date.plusDays(1));
+        ChallengeRecordDto todayRecord = challengeService.getChallengeRecord(NORMAL_USER, challengeId, today);
+        ChallengeRecordDto tomorrowRecord = challengeService.getChallengeRecord(NORMAL_USER, challengeId, today.plusDays(1));
         ChallengeStatDto challengeStat = challengeService.getChallengeStat(NORMAL_USER, challengeId);
 
         assertTrue(todayRecord.getStatus().equals(ChallengeRecordStatus.FAIL));

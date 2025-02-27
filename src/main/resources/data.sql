@@ -44,15 +44,8 @@ INSERT INTO user_surveys (
 
 INSERT INTO user_stats (
     user_id, challenge_count, post_count, achievement_guage, continue_count
-) VALUES ( 'id0001', 2, 1, 2000, 2 ),
-        ( 'id0003', 1, 0, 0, 1 );
-
-INSERT INTO daily_records (
-    user_id, date, saving, total_challenges, achieved_challenges
-) VALUES ( 'id0001', '2025-01-19', 2000, 1, 1 ),
-        ( 'id0001', '2025-01-21', 3000, 1, 1 ),
-        ( 'id0001', '2025-01-22', 3000, 1, 1 ),
-        ( 'id0001', '2025-01-23', 0, 1, 0 );
+) VALUES ( 'id0001', 0, 0, 0, 0 ),
+        ( 'id0003', 0, 0, 0, 0 );
 
 INSERT INTO challenges (
     title, image_url_large, image_url_small, reward, participant_count, max_achieve_days, total_records, achieved_records
@@ -67,27 +60,9 @@ INSERT INTO challenges (
         ( '가계부 작성하기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge09.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge09.png', 10000, 0, 0, 0, 0 ),
         ( '무지출하기', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_large/challenge10.png', 'https://goolbitg-bucket.s3.ap-northeast-2.amazonaws.com/challenge_small/challenge10.png', 10000, 0, 0, 0, 0 );
 
-INSERT INTO challenge_records (
-    challenge_id, user_id, date, status, location
-) VALUES ( 2, 'id0001', '2025-01-15', 'SUCCESS', 1 ),
-        ( 2, 'id0001', '2025-01-16', 'SUCCESS', 2 ),
-        ( 2, 'id0001', '2025-01-17', 'FAIL', 3 ),
-        ( 2, 'id0001', '2025-01-21', 'SUCCESS', 1 ),
-        ( 2, 'id0001', '2025-01-22', 'SUCCESS', 2 ),
-        ( 2, 'id0001', '2025-01-23', 'WAIT', 3 ),
-        ( 1, 'id0001', '2025-01-17', 'SUCCESS', 1 ),
-        ( 1, 'id0001', '2025-01-18', 'SUCCESS', 2 ),
-        ( 1, 'id0001', '2025-01-19', 'SUCCESS', 3 ),
-        ( 2, 'id0003', '2025-01-22', 'SUCCESS', 1 ),
-        ( 2, 'id0003', '2025-01-23', 'WAIT', 2 ),
-        ( 2, 'id0003', '2025-01-24', 'WAIT', 3 );
-
 INSERT INTO challenge_stats (
     challenge_id, user_id, continue_count, current_continue_count, total_count, enroll_count
-) VALUES ( 1, 'id0001', 3, 3, 3, 1 ),
-        ( 2, 'id0001', 2, 2, 4, 2 ),
-        ( 2, 'id0003', 1, 1, 1, 1 ),
-        ( 1, 'id0005', 0, 0, 0, 0 ),
+) VALUES ( 1, 'id0005', 0, 0, 0, 0 ),
         ( 2, 'id0005', 0, 0, 0, 0 ),
         ( 3, 'id0005', 0, 0, 0, 0 ),
         ( 4, 'id0005', 0, 0, 0, 0 ),
