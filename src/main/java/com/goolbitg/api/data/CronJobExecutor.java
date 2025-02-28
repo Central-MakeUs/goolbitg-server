@@ -73,7 +73,7 @@ public class CronJobExecutor {
         // 2. Turn status to FAIL for all uncompleted challenges
         for (ChallengeRecord record : challengeRecordRepository.findAllByDateAndStatus(yesterday, ChallengeRecordStatus.WAIT)) {
             try {
-                challengeService.failChallenge(record.getUserId(), record.getChallengeId(), today);
+                challengeService.failChallenge(record.getUserId(), record.getChallengeId(), yesterday);
             } catch (Exception e) {
                 log.error("Canceling challenge failed: ", e);
             }

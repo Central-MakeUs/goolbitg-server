@@ -120,12 +120,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
         DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
-
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
 
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
-
         Optional<ChallengeStat> statResult = challengeStatRepository.findById(statId);
 
         if (recordResult.isEmpty() || statResult.isEmpty()) {
@@ -135,7 +133,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeRecord record = recordResult.get();
         ChallengeStat challengeStat = statResult.get();
 
-        if (record.getStatus() != ChallengeRecordStatus.WAIT) {
+        if (record.getStatus().equals(ChallengeRecordStatus.FAIL)) {
+            throw ChallengeException.notEnrolled(challengeId);
+        }
+        if (record.getStatus().equals(ChallengeRecordStatus.SUCCESS)) {
             throw ChallengeException.alreadyComplete(challengeId);
         }
 
@@ -290,9 +291,11 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
-
         ChallengeRecord currentRecord = challengeRecordRepository.findById(recordId)
                 .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
+        if (currentRecord.getStatus().equals(ChallengeRecordStatus.FAIL)) {
+            throw ChallengeException.notEnrolled(challengeId);
+        }
 
         ChallengeStat stat = challengeStatRepository.findById(statId).get();
 

@@ -286,6 +286,20 @@ public class ChallengeIntegrationTest {
 
     @Test
     @WithMockUser(ROOT_USER)
+    void throws_when_check_canceled_challenge() throws Exception {
+        Long challengeId = 1L;
+        LocalDate today = timeService.getToday();
+
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+        challengeService.cancelChallenge(ROOT_USER, challengeId, today);
+
+        mockMvc.perform(post("/challengeRecords/{challengeId}/check", challengeId))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code").value("4002"));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
     void cancel_challenge() throws Exception {
         Long challengeId = 1L;
         LocalDate today = timeService.getToday();
@@ -349,6 +363,20 @@ public class ChallengeIntegrationTest {
                 .andExpect(jsonPath("$.check3").value("WAIT"))
                 .andExpect(jsonPath("$.location").value(2))
                 .andExpect(jsonPath("$.canceled").value(false));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void throws_when_requesting_canceled_challenge_triple() throws Exception {
+        Long challengeId = 1L;
+        LocalDate today = timeService.getToday();
+    
+        challengeService.enrollChallenge(ROOT_USER, challengeId, today);
+        challengeService.cancelChallenge(ROOT_USER, challengeId, today);
+
+        mockMvc.perform(get("/challengeTripple/{challengeId}", challengeId))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code").value("4002"));
     }
 
     @Test
