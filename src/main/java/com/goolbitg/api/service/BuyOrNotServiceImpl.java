@@ -64,13 +64,13 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     }
 
     @Override
-    public PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String writerId) {
+    public PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String userId, String writerId) {
         Pageable pageReq = PageRequest.of(page, size);
         Page<BuyOrNot> result;
         if (writerId != null) {
-            result = buyOrNotRepository.findAllByWriterIdFiltered(writerId, pageReq);
+            result = buyOrNotRepository.findAllByWriterIdFiltered(userId, writerId, pageReq);
         } else {
-            result = buyOrNotRepository.findAllFiltered(writerId, pageReq);
+            result = buyOrNotRepository.findAllFiltered(userId, pageReq);
         }
 
         return getPaginatedBuyOrNotDto(result);

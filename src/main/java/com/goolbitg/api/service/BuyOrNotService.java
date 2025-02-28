@@ -11,7 +11,7 @@ import com.goolbitg.api.model.PaginatedBuyOrNotDto;
 public interface BuyOrNotService {
 
     BuyOrNotDto getBuyOrNot(Long postId);
-    PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String writerId);
+    PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String userId, String writerId);
     BuyOrNotDto createBuyOrNot(String userId, BuyOrNotDto request);
     BuyOrNotDto updateBuyOrNot(String userId, Long postId, BuyOrNotDto request);
     void deleteBuyOrNot(String userId, Long postId);

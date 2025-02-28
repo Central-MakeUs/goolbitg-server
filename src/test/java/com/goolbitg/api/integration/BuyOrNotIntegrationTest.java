@@ -187,7 +187,7 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(status().isOk());
         mockMvc.perform(get("/buyOrNots"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalSize").value(1));
+            .andExpect(jsonPath("$.totalSize").value(0));
     }
 
 }
