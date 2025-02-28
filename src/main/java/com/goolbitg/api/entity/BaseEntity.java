@@ -8,9 +8,12 @@ import jakarta.persistence.MappedSuperclass;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import lombok.Getter;
+
 /**
  * BaseEntity
  */
+@Getter
 @MappedSuperclass
 public abstract class BaseEntity {
 

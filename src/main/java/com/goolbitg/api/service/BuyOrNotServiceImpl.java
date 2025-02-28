@@ -1,6 +1,13 @@
 package com.goolbitg.api.service;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,6 +49,11 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     private BuyOrNotReportRepository buyOrNotReportRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TimeService timeService;
+
+    private Queue<BuyOrNot> timerCache = new LinkedList<>();
+    private Set<Long> canceledTimerIdSet = new HashSet<>();
 
     @Override
     public BuyOrNotDto getBuyOrNot(Long postId) {
@@ -106,6 +118,7 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
                 .badReason(request.getBadReason())
                 .build();
         BuyOrNot created = buyOrNotRepository.save(post);
+        timerCache.add(created);
 
         return getBuyOrNotDto(created);
     }
@@ -143,6 +156,7 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
         if (!post.getWriterId().equals(userId))
             throw AuthException.notAllowed();
         buyOrNotRepository.deleteById(postId);
+        canceledTimerIdSet.remove(postId);
     }
 
     @Override
@@ -187,6 +201,23 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
                 .build();
 
         buyOrNotReportRepository.save(report);
+    }
+
+    @Override
+    public List<BuyOrNotDto> getTimeCompletedBuyOrNots() {
+        LocalDateTime now = timeService.getNow();
+        List<BuyOrNotDto> result = new ArrayList<>();
+
+        while (timerCache.peek().getCreatedAt().isBefore(now.minusHours(24))) {
+            BuyOrNot post = timerCache.remove();
+            if (canceledTimerIdSet.contains(post.getId())) {
+                canceledTimerIdSet.remove(post.getId());
+                continue;
+            }
+            result.add(getBuyOrNotDto(post));
+        }
+
+        return result;
     }
 
 }

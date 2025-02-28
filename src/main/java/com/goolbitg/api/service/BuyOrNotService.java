@@ -1,5 +1,8 @@
 package com.goolbitg.api.service;
 
+import java.util.List;
+
+import com.goolbitg.api.entity.BuyOrNot;
 import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
@@ -17,5 +20,6 @@ public interface BuyOrNotService {
     void deleteBuyOrNot(String userId, Long postId);
     BuyOrNotVoteChangeDto voteBuyOrNot(String userId, Long postId, BuyOrNotVoteDto request);
     void reportBuyOrNot(String userId, Long postId, String reason);
+    List<BuyOrNotDto> getTimeCompletedBuyOrNots();
 
 }
