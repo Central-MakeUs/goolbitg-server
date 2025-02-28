@@ -31,7 +31,7 @@ public interface BuyOrNotRepository extends JpaRepository<BuyOrNot, Long> {
         SELECT p
         FROM BuyOrNot p
         LEFT JOIN BuyOrNotReport r ON p.id = r.postId
-        WHERE p.writerId = :writer_id
+        WHERE p.writerId = :writerId
         AND p.id NOT IN (
             SELECT r.postId FROM BuyOrNotReport r
             WHERE r.reporterId = :writerId
