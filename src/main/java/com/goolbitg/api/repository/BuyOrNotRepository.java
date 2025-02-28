@@ -17,19 +17,29 @@ public interface BuyOrNotRepository extends JpaRepository<BuyOrNot, Long> {
         SELECT p
         FROM BuyOrNot p
         LEFT JOIN BuyOrNotReport r ON p.id = r.postId
+        WHERE p.id NOT IN (
+            SELECT r.postId FROM BuyOrNotReport r
+            WHERE r.reporterId = :userId
+        )
         GROUP BY p.id
         HAVING COUNT(*) < 3
+        ORDER BY p.id DESC
         """)
-    Page<BuyOrNot> findAllFiltered(Pageable pageReq);
+    Page<BuyOrNot> findAllFiltered(@Param("userId") String userId, Pageable pageReq);
 
     @Query("""
         SELECT p
         FROM BuyOrNot p
         LEFT JOIN BuyOrNotReport r ON p.id = r.postId
         WHERE p.writerId = :writer_id
+        AND p.id NOT IN (
+            SELECT r.postId FROM BuyOrNotReport r
+            WHERE r.reporterId = :writerId
+        )
         GROUP BY p.id
         HAVING COUNT(p) < 3
+        ORDER BY p.id DESC
         """)
-    Page<BuyOrNot> findAllByWriterIdFiltered(@Param("writer_id") String writerId, Pageable pageReq);
+    Page<BuyOrNot> findAllByWriterIdFiltered(@Param("writerId") String writerId, Pageable pageReq);
 
 }

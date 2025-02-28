@@ -70,7 +70,7 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
         if (writerId != null) {
             result = buyOrNotRepository.findAllByWriterIdFiltered(writerId, pageReq);
         } else {
-            result = buyOrNotRepository.findAllFiltered(pageReq);
+            result = buyOrNotRepository.findAllFiltered(writerId, pageReq);
         }
 
         return getPaginatedBuyOrNotDto(result);

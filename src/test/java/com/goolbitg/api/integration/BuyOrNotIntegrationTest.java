@@ -9,18 +9,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URI;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotReportRequest;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
 import com.goolbitg.api.model.BuyOrNotVoteType;
+import com.goolbitg.api.service.BuyOrNotService;
 
 /**
  * BuyOrNotIntegrationTest
@@ -32,127 +33,155 @@ public class BuyOrNotIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private  ObjectMapper mapper;
+    private ObjectMapper mapper;
+    @Autowired
+    private BuyOrNotService buyOrNotService;
 
-    private final String ROOT_USER_ID = "id0001";
-    private final String NORMAL_USER_ID = "id0003";
+    private final String ROOT_USER = "id0001";
+    private final String NORMAL_USER = "id0003";
+
+    private BuyOrNotDto post1;
+    private BuyOrNotDto post2;
+    private BuyOrNotDto post3;
+
+    @BeforeEach
+    void preparePost() {
+        post1 = new BuyOrNotDto();
+        post1.setProductName("Product 1");
+        post1.setProductImageUrl(URI.create("http://localhost:8080/image/1"));
+        post1.setProductPrice(50000);
+        post1.setGoodReason("Good Reason");
+        post1.setBadReason("Bad Reason");
+
+        post2 = new BuyOrNotDto();
+        post2.setProductName("Product 2");
+        post2.setProductImageUrl(URI.create("http://localhost:8080/image/2"));
+        post2.setProductPrice(50000);
+        post2.setGoodReason("Good Reason");
+        post2.setBadReason("Bad Reason");
+
+        post3 = new BuyOrNotDto();
+        post3.setProductName("Product 3");
+        post3.setProductImageUrl(URI.create("http://localhost:8080/image/3"));
+        post3.setProductPrice(50000);
+        post3.setGoodReason("Good Reason");
+        post3.setBadReason("Bad Reason");
+    }
 
     @Test
-    @Transactional
-    @WithMockUser(ROOT_USER_ID)
+    @WithMockUser(ROOT_USER)
     void get_a_buy_or_not() throws Exception {
-        Long postId = 1L;
-        mockMvc.perform(get("/buyOrNots/{postId}", postId))
+        BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
+
+        mockMvc.perform(get("/buyOrNots/{postId}", created.getId()))
                     .andExpect(status().isOk());
     }
 
     @Test
-    @Transactional
-    @WithMockUser(ROOT_USER_ID)
+    @WithMockUser(ROOT_USER)
     void get_buy_or_not_list() throws Exception {
+        BuyOrNotDto created1 = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
+        BuyOrNotDto created2 = buyOrNotService.createBuyOrNot(ROOT_USER, post2);
+        BuyOrNotDto created3 = buyOrNotService.createBuyOrNot(ROOT_USER, post3);
+
         mockMvc.perform(get("/buyOrNots"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSize").value(2));
+                .andExpect(jsonPath("$.totalSize").value(3))
+                .andExpect(jsonPath("$.items[0].id").value(created3.getId()))
+                .andExpect(jsonPath("$.items[1].id").value(created2.getId()))
+                .andExpect(jsonPath("$.items[2].id").value(created1.getId()));
     }
 
     @Test
-    @Transactional
-    @WithMockUser(ROOT_USER_ID)
+    @WithMockUser(ROOT_USER)
     void create_new_post() throws Exception {
-        BuyOrNotDto request = new BuyOrNotDto();
-        request.setProductName("에어팟");
-        request.setProductPrice(129000);
-        request.setProductImageUrl(URI.create("test_url"));
-        request.setGoodReason("노래들을때 좋음");
-        request.setBadReason("비쌈");
-        String jsonBody = mapper.writeValueAsString(request);
+        String jsonBody = mapper.writeValueAsString(post1);
 
         mockMvc.perform(post("/buyOrNots")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(3));
+                .andExpect(jsonPath("$.writerId").value(ROOT_USER))
+                .andExpect(jsonPath("$.productName").value(post1.getProductName()))
+                .andExpect(jsonPath("$.productPrice").value(post1.getProductPrice()))
+                .andExpect(jsonPath("$.productImageUrl").value(post1.getProductImageUrl().toString()))
+                .andExpect(jsonPath("$.goodReason").value(post1.getGoodReason()))
+                .andExpect(jsonPath("$.badReason").value(post1.getBadReason()));
     }
 
     @Test
-    @Transactional
-    @WithMockUser(ROOT_USER_ID)
+    @WithMockUser(ROOT_USER)
     void update_post() throws Exception {
-        Long postId = 1L;
-        BuyOrNotDto request = new BuyOrNotDto();
-        request.setProductName("에어팟");
-        request.setGoodReason("노래들을때 좋음");
-        request.setBadReason("비쌈");
-        request.setProductImageUrl(URI.create("example_url"));
-        request.setProductPrice(100000);
-        String jsonBody = mapper.writeValueAsString(request);
+        BuyOrNotDto previous = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
+        String jsonBody = mapper.writeValueAsString(post2);
 
-        mockMvc.perform(put("/buyOrNots/{postId}", postId)
+        mockMvc.perform(put("/buyOrNots/{postId}", previous.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName").value("에어팟"));
+                .andExpect(jsonPath("$.writerId").value(ROOT_USER))
+                .andExpect(jsonPath("$.productName").value(post2.getProductName()))
+                .andExpect(jsonPath("$.productPrice").value(post2.getProductPrice()))
+                .andExpect(jsonPath("$.productImageUrl").value(post2.getProductImageUrl().toString()))
+                .andExpect(jsonPath("$.goodReason").value(post2.getGoodReason()))
+                .andExpect(jsonPath("$.badReason").value(post2.getBadReason()));
     }
 
     @Test
-    @Transactional
-    @WithMockUser(ROOT_USER_ID)
+    @WithMockUser(ROOT_USER)
     void delete_post() throws Exception {
-        Long postId = 1L;
+        BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
 
-        mockMvc.perform(delete("/buyOrNots/{postId}", postId))
+        mockMvc.perform(delete("/buyOrNots/{postId}", created.getId()))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/buyOrNots"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSize").value(1));
+                .andExpect(jsonPath("$.totalSize").value(0));
     }
 
     @Test
-    @Transactional
-    @WithMockUser(ROOT_USER_ID)
+    @WithMockUser(ROOT_USER)
     void vote_buy_or_not() throws Exception {
-        Long postId = 1L;
+        BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
         BuyOrNotVoteDto request = new BuyOrNotVoteDto();
         request.setVote(BuyOrNotVoteType.BAD);
         String jsonBody = mapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/buyOrNots/{postId}/vote", postId)
+        mockMvc.perform(post("/buyOrNots/{postId}/vote", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.goodVoteCount").value(0))
                 .andExpect(jsonPath("$.badVoteCount").value(1));
-        mockMvc.perform(get("/buyOrNots/{podtId}", postId))
+        mockMvc.perform(get("/buyOrNots/{podtId}", created.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.goodVoteCount").value(0))
                 .andExpect(jsonPath("$.badVoteCount").value(1));
     }
 
     @Test
-    @Transactional
-    @WithMockUser(NORMAL_USER_ID)
+    @WithMockUser(NORMAL_USER)
     void report_post() throws Exception {
-        Long postId = 1L;
+        BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
         BuyOrNotReportRequest request = new BuyOrNotReportRequest();
         request.setReason("잘못된 정보");
         String jsonBody = mapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/buyOrNots/{postId}/report", postId)
+        mockMvc.perform(post("/buyOrNots/{postId}/report", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @Transactional
-    @WithMockUser(NORMAL_USER_ID)
+    @WithMockUser(NORMAL_USER)
     void get_filtered_result() throws Exception {
-        Long postId = 1L;
+        BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
         BuyOrNotReportRequest request = new BuyOrNotReportRequest();
         request.setReason("잘못된 정보");
         String jsonBody = mapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/buyOrNots/{postId}/report", postId)
+        mockMvc.perform(post("/buyOrNots/{postId}/report", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
