@@ -18,6 +18,7 @@ public interface ChallengeService {
     ChallengeDto getChallenge(Long challengeId);
     PaginatedChallengeDto getChallenges(Integer page, Integer size, String userId);
     void cancelChallenge(String userId, Long challengeId, LocalDate date);
+    void failChallenge(String userId, Long challengeId, LocalDate date);
     ChallengeRecordDto checkChallenge(String userId, Long challengeId, LocalDate date);
     void enrollChallenge(String userId, Long challengeId, LocalDate date);
     ChallengeRecordDto getChallengeRecord(String userId, Long challengeId, LocalDate date);

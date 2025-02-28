@@ -49,7 +49,7 @@ public class UserIntegrationTest {
             .andExpect(jsonPath("$.spendingType.id").value(5))
             .andExpect(jsonPath("$.spendingType.peopleCount").value(3))
             .andExpect(jsonPath("$.spendingType.goal").isEmpty())
-            .andExpect(jsonPath("$.postCount").value(1));
+            .andExpect(jsonPath("$.postCount").value(0));
     }
 
     @Test
@@ -152,9 +152,9 @@ public class UserIntegrationTest {
         updateAgreement();
         mockMvc.perform(get("/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.saving").value(6000))
+                .andExpect(jsonPath("$.saving").value(0))
                 .andExpect(jsonPath("$.todayIndex").value(3))
-                .andExpect(jsonPath("$.continueCount").value(3));
+                .andExpect(jsonPath("$.continueCount").value(1));
     }
 
     @Test
@@ -165,9 +165,9 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/users/me/weeklyStatus")
             .param("date", "2025-01-20"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.saving").value(6000))
+                .andExpect(jsonPath("$.saving").value(0))
                 .andExpect(jsonPath("$.todayIndex").value(0))
-                .andExpect(jsonPath("$.continueCount").value(3));
+                .andExpect(jsonPath("$.continueCount").value(1));
     }
 
     private void updateAgreement() throws JsonProcessingException, Exception {

@@ -1530,6 +1530,8 @@ components:
           id: 1
           title: 자린고비 굴비
           imageUrl: http://localhost:8080/image/st1
+          profileUrl: http://localhost:8080/image/st1
+          onboardingResultUrl: http://localhost:8080/image/st1
           goal: 20000
           peopleCount: 20
         challengeCount: 14

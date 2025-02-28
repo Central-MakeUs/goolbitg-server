@@ -59,10 +59,10 @@ public class BuyOrNotController implements BuyOrNotApi {
     @Override
     public ResponseEntity<PaginatedBuyOrNotDto> getBuyOrNots(@Valid Integer page, @Valid Integer size,
             @Valid Boolean created) throws Exception {
-        String userId = null;
-        if (created)
-            userId = AuthUtil.getLoginUserId();
-        PaginatedBuyOrNotDto result = buyOrNotService.getBuyOrNots(page, size, userId);
+        String userId = AuthUtil.getLoginUserId();
+        String writerId = null;
+        if (created) writerId = userId;
+        PaginatedBuyOrNotDto result = buyOrNotService.getBuyOrNots(page, size, userId, writerId);
         return ResponseEntity.ok(result);
     }
 
