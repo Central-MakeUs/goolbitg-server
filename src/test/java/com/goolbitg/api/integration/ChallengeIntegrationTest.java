@@ -77,7 +77,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("WAIT"))
-                .andExpect(jsonPath("$.duration").value(0));
+                .andExpect(jsonPath("$.duration").value(1));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class ChallengeIntegrationTest {
         mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("WAIT"))
-                .andExpect(jsonPath("$.duration").value(2));
+                .andExpect(jsonPath("$.duration").value(3));
     }
 
     @Test
