@@ -398,7 +398,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         dto.setStatus(record.getStatus());
         dto.setDate(record.getDate());
         dto.setLocation(record.getLocation());
-        dto.setDuration(stat.getCurrentContinueCount());
+        dto.setDuration(getChallengeDuration(stat, record));
         return dto;
     }
 
@@ -436,15 +436,20 @@ public class ChallengeServiceImpl implements ChallengeService {
     private ChallengeTrippleDto getChallengeTrippleDto(Challenge challenge, List<ChallengeRecord> records, ChallengeRecord currentRecord, ChallengeStat stat, boolean canceled) {
         ChallengeTrippleDto dto = new ChallengeTrippleDto();
         dto.setChallenge(getChallengeDto(challenge));
-        if (currentRecord.getStatus() == ChallengeRecordStatus.WAIT)
-            dto.setDuration(stat.getContinueCount() + 1);
-        else
-            dto.setDuration(stat.getContinueCount());
+        dto.setDuration(getChallengeDuration(stat, currentRecord));
         dto.setCheck1(records.get(0).getStatus());
         dto.setCheck2(records.get(1).getStatus());
         dto.setCheck3(records.get(2).getStatus());
         dto.setLocation(currentRecord.getLocation());
         dto.setCanceled(canceled);
         return dto;
+    }
+
+    private int getChallengeDuration(ChallengeStat stat, ChallengeRecord record) {
+        if (record.getStatus() == ChallengeRecordStatus.WAIT)
+            return stat.getContinueCount() + 1;
+        else
+            return stat.getContinueCount();
+
     }
 }
