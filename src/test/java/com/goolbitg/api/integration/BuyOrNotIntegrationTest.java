@@ -107,6 +107,9 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(jsonPath("$.productImageUrl").value(post1.getProductImageUrl().toString()))
                 .andExpect(jsonPath("$.goodReason").value(post1.getGoodReason()))
                 .andExpect(jsonPath("$.badReason").value(post1.getBadReason()));
+        mockMvc.perform(get("/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postCount").value(1));
     }
 
     @Test
@@ -137,6 +140,9 @@ public class BuyOrNotIntegrationTest {
         mockMvc.perform(get("/buyOrNots"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalSize").value(0));
+        mockMvc.perform(get("/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postCount").value(0));
     }
 
     @Test
