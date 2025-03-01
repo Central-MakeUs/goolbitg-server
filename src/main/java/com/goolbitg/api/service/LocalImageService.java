@@ -9,13 +9,10 @@ import com.goolbitg.api.model.ImageUploadResponse;
 /**
  * LocalImageService
  */
-@Service
-@Profile({"local", "test"})
 public class LocalImageService implements ImageService {
 
     @Override
     public ImageUploadResponse uploadImage(MultipartFile image) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'uploadImage'");
     }
 

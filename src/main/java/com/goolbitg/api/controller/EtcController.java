@@ -60,7 +60,6 @@ public class EtcController implements EtcApi {
     }
 
     @Override
-    @Profile({ "dev", "local" })
     public ResponseEntity<Void> sendChallengeNotice(@NotNull @Valid String password) throws Exception {
         adminService.authenticateAdmin(password);
         cronJobExecutor.sendChallengeAlarm();

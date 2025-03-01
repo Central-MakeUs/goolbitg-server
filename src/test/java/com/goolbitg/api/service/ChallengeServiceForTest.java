@@ -22,5 +22,4 @@ public class ChallengeServiceForTest extends ChallengeServiceImpl {
         super.failChallenge(userId, challengeId, date);
     }
 
-    
 }
