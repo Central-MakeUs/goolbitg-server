@@ -1,6 +1,13 @@
 package com.goolbitg.api.service;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,8 +21,10 @@ import com.goolbitg.api.entity.BuyOrNotReport;
 import com.goolbitg.api.entity.BuyOrNotReportId;
 import com.goolbitg.api.entity.BuyOrNotVote;
 import com.goolbitg.api.entity.BuyOrNotVoteId;
+import com.goolbitg.api.entity.User;
 import com.goolbitg.api.exception.AuthException;
 import com.goolbitg.api.exception.BuyOrNotException;
+import com.goolbitg.api.exception.UserException;
 import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
@@ -24,6 +33,7 @@ import com.goolbitg.api.model.PaginatedBuyOrNotDto;
 import com.goolbitg.api.repository.BuyOrNotReportRepository;
 import com.goolbitg.api.repository.BuyOrNotRepository;
 import com.goolbitg.api.repository.BuyOrNotVoteRepository;
+import com.goolbitg.api.repository.UserRepository;
 
 /**
  * BuyOrNotServiceImpl
@@ -37,6 +47,13 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     private BuyOrNotVoteRepository buyOrNotVoteRepository;
     @Autowired
     private BuyOrNotReportRepository buyOrNotReportRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private TimeService timeService;
+
+    private Queue<BuyOrNot> timerCache = new LinkedList<>();
+    private Set<Long> canceledTimerIdSet = new HashSet<>();
 
     @Override
     public BuyOrNotDto getBuyOrNot(Long postId) {
@@ -64,13 +81,13 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     }
 
     @Override
-    public PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String writerId) {
+    public PaginatedBuyOrNotDto getBuyOrNots(Integer page, Integer size, String userId, String writerId) {
         Pageable pageReq = PageRequest.of(page, size);
         Page<BuyOrNot> result;
         if (writerId != null) {
-            result = buyOrNotRepository.findAllByWriterIdFiltered(writerId, pageReq);
+            result = buyOrNotRepository.findAllByWriterIdFiltered(userId, writerId, pageReq);
         } else {
-            result = buyOrNotRepository.findAllFiltered(pageReq);
+            result = buyOrNotRepository.findAllFiltered(userId, pageReq);
         }
 
         return getPaginatedBuyOrNotDto(result);
@@ -89,6 +106,9 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     @Override
     @Transactional
     public BuyOrNotDto createBuyOrNot(String userId, BuyOrNotDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        user.getStat().increasePostCount();
         BuyOrNot post = BuyOrNot.builder()
                 .writerId(userId)
                 .productName(request.getProductName())
@@ -98,6 +118,7 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
                 .badReason(request.getBadReason())
                 .build();
         BuyOrNot created = buyOrNotRepository.save(post);
+        timerCache.add(created);
 
         return getBuyOrNotDto(created);
     }
@@ -127,11 +148,15 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     @Override
     @Transactional
     public void deleteBuyOrNot(String userId, Long postId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.userNotExist(userId));
+        user.getStat().decreasePostCount();
         BuyOrNot post = buyOrNotRepository.findById(postId)
                 .orElseThrow(() -> BuyOrNotException.postNotExist(postId));
         if (!post.getWriterId().equals(userId))
             throw AuthException.notAllowed();
         buyOrNotRepository.deleteById(postId);
+        canceledTimerIdSet.remove(postId);
     }
 
     @Override
@@ -176,6 +201,23 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
                 .build();
 
         buyOrNotReportRepository.save(report);
+    }
+
+    @Override
+    public List<BuyOrNotDto> getTimeCompletedBuyOrNots() {
+        LocalDateTime now = timeService.getNow();
+        List<BuyOrNotDto> result = new ArrayList<>();
+
+        while (timerCache.peek().getCreatedAt().isBefore(now.minusHours(24))) {
+            BuyOrNot post = timerCache.remove();
+            if (canceledTimerIdSet.contains(post.getId())) {
+                canceledTimerIdSet.remove(post.getId());
+                continue;
+            }
+            result.add(getBuyOrNotDto(post));
+        }
+
+        return result;
     }
 
 }

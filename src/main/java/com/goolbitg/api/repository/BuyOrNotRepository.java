@@ -16,20 +16,35 @@ public interface BuyOrNotRepository extends JpaRepository<BuyOrNot, Long> {
     @Query("""
         SELECT p
         FROM BuyOrNot p
-        LEFT JOIN BuyOrNotReport r ON p.id = r.postId
-        GROUP BY p.id
-        HAVING COUNT(*) < 3
+        WHERE NOT EXISTS (
+            SELECT 1 FROM BuyOrNotReport r2
+            WHERE r2.postId = p.id
+            AND r2.reporterId = :userId
+        )
+        AND (
+            SELECT COUNT(*) FROM BuyOrNotReport r3
+            WHERE r3.postId = p.id
+        ) < 3
+        ORDER BY p.id DESC
         """)
-    Page<BuyOrNot> findAllFiltered(Pageable pageReq);
+    Page<BuyOrNot> findAllFiltered(@Param("userId") String userId, Pageable pageReq);
 
     @Query("""
         SELECT p
         FROM BuyOrNot p
-        LEFT JOIN BuyOrNotReport r ON p.id = r.postId
-        WHERE p.writerId = :writer_id
-        GROUP BY p.id
-        HAVING COUNT(p) < 3
+        LEFT JOIN BuyOrNotReport r1 ON p.id = r1.postId
+        WHERE p.writerId = :writerId
+        AND NOT EXISTS (
+            SELECT 1 FROM BuyOrNotReport r2
+            WHERE r2.postId = p.id
+            AND r2.reporterId = :userId
+        )
+        AND (
+            SELECT COUNT(*) FROM BuyOrNotReport r3
+            WHERE r3.postId = p.id
+        ) < 3
+        ORDER BY p.id DESC
         """)
-    Page<BuyOrNot> findAllByWriterIdFiltered(@Param("writer_id") String writerId, Pageable pageReq);
+    Page<BuyOrNot> findAllByWriterIdFiltered(@Param("userId") String userId, @Param("writerId") String writerId, Pageable pageReq);
 
 }

@@ -57,6 +57,14 @@ public class UserStat {
         continueCount += 1;
     }
 
+    public void increasePostCount() {
+        postCount += 1;
+    }
+
+    public void decreasePostCount() {
+        postCount -= 1;
+    }
+
     public void resetContinueCount() {
         continueCount = 0;
     }

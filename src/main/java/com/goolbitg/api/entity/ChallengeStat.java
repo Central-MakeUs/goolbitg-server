@@ -58,6 +58,10 @@ public class ChallengeStat {
         continueCount = 0;
     }
 
+    public void fail() {
+        continueCount = 0;
+    }
+
     public static ChallengeStat getDefault(Long challengeId, String userId) {
         return ChallengeStat.builder()
                 .challengeId(challengeId)
