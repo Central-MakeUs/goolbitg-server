@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+        <link href="css/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1>굴비잇기 어드민 로그인</h1>
+        <div th:if="${errorMsg}" style="color: red;">
+            <p th:text="${errorMsg}"></p>
+        </div>
+        <h2>Login</h2>
+        <form action="/admin/login" method="POST">
+            <label>e-mail: <input type="text" name="username" placeholder="Username" required></label>
+            <label>password: <input type="password" name="password" placeholder="Password" required></label>
+            <button type="submit">Login</button>
+        </form>
+    </body>
+</html>

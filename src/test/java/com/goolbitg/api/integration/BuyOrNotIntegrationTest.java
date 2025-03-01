@@ -21,7 +21,7 @@ import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotReportRequest;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
 import com.goolbitg.api.model.BuyOrNotVoteType;
-import com.goolbitg.api.service.BuyOrNotService;
+import com.goolbitg.api.v1.service.BuyOrNotService;
 
 /**
  * BuyOrNotIntegrationTest
@@ -73,7 +73,7 @@ public class BuyOrNotIntegrationTest {
     void get_a_buy_or_not() throws Exception {
         BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
 
-        mockMvc.perform(get("/buyOrNots/{postId}", created.getId()))
+        mockMvc.perform(get("/api/v1/buyOrNots/{postId}", created.getId()))
                     .andExpect(status().isOk());
     }
 
@@ -84,7 +84,7 @@ public class BuyOrNotIntegrationTest {
         BuyOrNotDto created2 = buyOrNotService.createBuyOrNot(ROOT_USER, post2);
         BuyOrNotDto created3 = buyOrNotService.createBuyOrNot(ROOT_USER, post3);
 
-        mockMvc.perform(get("/buyOrNots"))
+        mockMvc.perform(get("/api/v1/buyOrNots"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalSize").value(3))
                 .andExpect(jsonPath("$.items[0].id").value(created3.getId()))
@@ -97,7 +97,7 @@ public class BuyOrNotIntegrationTest {
     void create_new_post() throws Exception {
         String jsonBody = mapper.writeValueAsString(post1);
 
-        mockMvc.perform(post("/buyOrNots")
+        mockMvc.perform(post("/api/v1/buyOrNots")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isCreated())
@@ -107,7 +107,7 @@ public class BuyOrNotIntegrationTest {
                 .andExpect(jsonPath("$.productImageUrl").value(post1.getProductImageUrl().toString()))
                 .andExpect(jsonPath("$.goodReason").value(post1.getGoodReason()))
                 .andExpect(jsonPath("$.badReason").value(post1.getBadReason()));
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.postCount").value(1));
     }
@@ -118,7 +118,7 @@ public class BuyOrNotIntegrationTest {
         BuyOrNotDto previous = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
         String jsonBody = mapper.writeValueAsString(post2);
 
-        mockMvc.perform(put("/buyOrNots/{postId}", previous.getId())
+        mockMvc.perform(put("/api/v1/buyOrNots/{postId}", previous.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk())
@@ -135,12 +135,12 @@ public class BuyOrNotIntegrationTest {
     void delete_post() throws Exception {
         BuyOrNotDto created = buyOrNotService.createBuyOrNot(ROOT_USER, post1);
 
-        mockMvc.perform(delete("/buyOrNots/{postId}", created.getId()))
+        mockMvc.perform(delete("/api/v1/buyOrNots/{postId}", created.getId()))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/buyOrNots"))
+        mockMvc.perform(get("/api/v1/buyOrNots"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalSize").value(0));
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.postCount").value(0));
     }
@@ -153,13 +153,13 @@ public class BuyOrNotIntegrationTest {
         request.setVote(BuyOrNotVoteType.BAD);
         String jsonBody = mapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/buyOrNots/{postId}/vote", created.getId())
+        mockMvc.perform(post("/api/v1/buyOrNots/{postId}/vote", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.goodVoteCount").value(0))
                 .andExpect(jsonPath("$.badVoteCount").value(1));
-        mockMvc.perform(get("/buyOrNots/{podtId}", created.getId()))
+        mockMvc.perform(get("/api/v1/buyOrNots/{podtId}", created.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.goodVoteCount").value(0))
                 .andExpect(jsonPath("$.badVoteCount").value(1));
@@ -173,7 +173,7 @@ public class BuyOrNotIntegrationTest {
         request.setReason("잘못된 정보");
         String jsonBody = mapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/buyOrNots/{postId}/report", created.getId())
+        mockMvc.perform(post("/api/v1/buyOrNots/{postId}/report", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
@@ -187,11 +187,11 @@ public class BuyOrNotIntegrationTest {
         request.setReason("잘못된 정보");
         String jsonBody = mapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/buyOrNots/{postId}/report", created.getId())
+        mockMvc.perform(post("/api/v1/buyOrNots/{postId}/report", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/buyOrNots"))
+        mockMvc.perform(get("/api/v1/buyOrNots"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalSize").value(0));
     }

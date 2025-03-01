@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.goolbitg.api.data.CronJobExecutor;
-import com.goolbitg.api.service.ChallengeService;
-import com.goolbitg.api.service.TimeService;
+import com.goolbitg.api.v1.data.CronJobExecutor;
+import com.goolbitg.api.v1.service.ChallengeService;
+import com.goolbitg.api.v1.service.TimeService;
 
 /**
  * CronJobExecutorTest
@@ -41,14 +41,14 @@ public class CronJobExecutorTest {
         challengeService.enrollChallenge(ROOT_USER, challengeId, today.minusDays(1));
         cronJobExecutor.finishTheDay();
 
-        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
+        mockMvc.perform(get("/api/v1/challengeRecords/{challengeId}", challengeId)
             .param("date", today.minusDays(1).toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("FAIL"));
-        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId))
+        mockMvc.perform(get("/api/v1/challengeRecords/{challengeId}", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("FAIL"));
-        mockMvc.perform(get("/challengeRecords/{challengeId}", challengeId)
+        mockMvc.perform(get("/api/v1/challengeRecords/{challengeId}", challengeId)
             .param("date", today.plusDays(1).toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("FAIL"));
@@ -64,7 +64,7 @@ public class CronJobExecutorTest {
         challengeService.checkChallenge(ROOT_USER, challengeId, today.minusDays(1));
         cronJobExecutor.finishTheDay();
 
-        mockMvc.perform(get("/users/me/weeklyStatus"))
+        mockMvc.perform(get("/api/v1/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weeklyStatus[2].totalChallenges").value(1))
                 .andExpect(jsonPath("$.weeklyStatus[2].achievedChallenges").value(1))

@@ -68,6 +68,7 @@ dependencies {
     implementation "org.flywaydb:flyway-mysql:11.3.1"
     implementation 'software.amazon.awssdk:s3:2.30.17'
     implementation 'org.springframework.security:spring-security-crypto'
+    implementation 'org.thymeleaf:thymeleaf-spring6'
 }
 
 tasks.named('test') {

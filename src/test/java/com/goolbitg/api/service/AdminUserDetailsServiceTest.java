@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.goolbitg.api.security.AdminUserDetailsService;
-import com.goolbitg.api.security.RoleType;
+import com.goolbitg.api.v1.security.AdminUserDetailsService;
+import com.goolbitg.api.v1.security.RoleType;
 
 /**
  * AdminUserDetailsServiceTest
@@ -20,7 +20,7 @@ public class AdminUserDetailsServiceTest {
 
     @Test
     void register_a_admin_user() {
-        adminUserDetailsService.registerAdminUser("test@gmail.com", "asdf1234", Set.of(RoleType.ADMIN));
+        adminUserDetailsService.registerAdminUser("test@gmail.com", "asdf1234", Set.of(RoleType.ROLE_ADMIN));
     }
 
 }
