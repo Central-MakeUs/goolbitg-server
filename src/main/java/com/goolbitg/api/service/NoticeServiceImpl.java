@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
@@ -120,6 +122,13 @@ public class NoticeServiceImpl implements NoticeService {
                 .setBody(message)
                 .build())
             .setToken(registrationToken)
+            .setApnsConfig(ApnsConfig.builder()
+                .setAps(Aps.builder()
+                    .setContentAvailable(true)
+                    .putCustomData("apns-push-type", "background")
+                    .putCustomData("apns-priority", 5)
+                    .build())
+                .build())
             .build();
 
         try {
