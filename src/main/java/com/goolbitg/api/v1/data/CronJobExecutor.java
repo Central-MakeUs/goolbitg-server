@@ -3,22 +3,22 @@ package com.goolbitg.api.v1.data;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.goolbitg.api.v1.entity.Challenge;
-import com.goolbitg.api.v1.entity.ChallengeRecord;
-import com.goolbitg.api.v1.entity.User;
-import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
-import com.goolbitg.api.v1.repository.ChallengeRepository;
-import com.goolbitg.api.v1.repository.DailyRecordRepository;
-import com.goolbitg.api.v1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goolbitg.api.v1.entity.DailyRecord;
 import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.NoticeType;
+import com.goolbitg.api.v1.entity.Challenge;
+import com.goolbitg.api.v1.entity.ChallengeRecord;
+import com.goolbitg.api.v1.entity.DailyRecord;
+import com.goolbitg.api.v1.entity.User;
+import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
+import com.goolbitg.api.v1.repository.ChallengeRepository;
+import com.goolbitg.api.v1.repository.DailyRecordRepository;
+import com.goolbitg.api.v1.repository.UserRepository;
 import com.goolbitg.api.v1.service.BuyOrNotService;
 import com.goolbitg.api.v1.service.ChallengeService;
 import com.goolbitg.api.v1.service.NoticeService;
@@ -120,7 +120,7 @@ public class CronJobExecutor {
     @Scheduled(cron = "0 */6 * * * *")
     public void sendBuyOrNotVoteAlarm() {
         for (BuyOrNotDto post : buyOrNotService.getTimeCompletedBuyOrNots()) {
-            String message = String.format("{%s}에 대한 투표결과가 나왔어요. 어서 확인해보세요", post.getProductName());
+            String message = String.format("[%s]에 대한 투표결과가 나왔어요. 어서 확인해보세요", post.getProductName());
             noticeService.sendMessage(post.getWriterId(), message, NoticeType.VOTE);
         }
     }
