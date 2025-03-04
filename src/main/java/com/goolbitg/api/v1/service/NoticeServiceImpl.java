@@ -4,6 +4,8 @@ import com.goolbitg.api.v1.entity.Notice;
 import com.goolbitg.api.v1.exception.NoticeException;
 import com.goolbitg.api.v1.repository.NoticeRepository;
 import com.goolbitg.api.v1.repository.RegistrationTokenRepository;
+import com.goolbitg.api.v1.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.goolbitg.api.v1.entity.RegistrationToken;
+import com.goolbitg.api.v1.entity.User;
 import com.goolbitg.api.model.NoticeDto;
 import com.goolbitg.api.model.NoticeType;
 import com.goolbitg.api.model.PaginatedNoticeDto;
@@ -33,13 +36,23 @@ import lombok.extern.slf4j.Slf4j;
 public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
-    private final NoticeRepository noticeRepository;
+    private NoticeRepository noticeRepository;
     @Autowired
-    private final RegistrationTokenRepository registrationTokenRepository;
+    private RegistrationTokenRepository registrationTokenRepository;
     @Autowired
-    private final TimeService timeService;
+    private TimeService timeService;
+    @Autowired
+    private UserRepository userRepository;
 
     /* ------------ Implementations ----------- */
+
+    @Override
+    @Transactional
+    public void broadcast(String message, NoticeType type) {
+        for (User user : userRepository.findAll()) {
+            sendMessage(user.getId(), message, type);
+        }
+    }
 
     @Override
     @Transactional

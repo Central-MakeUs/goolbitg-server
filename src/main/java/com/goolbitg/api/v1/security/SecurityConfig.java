@@ -108,8 +108,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers( "/auth/unregister", "/auth/logout").hasRole("USER")
-                .requestMatchers( "/api/v1/auth/**", "/api/v1/token").permitAll()
+                .requestMatchers("/auth/unregister", "/auth/logout").hasRole("USER")
+                .requestMatchers("/api/v1/auth/**", "/api/v1/token").permitAll()
                 .anyRequest().hasRole("USER")
             )
             .oauth2ResourceServer(oauth2ResourceServer -> 
@@ -129,7 +129,7 @@ public class SecurityConfig {
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/login")
                 .failureUrl("/admin/login?error")
-                .defaultSuccessUrl("/admin/home", true)
+                .defaultSuccessUrl("/admin", true)
                 .permitAll()
             )
             .authorizeHttpRequests(authorize -> authorize

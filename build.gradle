@@ -45,30 +45,35 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    swaggerCodegen 'org.openapitools:openapi-generator-cli:6.2.1'
-    swaggerUI 'org.webjars:swagger-ui:3.52.5'
-    compileOnly 'io.swagger:swagger-annotations:1.6.4'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    compileOnly 'org.openapitools:jackson-databind-nullable:0.2.3'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-    implementation 'io.springfox:springfox-oas:3.0.0'
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.security:spring-security-crypto'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation 'io.springfox:springfox-oas:3.0.0'
     implementation 'com.auth0:java-jwt:4.3.0'
-    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'com.google.firebase:firebase-admin:9.4.3'
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.flywaydb:flyway-core:11.3.1'
     implementation "org.flywaydb:flyway-mysql:11.3.1"
     implementation 'software.amazon.awssdk:s3:2.30.17'
-    implementation 'org.springframework.security:spring-security-crypto'
     implementation 'org.thymeleaf:thymeleaf-spring6'
+
+    compileOnly 'io.swagger:swagger-annotations:1.6.4'
+    compileOnly 'org.openapitools:jackson-databind-nullable:0.2.3'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    runtimeOnly 'com.h2database:h2'
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    swaggerCodegen 'org.openapitools:openapi-generator-cli:6.2.1'
+    swaggerUI 'org.webjars:swagger-ui:3.52.5'
 }
 
 tasks.named('test') {

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>굴비잇기 관리자 페이지</title>
+        <link href="css/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <a href="/admin">홈으로</a>
+        <h1>푸시 알림 관리</h1>
+        <section>
+            <h2>푸시 알림 보내기</h2>
+            <p>모든 유저에게 푸시 알람을 보냅니다.</p>
+            <div th:if="${resultMsg}" style="color: green;">
+                <p th:text="${resultMsg}"></p>
+            </div>
+            <div th:if="${errorMsg}" style="color: red;">
+                <p th:text="${errorMsg}"></p>
+            </div>
+            <form action="/admin/notice/broadcast" method="post">
+                <div>
+                    <label for="type">알림 타입</label>
+                    <select id="type" name="type">
+                        <option value="CHALLENGE">챌린지</option>
+                        <option value="VOTE">투표결과</option>
+                        <option value="CHAT">채팅</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="message">내용</label>
+                    <br/>
+                    <textarea id="message" name="message" rows="8" cols="100" placeholder="내용" required></textarea>
+                </div>
+                <div>
+                    <button type="submit">보내기</button>
+                </div>
+            </form>
+        </section>
+    </body>
+</html>

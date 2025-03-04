@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title></title>
-        <link href="css/style.css" rel="stylesheet">
-    </head>
-    <body>
-        <h1>Welcome to the admin page!</h1>
-        <p>Login user: <span th:text="${email}"/></p>
-    </body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>굴비잇기 관리자 페이지</title>
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <h1>굴비잇기 관리자 페이지</h1>
+    <p>Login user: <span th:text="${email}"/></p>
+    <section>
+      <h3>통계</h3>
+    </section>
+    <section>
+      <h3>관리</h3>
+      <ul>
+        <li>
+          <a href="/admin/notice">푸시 알림 관리</a>
+        </li>
+        <li>
+          <a href="/admin/buyornot">살까말까 포스트 관리</a>
+        </li>
+        <li>
+          <a href="/admin/user">유저 관리</a>
+        </li>
+      </ul>
+    </section>
+  </body>
 </html>

@@ -8,6 +8,7 @@ import com.goolbitg.api.model.PaginatedNoticeDto;
  */
 public interface NoticeService {
 
+    void broadcast(String message, NoticeType type);
     void sendMessage(String userId, String message, NoticeType type);
     PaginatedNoticeDto getNotices(Integer page, Integer size, String userId, NoticeType type);
     void readNotice(Long noticeId);
