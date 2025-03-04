@@ -117,13 +117,6 @@ INSERT INTO challenge_groups (
     owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achieve_ratio, max_achieve_days
 ) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 2000, 6, 1, 23, 50, 63 );
 
-INSERT INTO notices (
-    receiver_id, message, published_at, type, is_read
-) VALUES ( 'id0001', '오늘 아직 챌린지를 달성하지 못했어요.',
-    '2025-01-07 14:26:32', 'CHALLENGE', 0 ),
-          ( 'id0001', '누군가 내 게시글에 투표했어요.',
-    '2025-01-07 14:26:32', 'VOTE', 0 );
-
 INSERT INTO challenge_group_records (
     group_id, user_id, date, status
 ) VALUES ( 1, 'id0001', '2025-01-14', 'FAIL' );

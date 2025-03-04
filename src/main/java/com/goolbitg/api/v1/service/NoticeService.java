@@ -1,7 +1,9 @@
 package com.goolbitg.api.v1.service;
 
+import com.goolbitg.api.model.NoticeDto;
 import com.goolbitg.api.model.NoticeType;
 import com.goolbitg.api.model.PaginatedNoticeDto;
+import com.goolbitg.api.v1.entity.Notice;
 
 /**
  * NoticeService
@@ -9,7 +11,7 @@ import com.goolbitg.api.model.PaginatedNoticeDto;
 public interface NoticeService {
 
     void broadcast(String message, NoticeType type);
-    void sendMessage(String userId, String message, NoticeType type);
+    NoticeDto sendMessage(String userId, String message, NoticeType type);
     PaginatedNoticeDto getNotices(Integer page, Integer size, String userId, NoticeType type);
     void readNotice(Long noticeId);
 

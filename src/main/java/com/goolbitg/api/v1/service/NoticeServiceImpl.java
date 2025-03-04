@@ -1,11 +1,5 @@
 package com.goolbitg.api.v1.service;
 
-import com.goolbitg.api.v1.entity.Notice;
-import com.goolbitg.api.v1.exception.NoticeException;
-import com.goolbitg.api.v1.repository.NoticeRepository;
-import com.goolbitg.api.v1.repository.RegistrationTokenRepository;
-import com.goolbitg.api.v1.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +13,16 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.goolbitg.api.v1.entity.RegistrationToken;
-import com.goolbitg.api.v1.entity.User;
 import com.goolbitg.api.model.NoticeDto;
 import com.goolbitg.api.model.NoticeType;
 import com.goolbitg.api.model.PaginatedNoticeDto;
+import com.goolbitg.api.v1.entity.Notice;
+import com.goolbitg.api.v1.entity.RegistrationToken;
+import com.goolbitg.api.v1.entity.User;
+import com.goolbitg.api.v1.exception.NoticeException;
+import com.goolbitg.api.v1.repository.NoticeRepository;
+import com.goolbitg.api.v1.repository.RegistrationTokenRepository;
+import com.goolbitg.api.v1.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     @Transactional
-    public void sendMessage(String userId, String message, NoticeType type) {
+    public NoticeDto sendMessage(String userId, String message, NoticeType type) {
         Notice notice = Notice.builder()
             .receiverId(userId)
             .message(message)
@@ -66,11 +65,13 @@ public class NoticeServiceImpl implements NoticeService {
             .type(type)
             .build();
 
-        noticeRepository.save(notice);
+        Notice saved = noticeRepository.save(notice);
 
         for (RegistrationToken token : registrationTokenRepository.findAllByUserId(userId)) {
             sendMessageInner(token.getRegistrationToken(), message);
         }
+
+        return getNoticeDto(saved);
     }
 
     @Override
@@ -78,9 +79,9 @@ public class NoticeServiceImpl implements NoticeService {
         Pageable pageReq = PageRequest.of(page, size);
         Page<Notice> result;
         if (type == null) {
-            result = noticeRepository.findAllByReceiverId(userId, pageReq);
+            result = noticeRepository.findAllByReceiverIdOrderByIdDesc(userId, pageReq);
         } else {
-            result = noticeRepository.findAllByReceiverIdAndType(userId, type, pageReq);
+            result = noticeRepository.findAllByReceiverIdAndTypeOrderByIdDesc(userId, type, pageReq);
         }
 
         return getPaginatedNoticeDto(result);

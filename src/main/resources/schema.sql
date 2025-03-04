@@ -206,3 +206,10 @@ CREATE TABLE admin_user_roles (
   FOREIGN KEY (email) REFERENCES admin_users(email) ON DELETE CASCADE
 );
 
+CREATE TABLE registration_tokens (
+  registration_token VARCHAR(255) NOT NULL,
+  user_id VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (registration_token)
+);
+
