@@ -2,6 +2,7 @@ package com.goolbitg.api.service;
 
 import java.time.LocalDate;
 
+import com.goolbitg.api.v1.service.ChallengeServiceImpl;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -22,5 +23,4 @@ public class ChallengeServiceForTest extends ChallengeServiceImpl {
         super.failChallenge(userId, challengeId, date);
     }
 
-    
 }

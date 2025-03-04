@@ -26,7 +26,7 @@ public class NoticeIntegrationTest {
     @Transactional
     @WithMockUser(ROOT_USER_ID)
     void get_notices() throws Exception {
-        mockMvc.perform(get("/notices"))
+        mockMvc.perform(get("/api/v1/notices"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.size").value(2));
     }
@@ -35,7 +35,7 @@ public class NoticeIntegrationTest {
     @Transactional
     @WithMockUser(ROOT_USER_ID)
     void get_notices_of_type() throws Exception {
-        mockMvc.perform(get("/notices")
+        mockMvc.perform(get("/api/v1/notices")
             .param("type", "CHALLENGE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(1));
@@ -46,10 +46,10 @@ public class NoticeIntegrationTest {
     @WithMockUser(ROOT_USER_ID)
     void read_notice() throws Exception {
         Long noticeId = 1L;
-        mockMvc.perform(post("/notices/{noticeId}", noticeId))
+        mockMvc.perform(post("/api/v1/notices/{noticeId}", noticeId))
             .andExpect(status().isOk());
 
-        mockMvc.perform(get("/notices")
+        mockMvc.perform(get("/api/v1/notices")
             .param("type", "CHALLENGE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].read").value(true));

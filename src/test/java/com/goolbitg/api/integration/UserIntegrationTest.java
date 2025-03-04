@@ -43,7 +43,7 @@ public class UserIntegrationTest {
     @Transactional
     @WithMockUser(ROOT_USER_ID)
     void get_user_info() throws Exception {
-        mockMvc.perform(get("/users/me").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/users/me").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.nickname").value("굴비왕"))
             .andExpect(jsonPath("$.spendingType.id").value(5))
@@ -60,7 +60,7 @@ public class UserIntegrationTest {
         requestBody.setNickname("굴비왕");
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/nickname/check")
+        mockMvc.perform(post("/api/v1/users/nickname/check")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk())
@@ -78,7 +78,7 @@ public class UserIntegrationTest {
         requestBody.setGender(Gender.FEMALE);
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/info")
+        mockMvc.perform(post("/api/v1/users/me/info")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isBadRequest());
@@ -90,56 +90,56 @@ public class UserIntegrationTest {
     void update_info_and_check_status() throws Exception {
         Long challengeId = 3L;
         updateAgreement();
-        mockMvc.perform(get("/users/me/registerStatus"))
+        mockMvc.perform(get("/api/v1/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(1))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
 
         updateUserInfo();
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.nickname").value("굴비시민"))
             .andExpect(jsonPath("$.birthday").value("1999-03-01"))
             .andExpect(jsonPath("$.gender").value("FEMALE"));
-        mockMvc.perform(get("/users/me/registerStatus"))
+        mockMvc.perform(get("/api/v1/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(2))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
 
         updateChecklist();
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.check1").value(true))
             .andExpect(jsonPath("$.check3").value(false));
-        mockMvc.perform(get("/users/me/registerStatus"))
+        mockMvc.perform(get("/api/v1/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(3))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
 
         updateHabit();
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.avgIncomePerMonth").value(360000))
             .andExpect(jsonPath("$.avgSpendingPerMonth").value(200000))
             .andExpect(jsonPath("$.spendingType.id").value(2));
-        mockMvc.perform(get("/users/me/registerStatus"))
+        mockMvc.perform(get("/api/v1/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(4))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
 
         updatePattern();
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.primeUseDay").value("SUNDAY"))
             .andExpect(jsonPath("$.primeUseTime").value("18:30:00"));
-        mockMvc.perform(get("/users/me/registerStatus"))
+        mockMvc.perform(get("/api/v1/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(5))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(false));
 
-        mockMvc.perform(post("/challenges/{challengeId}/enroll", challengeId))
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/enroll", challengeId))
                 .andExpect(status().isCreated());
-        mockMvc.perform(get("/users/me/registerStatus"))
+        mockMvc.perform(get("/api/v1/users/me/registerStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(6))
                 .andExpect(jsonPath("$.requiredInfoCompleted").value(true));
@@ -150,7 +150,7 @@ public class UserIntegrationTest {
     @WithMockUser(ROOT_USER_ID)
     void get_weekly_status() throws Exception {
         updateAgreement();
-        mockMvc.perform(get("/users/me/weeklyStatus"))
+        mockMvc.perform(get("/api/v1/users/me/weeklyStatus"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.saving").value(0))
                 .andExpect(jsonPath("$.todayIndex").value(3))
@@ -162,7 +162,7 @@ public class UserIntegrationTest {
     @WithMockUser(ROOT_USER_ID)
     void get_weekly_status_at_monday() throws Exception {
         updateAgreement();
-        mockMvc.perform(get("/users/me/weeklyStatus")
+        mockMvc.perform(get("/api/v1/users/me/weeklyStatus")
             .param("date", "2025-01-20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.saving").value(0))
@@ -178,7 +178,7 @@ public class UserIntegrationTest {
         requestBody.setAgreement4(false);
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/agreement")
+        mockMvc.perform(post("/api/v1/users/me/agreement")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
@@ -191,7 +191,7 @@ public class UserIntegrationTest {
         requestBody.setGender(Gender.FEMALE);
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/info")
+        mockMvc.perform(post("/api/v1/users/me/info")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
@@ -207,7 +207,7 @@ public class UserIntegrationTest {
         requestBody.setCheck6(false);
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/checklist")
+        mockMvc.perform(post("/api/v1/users/me/checklist")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
@@ -219,7 +219,7 @@ public class UserIntegrationTest {
         requestBody.setAvgSavingPerMonth(200000);
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/habit")
+        mockMvc.perform(post("/api/v1/users/me/habit")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());
@@ -231,7 +231,7 @@ public class UserIntegrationTest {
         requestBody.setPrimeUseTime("18:30:00");
 
         String jsonBody = mapper.writeValueAsString(requestBody);
-        mockMvc.perform(post("/users/me/pattern")
+        mockMvc.perform(post("/api/v1/users/me/pattern")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonBody))
                 .andExpect(status().isOk());

@@ -1,12 +1,9 @@
 package com.goolbitg.api.etc;
 
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.goolbitg.api.integration.CustomIntegrationTest;
-import com.goolbitg.api.repository.ChallengeRepository;
+import com.goolbitg.api.v1.repository.ChallengeRepository;
 
 /**
  * SandboxTest
