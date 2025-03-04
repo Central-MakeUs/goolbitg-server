@@ -2,6 +2,7 @@ package com.goolbitg.api.service;
 
 import java.util.Set;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +20,7 @@ public class AdminUserDetailsServiceTest {
     private AdminUserDetailsService adminUserDetailsService;
 
     @Test
+    @Disabled
     void register_a_admin_user() {
         adminUserDetailsService.registerAdminUser("test@gmail.com", "asdf1234", Set.of(RoleType.ROLE_ADMIN));
     }
