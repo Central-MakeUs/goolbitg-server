@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.goolbitg.api.v1.entity.ChallengeRecordId;
-import com.goolbitg.api.v1.entity.DailyRecordId;
-import com.goolbitg.api.v1.exception.ChallengeException;
-import com.goolbitg.api.v1.exception.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,14 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goolbitg.api.v1.entity.Challenge;
-import com.goolbitg.api.v1.entity.ChallengeRecord;
-import com.goolbitg.api.v1.entity.ChallengeStat;
-import com.goolbitg.api.v1.entity.ChallengeStatId;
-import com.goolbitg.api.v1.entity.DailyRecord;
-import com.goolbitg.api.v1.entity.SpendingType;
-import com.goolbitg.api.v1.entity.User;
-import com.goolbitg.api.v1.entity.UserStat;
 import com.goolbitg.api.model.ChallengeDto;
 import com.goolbitg.api.model.ChallengeRecordDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
@@ -33,11 +22,20 @@ import com.goolbitg.api.model.ChallengeStatDto;
 import com.goolbitg.api.model.ChallengeTrippleDto;
 import com.goolbitg.api.model.PaginatedChallengeDto;
 import com.goolbitg.api.model.PaginatedChallengeRecordDto;
+import com.goolbitg.api.v1.entity.Challenge;
+import com.goolbitg.api.v1.entity.ChallengeRecord;
+import com.goolbitg.api.v1.entity.ChallengeRecordId;
+import com.goolbitg.api.v1.entity.ChallengeStat;
+import com.goolbitg.api.v1.entity.ChallengeStatId;
+import com.goolbitg.api.v1.entity.User;
+import com.goolbitg.api.v1.event.challenge.ChallengeCancelEvent;
+import com.goolbitg.api.v1.event.challenge.ChallengeCheckEvent;
+import com.goolbitg.api.v1.event.challenge.ChallengeEnrollEvent;
+import com.goolbitg.api.v1.exception.ChallengeException;
+import com.goolbitg.api.v1.exception.UserException;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRepository;
 import com.goolbitg.api.v1.repository.ChallengeStatRepository;
-import com.goolbitg.api.v1.repository.DailyRecordRepository;
-import com.goolbitg.api.v1.repository.SpendingTypeRepository;
 import com.goolbitg.api.v1.repository.UserRepository;
 
 /**
@@ -56,9 +54,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private DailyRecordRepository dailyRecordRepository;
-    @Autowired
-    private SpendingTypeRepository spendingTypeRepository;
+    private ApplicationEventPublisher applicationEventPublisher;
 
 
 
@@ -87,31 +83,23 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Transactional
     public void cancelChallenge(String userId, Long challengeId, LocalDate date) {
         ChallengeRecordId challengeRecordId = new ChallengeRecordId(challengeId, userId, date);
-        ChallengeStatId challengeStatId = new ChallengeStatId(challengeId, userId);
-        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
-
         ChallengeRecord todayRecord = challengeRecordRepository.findById(challengeRecordId)
                 .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
-        ChallengeStat challengeStat = challengeStatRepository.findById(challengeStatId).get();
-        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId).get();
+        boolean checkedToday = todayRecord.getStatus().equals(ChallengeRecordStatus.SUCCESS);
 
-        if (todayRecord.getStatus() == ChallengeRecordStatus.WAIT) {
+        if (!checkedToday) {
             todayRecord.fail();
-            challengeRecordRepository.save(todayRecord);
-            dailyRecord.cancel();
         }
-
         for (int i = todayRecord.getLocation() + 1; i <= 3; i++) {
             challengeRecordId = challengeRecordId.next();
             ChallengeRecord challengeRecord = challengeRecordRepository.findById(challengeRecordId)
                     .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
             challengeRecord.fail();
-            challengeRecordRepository.save(challengeRecord);
         }
-        challengeStat.cancel();
 
-        challengeStatRepository.save(challengeStat);
-        dailyRecordRepository.save(dailyRecord);
+        applicationEventPublisher.publishEvent(
+            new ChallengeCancelEvent(this, userId, challengeId, date, checkedToday)
+        );
     }
 
     @Override
@@ -119,19 +107,12 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeRecordDto checkChallenge(String userId, Long challengeId, LocalDate date) {
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
         ChallengeStatId statId = new ChallengeStatId(challengeId, userId);
-        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
-
-        Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
-        Optional<ChallengeStat> statResult = challengeStatRepository.findById(statId);
-
-        if (recordResult.isEmpty() || statResult.isEmpty()) {
-            throw ChallengeException.notEnrolled(challengeId);
-        }
-
-        ChallengeRecord record = recordResult.get();
-        ChallengeStat challengeStat = statResult.get();
+        ChallengeRecord record = challengeRecordRepository.findById(recordId)
+                .orElseThrow(() -> ChallengeException.notEnrolled(challengeId));
+        ChallengeStat stat = challengeStatRepository.findById(statId)
+                .orElseThrow();
 
         if (record.getStatus().equals(ChallengeRecordStatus.FAIL)) {
             throw ChallengeException.notEnrolled(challengeId);
@@ -140,59 +121,21 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw ChallengeException.alreadyComplete(challengeId);
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> UserException.userNotExist(userId));
-
-        UserStat userStat = user.getStat();
-
-        DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
-
         record.success();
-        challengeStat.increaseCount();
-        increaseAchievementGuage(challenge, user, userStat);
-        dailyRecord.achieve(challenge.getReward());
         challenge.achieve();
 
-        userRepository.save(user);
-        dailyRecordRepository.save(dailyRecord);
-        challengeRepository.save(challenge);
-        challengeRecordRepository.save(record);
-        challengeStatRepository.save(challengeStat);
-
-        return getChallengeRecordDto(challenge, record, challengeStat);
-    }
-
-    private void increaseAchievementGuage(Challenge challenge, User user, UserStat userStat) {
-        SpendingType currentType = user.getSpendingType();
-        int newGuage = userStat.getAchievementGuage() + challenge.getReward();
-
-        if (currentType.getGoal() != null && newGuage >= currentType.getGoal()) {
-            SpendingType newType = spendingTypeRepository.findById(currentType.getId() + 1).orElseGet(null);
-            newGuage = newGuage - currentType.getGoal();
-            user.setSpendingType(newType);
-        }
-        userStat.setAchievementGuage(newGuage);
+        applicationEventPublisher.publishEvent(
+            new ChallengeCheckEvent(this, userId, challengeId, date, challenge.getReward())
+        );
+        return getChallengeRecordDto(challenge, record, stat);
     }
 
     @Override
     @Transactional
     public void enrollChallenge(String userId, Long challengeId, LocalDate date) {
-        DailyRecordId dailyRecordId = new DailyRecordId(userId, date);
-        ChallengeStatId id = new ChallengeStatId(challengeId, userId);
         ChallengeRecordId recordId = new ChallengeRecordId(challengeId, userId, date);
-
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeId));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> UserException.userNotExist(userId));
-        UserStat userStat = user.getStat();
-
-        DailyRecord dailyRecord = findOrCreateDailyRecord(userId, date, dailyRecordId);
-
-        ChallengeStat challengeStat = challengeStatRepository.findById(id)
-                .orElse(ChallengeStat.getDefault(challengeId, userId));
-
         Optional<ChallengeRecord> recordResult = challengeRecordRepository.findById(recordId);
 
         int startDay = 0;
@@ -205,15 +148,6 @@ public class ChallengeServiceImpl implements ChallengeService {
             }
         }
 
-        Integer prevEnrollCount = challengeStat.getEnrollCount();
-        if (prevEnrollCount == 0) {
-            // New Enrollment
-            userStat.increaseChallengeCount();
-        }
-        challengeStat.enroll();
-
-        challengeStatRepository.save(challengeStat);
-
         for (int i = 0; i < 3; i++) {
             ChallengeRecord record = ChallengeRecord.builder()
                     .challengeId(challengeId)
@@ -225,19 +159,11 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeRecordRepository.save(record);
         }
 
-
-        if (startDay == 0) dailyRecord.enroll();
         challenge.enroll();
 
-        dailyRecordRepository.save(dailyRecord);
-        userRepository.save(user);
-        challengeRepository.save(challenge);
-    }
-
-    private DailyRecord findOrCreateDailyRecord(String userId, LocalDate date, DailyRecordId dailyRecordId) {
-        DailyRecord dailyRecord = dailyRecordRepository.findById(dailyRecordId)
-                .orElseGet(() -> DailyRecord.getDefault(userId, date));
-        return dailyRecord;
+        applicationEventPublisher.publishEvent(
+            new ChallengeEnrollEvent(this, userId, challengeId, date, startDay == 1)
+        );
     }
 
     @Override
@@ -355,11 +281,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             ChallengeRecord challengeRecord = challengeRecordRepository.findById(challengeRecordId)
                     .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeId));
             challengeRecord.fail();
-            challengeRecordRepository.save(challengeRecord);
         }
-        challengeRecordRepository.save(todayRecord);
         challengeStat.fail();
-        challengeStatRepository.save(challengeStat);
     }
 
 
