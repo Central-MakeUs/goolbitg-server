@@ -1,8 +1,6 @@
 package com.goolbitg.api.v1.entity;
 
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
