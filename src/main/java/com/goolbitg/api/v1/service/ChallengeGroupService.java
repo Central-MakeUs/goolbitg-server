@@ -1,13 +1,13 @@
 package com.goolbitg.api.v1.service;
 
+import java.time.LocalDate;
+
 import com.goolbitg.api.model.ChallengeGroupDto;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
 import com.goolbitg.api.model.ChallengeGroupStatDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.PaginatedChallengeGroupDto;
 import com.goolbitg.api.model.PaginatedChallengeGroupRecordDto;
-
-import java.time.LocalDate;
 
 /**
  * ChallengeGroupService

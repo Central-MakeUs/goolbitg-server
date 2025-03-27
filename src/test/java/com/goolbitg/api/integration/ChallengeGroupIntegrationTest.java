@@ -7,12 +7,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.net.URI;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -47,16 +47,16 @@ public class ChallengeGroupIntegrationTest {
         group1.setTitle("title1");
         group1.setMaxSize(3);
         group1.setHashtags(List.of("tag1", "tag2"));
-        group1.setImageUrl(URI.create("url1"));
+        group1.setReward(5000);
         group1.setIsHidden(false);
 
         group2 = new ChallengeGroupDto();
         group2.setTitle("title2");
         group2.setMaxSize(3);
         group2.setHashtags(List.of("tag2", "tag3"));
-        group2.setImageUrl(URI.create("url2"));
+        group2.setReward(5000);
         group2.setIsHidden(true);
-        group2.setPassword("password");
+        group2.setPassword("1234");
     }
 
     @Test
@@ -76,7 +76,8 @@ public class ChallengeGroupIntegrationTest {
         String content = objectMapper.writeValueAsString(group1);
 
         mockMvc.perform(post("/api/v1/challengeGroups")
-            .content(content))
+            .content(content)
+            .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
 
@@ -86,7 +87,8 @@ public class ChallengeGroupIntegrationTest {
         String content = objectMapper.writeValueAsString(group2);
 
         mockMvc.perform(post("/api/v1/challengeGroups")
-            .content(content))
+            .content(content)
+            .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
 
