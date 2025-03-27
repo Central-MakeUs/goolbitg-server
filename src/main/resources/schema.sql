@@ -137,15 +137,16 @@ CREATE TABLE challenge_groups (
   owner_id VARCHAR(50) NOT NULL,
   title VARCHAR(50) NOT NULL,
   hashtags VARCHAR(100) DEFAULT '',
-  image_url VARCHAR(50) NOT NULL,
   reward INT NOT NULL,
   max_size INT NOT NULL,
   people_count INT DEFAULT 1,
+  is_hidden TINYINT DEFAULT 0,
+  password VARCHAR(4),
   participant_count INT DEFAULT 0,
   avg_achieve_ratio FLOAT DEFAULT 0.0,
   max_achieve_days INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP AS CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   FOREIGN KEY (owner_id) REFERENCES users(id)
 );

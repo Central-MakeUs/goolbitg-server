@@ -113,11 +113,3 @@ INSERT INTO challenge_stats (
         ( 9, 'id0009', 0, 0, 0, 0 ),
         ( 10, 'id0009', 0, 0, 0, 0 );
 
-INSERT INTO challenge_groups (
-    owner_id, title, hashtags, image_url, reward, max_size, people_count, participant_count, avg_achieve_ratio, max_achieve_days
-) VALUES ( 'id0001', '배달음식 안시켜먹기',  '배달,음식', 'exmaple_url', 2000, 6, 1, 23, 50, 63 );
-
-INSERT INTO challenge_group_records (
-    group_id, user_id, date, status
-) VALUES ( 1, 'id0001', '2025-01-14', 'FAIL' );
-

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  * ChallengeGroup
  */
 @Entity
-@Table(name = "users")
+@Table(name = "challenge_groups")
 @Getter
 @Builder
 @NoArgsConstructor
