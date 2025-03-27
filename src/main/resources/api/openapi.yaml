@@ -1703,6 +1703,9 @@ components:
         title:
           type: string
           description: 챌린지 제목
+        reward:
+          type: integer
+          description: 챌린지 금액
         hashtags:
           type: array
           items:
@@ -1716,10 +1719,6 @@ components:
         peopleCount:
           type: integer
           description: 참여 인원수
-        imageUrl:
-          type: string
-          format: uri
-          description: 그룹 대표 이미지 URL
         isHidden:
           type: boolean
           description: 비밀방 여부
@@ -1729,14 +1728,23 @@ components:
           minimum: 4
           maximum: 4
           description: 비밀번호
+        avgAchieveRatio:
+          type: number
+          format: float
+          description: 평균 달성 비율
+        maxAchieveDays:
+          type: integer
+          description: 최대 달성일
       example:
         id: 0
         ownerId: id0001
         title: 배달음식 안시켜먹기
         hashtags: [ "배달", "음식" ]
+        reward: 5000
         maxSize: 6
         peopleCount: 1
-        imageUrl: "http://localhost/images/ch01"
+        avgAchieveRatio: 4.5
+        maxAchieveDays: 9
     ChallengeRecordDto:
       type: object
       properties:
