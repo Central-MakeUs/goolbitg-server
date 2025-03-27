@@ -58,4 +58,3 @@ public class ChallengeGroupRecord {
         return Objects.hash(groupId, userId, date);
     }
 }
-
