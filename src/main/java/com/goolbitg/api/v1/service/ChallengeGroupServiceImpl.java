@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,7 @@ import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.PaginatedChallengeGroupDto;
 import com.goolbitg.api.model.PaginatedChallengeGroupRecordDto;
 import com.goolbitg.api.v1.entity.ChallengeGroup;
+import com.goolbitg.api.v1.exception.ChallengeException;
 import com.goolbitg.api.v1.exception.UserException;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupRepository;
@@ -44,8 +48,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     @Override
     @Transactional
     public ChallengeGroupDto createChallengeGroup(String userId, ChallengeGroupDto challengeGroupDto) throws Exception {
-        if (!userRepository.existsById(userId))
-            throw UserException.userNotExist(userId);
+        validateUser(userId);
 
         ChallengeGroup group = ChallengeGroup.builder()
                 .title(challengeGroupDto.getTitle())
@@ -88,9 +91,16 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
-    public ChallengeGroupDto getChallengeGroup(String userId, Long groupId) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getChallengeGroup'");
+    public ChallengeGroupDto getChallengeGroup(Long groupId) throws Exception {
+        ChallengeGroup group = challengeGroupRepository.findById(groupId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
+
+        return getChallengeGroupDto(group);
+    }
+
+    private void validateUser(String userId) {
+        if (!userRepository.existsById(userId))
+            throw UserException.userNotExist(userId);
     }
 
     @Override
@@ -101,7 +111,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
-    public PaginatedChallengeGroupRecordDto getChallengeGroupRecords(String userId, Integer page, Integer size,
+    public PaginatedChallengeGroupRecordDto getChallengeGroupRecords(String userId, int page, int size,
             LocalDate date, ChallengeRecordStatus status, Boolean created) throws Exception {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getChallengeGroupRecords'");
@@ -114,10 +124,39 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
-    public PaginatedChallengeGroupDto getChallengeGroups(String userId, Integer page, Integer size, String search,
+    public PaginatedChallengeGroupDto getChallengeGroups(String userId, int page, int size, String search,
             Boolean created) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getChallengeGroups'");
+        Pageable pageReq = PageRequest.of(page, size);
+
+        Page<ChallengeGroup> result;
+        if (search == null || search.isBlank()) {
+            if (created) {
+                result = challengeGroupRepository.findByOwnerId(userId, pageReq);
+            } else {
+                result = challengeGroupRepository.findAll(pageReq);
+            }
+        } else {
+            if (created) {
+                result = challengeGroupRepository.findByTitleContainingOrHashtagsContainingAndOwnerId(search, search, userId, pageReq);
+            } else {
+                result = challengeGroupRepository.findByTitleContainingOrHashtagsContaining(search, search, pageReq);
+            }
+        }
+
+        PaginatedChallengeGroupDto dto = getDto(result);
+        return dto;
+    }
+
+    private PaginatedChallengeGroupDto getDto(Page<ChallengeGroup> result) {
+        PaginatedChallengeGroupDto dto = new PaginatedChallengeGroupDto();
+        dto.setTotalSize((int)result.getTotalElements());
+        dto.setTotalPages(result.getTotalPages());
+        dto.setSize(result.getNumberOfElements());
+        dto.setPage(result.getNumber());
+        dto.setItems(result.getContent().stream()
+                .map(this::getChallengeGroupDto)
+                .toList());
+        return dto;
     }
 
     @Override

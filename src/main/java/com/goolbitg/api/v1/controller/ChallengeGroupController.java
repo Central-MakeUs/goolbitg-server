@@ -61,8 +61,7 @@ public class ChallengeGroupController implements ChallengeGroupApi {
 
     @Override
     public ResponseEntity<ChallengeGroupDto> getChallengeGroup(Long groupId) throws Exception {
-        String userId = AuthUtil.getLoginUserId();
-        ChallengeGroupDto result = challengeGroupService.getChallengeGroup(userId, groupId);
+        ChallengeGroupDto result = challengeGroupService.getChallengeGroup(groupId);
         return ResponseEntity.ok(result);
     }
 
@@ -79,6 +78,8 @@ public class ChallengeGroupController implements ChallengeGroupApi {
         @Valid Integer size, @Valid LocalDate date, @Valid ChallengeRecordStatus status, @Valid Boolean created)
     throws Exception {
         String userId = AuthUtil.getLoginUserId();
+        if (page == null) page = 0;
+        if (size == null) size = 10;
         PaginatedChallengeGroupRecordDto result = challengeGroupService.getChallengeGroupRecords(userId, page, size, date, status, created);
         return ResponseEntity.ok(result);
     }
@@ -94,6 +95,8 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     public ResponseEntity<PaginatedChallengeGroupDto> getChallengeGroups(@Valid Integer page, @Valid Integer size,
         @Valid String search, @Valid Boolean created) throws Exception {
         String userId = AuthUtil.getLoginUserId();
+        if (page == null) page = 0;
+        if (size == null) size = 10;
         PaginatedChallengeGroupDto result = challengeGroupService.getChallengeGroups(userId, page, size, search, created);
         return ResponseEntity.ok(result);
     }

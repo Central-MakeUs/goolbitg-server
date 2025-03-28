@@ -72,6 +72,31 @@ public class ChallengeGroupIntegrationTest {
 
     @Test
     @WithMockUser(ROOT_USER)
+    void get_challenge_groups_by_keyword() throws Exception {
+        challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.createChallengeGroup(ROOT_USER, group2);
+
+        mockMvc.perform(get("/api/v1/challengeGroups")
+            .param("search", "title1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSize").value(1));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_groups_i_created() throws Exception {
+        challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.createChallengeGroup(NORMAL_USER, group2);
+
+        mockMvc.perform(get("/api/v1/challengeGroups")
+            .param("created", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSize").value(1));
+    }
+
+
+    @Test
+    @WithMockUser(ROOT_USER)
     void create_a_challenge_group() throws Exception {
         String content = objectMapper.writeValueAsString(group1);
 

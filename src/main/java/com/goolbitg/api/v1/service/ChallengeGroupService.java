@@ -14,15 +14,15 @@ import com.goolbitg.api.model.PaginatedChallengeGroupRecordDto;
  */
 public interface ChallengeGroupService {
 
-ChallengeGroupRecordDto checkChallengeGroup(String userId, Long groupId) throws Exception;
-ChallengeGroupDto createChallengeGroup(String userId, ChallengeGroupDto challengeGroupDto) throws Exception;
-void deleteChallengeGroup(String userId, Long groupId) throws Exception;
-void enrollChallengeGroup(String userId, Long groupId) throws Exception;
-ChallengeGroupDto getChallengeGroup(String userId, Long groupId) throws Exception;
-ChallengeGroupRecordDto getChallengeGroupRecord(String userId, Long groupId, LocalDate date) throws Exception;
-PaginatedChallengeGroupRecordDto getChallengeGroupRecords(String userId, Integer page, Integer size, LocalDate date, ChallengeRecordStatus status, Boolean created) throws Exception;
-ChallengeGroupStatDto getChallengeGroupStat(String userId, Long groupId) throws Exception;
-PaginatedChallengeGroupDto getChallengeGroups(String userId, Integer page, Integer size, String search, Boolean created) throws Exception;
-ChallengeGroupDto updateChallengeGroup(String userId, Long groupId, ChallengeGroupDto challengeGroupDto) throws Exception;
+    ChallengeGroupRecordDto checkChallengeGroup(String userId, Long groupId) throws Exception;
+    ChallengeGroupDto createChallengeGroup(String userId, ChallengeGroupDto challengeGroupDto) throws Exception;
+    void deleteChallengeGroup(String userId, Long groupId) throws Exception;
+    void enrollChallengeGroup(String userId, Long groupId) throws Exception;
+    ChallengeGroupDto getChallengeGroup(Long groupId) throws Exception;
+    ChallengeGroupRecordDto getChallengeGroupRecord(String userId, Long groupId, LocalDate date) throws Exception;
+    PaginatedChallengeGroupRecordDto getChallengeGroupRecords(String userId, int page, int size, LocalDate date, ChallengeRecordStatus status, Boolean created) throws Exception;
+    ChallengeGroupStatDto getChallengeGroupStat(String userId, Long groupId) throws Exception;
+    PaginatedChallengeGroupDto getChallengeGroups(String userId, int page, int size, String search, Boolean created) throws Exception;
+    ChallengeGroupDto updateChallengeGroup(String userId, Long groupId, ChallengeGroupDto challengeGroupDto) throws Exception;
 
 }
