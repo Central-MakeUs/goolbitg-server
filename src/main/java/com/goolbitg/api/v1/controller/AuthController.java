@@ -41,7 +41,8 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<AuthResponseDto> login(@Valid AuthRequestDto authRequestDto) throws Exception {
-        return ResponseEntity.ok(authService.login(authRequestDto));
+        AuthResponseDto login = authService.login(authRequestDto);
+        return ResponseEntity.ok(login);
     }
 
     @Override
