@@ -24,9 +24,12 @@ import com.goolbitg.api.v1.repository.ChallengeGroupRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupStatsRepository;
 import com.goolbitg.api.v1.repository.UserRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * ChallengeGroupServiceImpl
  */
+@Slf4j
 @Service
 public class ChallengeGroupServiceImpl implements ChallengeGroupService {
 
@@ -160,10 +163,33 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
+    @Transactional
     public ChallengeGroupDto updateChallengeGroup(String userId, Long groupId, ChallengeGroupDto challengeGroupDto)
             throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateChallengeGroup'");
+        validateUser(userId);
+
+        ChallengeGroup group = challengeGroupRepository.findById(groupId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
+
+        updateChallengGroup(challengeGroupDto, group);
+
+        return getChallengeGroupDto(group);
+    }
+
+    private void updateChallengGroup(ChallengeGroupDto challengeGroupDto, ChallengeGroup group) {
+        Integer maxSize = challengeGroupDto.getMaxSize();
+        if (maxSize != null && maxSize >= group.getPeopleCount())
+            group.setMaxSize(challengeGroupDto.getMaxSize());
+        if (challengeGroupDto.getTitle() != null)
+            group.setTitle(challengeGroupDto.getTitle());
+        if (challengeGroupDto.getReward() != null)
+            group.setReward(challengeGroupDto.getReward());
+        if (challengeGroupDto.getIsHidden() != null)
+            group.setHidden(challengeGroupDto.getIsHidden());
+        if (challengeGroupDto.getPassword() != null)
+            group.setPassword(challengeGroupDto.getPassword());
+        if (challengeGroupDto.getHashtags() != null)
+            group.setHashtags(String.join(",", challengeGroupDto.getHashtags()));
     }
 
 }

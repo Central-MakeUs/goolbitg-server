@@ -60,4 +60,28 @@ public class ChallengeGroup extends BaseEntity {
     @Column(name = "max_achieve_days")
     private int maxAchieveDays;
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setHashtags(String hashtags) {
+        this.setHashtags(hashtags);
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    public void setReward(int reward) {
+        this.reward = reward;
+    }
+
+    public void setHidden(boolean isHidden) {
+        this.isHidden = isHidden;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }

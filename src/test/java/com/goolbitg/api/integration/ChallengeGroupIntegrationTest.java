@@ -136,7 +136,8 @@ public class ChallengeGroupIntegrationTest {
         String content = objectMapper.writeValueAsString(create);
 
         mockMvc.perform(put("/api/v1/challengeGroups/{groupId}", create.getId())
-                .content(content))
+            .content(content)
+            .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated Title"));
     }

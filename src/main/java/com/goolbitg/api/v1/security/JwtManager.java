@@ -66,6 +66,7 @@ public class JwtManager {
             .withSubject(principal)
             .withIssuedAt(new Date(now))
             .withExpiresAt(new Date(now + 999_999_999_999L))
+            .withClaim("scp", List.of("ROLE_USER"))
             .sign(Algorithm.RSA256(publicKey, privateKey));
     }
 }
