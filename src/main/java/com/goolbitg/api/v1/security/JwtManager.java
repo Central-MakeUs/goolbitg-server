@@ -54,9 +54,11 @@ public class JwtManager {
     }
 
     public String create(String principal, List<GrantedAuthority> authorities) {
-        return create(User.withUsername(principal)
+        UserDetails user = User.withUsername(principal)
+            .password("")
             .authorities(authorities)
-            .build());
+            .build();
+        return create(user);
     }
 
     public String createPermanent(String principal) {
