@@ -70,4 +70,15 @@ public class JwtManager {
             .withExpiresAt(new Date(now + 999_999_999_999L))
             .sign(Algorithm.RSA256(publicKey, privateKey));
     }
+
+    public String createExpired(String principal) {
+        final long now = System.currentTimeMillis();
+        return JWT.create()
+                .withIssuer("Goolbitg API")
+                .withSubject(principal)
+                .withIssuedAt(new Date(now - 100_000))
+                .withExpiresAt(new Date(now))
+                .sign(Algorithm.RSA256(publicKey, privateKey));
+
+    }
 }
