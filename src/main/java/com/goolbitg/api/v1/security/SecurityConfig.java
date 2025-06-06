@@ -108,9 +108,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/unregister", "/auth/logout").hasRole("USER")
+                .requestMatchers("/api/v1/auth/unregister", "/api/v1/auth/logout").authenticated()
                 .requestMatchers("/api/v1/auth/**", "/api/v1/token").permitAll()
-                .anyRequest().hasRole("USER")
+                .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2ResourceServer -> 
                 oauth2ResourceServer.jwt(jwt -> 
@@ -134,7 +134,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/admin/login").permitAll()
-                .anyRequest().hasRole("ADMIN")
+                .anyRequest().hasAuthority("SCOPE_ADMIN")
             );
 
         return http.build();
