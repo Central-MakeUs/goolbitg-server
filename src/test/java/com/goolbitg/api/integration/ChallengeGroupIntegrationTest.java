@@ -124,7 +124,23 @@ public class ChallengeGroupIntegrationTest {
 
         mockMvc.perform(get("/api/v1/challengeGroups/{groupId}", create.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(create.getId()));
+                .andExpect(jsonPath("$.group.id").value(create.getId()));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_group_rank() throws Exception {
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+        challengeGroupService.enrollChallengeGroup(NORMAL_USER, create.getId());
+        challengeGroupService.checkChallengeGroup(ROOT_USER, create.getId());
+
+        mockMvc.perform(get("/api/v1/challengeGroups/{groupId}", create.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rank[0].name").value("굴비왕"))
+                .andExpect(jsonPath("$.rank[0].saving").value(5000))
+                .andExpect(jsonPath("$.rank[1].name").value("굴비왕비"))
+                .andExpect(jsonPath("$.rank[1].saving").value(0));
     }
 
     @Test
@@ -167,64 +183,14 @@ public class ChallengeGroupIntegrationTest {
     @WithMockUser(ROOT_USER)
     void check_challenge_group_record() throws Exception {
         ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
 
-        mockMvc.perform(post("/api/v1/challengeGroupRecords/{groupId}/check", create.getId()))
+        mockMvc.perform(post("/api/v1/challengeGroups/{groupId}/check", create.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.challengeGroupId").value(create.getId()))
             .andExpect(jsonPath("$.userId").value(ROOT_USER))
             .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
 
-    @Test
-    @WithMockUser(ROOT_USER)
-    void enroll_and_check_challenge_group_record() throws Exception {
-        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
-        Long groupId = create.getId();
-        challengeGroupService.enrollChallengeGroup(ROOT_USER, groupId);
-
-        mockMvc.perform(get("/api/v1/challengeGroupRecords/{groupId}", create.getId()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.challengeGroupId").value(create.getId()))
-            .andExpect(jsonPath("$.userId").value(ROOT_USER))
-            .andExpect(jsonPath("$.status").value("SUCCESS"));
-    }
-
-    @Test
-    @WithMockUser(ROOT_USER)
-    void get_challenge_group_records() throws Exception {
-        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
-
-        mockMvc.perform(get("/api/v1/challengeGroupRecords"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalSize").value(2));
-    }
-
-    @Test
-    @WithMockUser(ROOT_USER)
-    void get_challenge_group_stats() throws Exception {
-        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
-        Long groupId = create.getId();
-
-        mockMvc.perform(get("/api/v1/challengeGroupStats/{groupId}", groupId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.groupId").value(groupId))
-            .andExpect(jsonPath("$.userId").value(ROOT_USER))
-            .andExpect(jsonPath("$.continueCount").value(0))
-            .andExpect(jsonPath("$.totalCount").value(0))
-            .andExpect(jsonPath("$.enrollCount").value(0));
-
-        challengeGroupService.enrollChallengeGroup(ROOT_USER, groupId);
-
-        mockMvc.perform(get("/api/v1/challengeGroupStats/{groupId}", groupId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.enrollCount").value(1));
-
-        challengeGroupService.checkChallengeGroup(ROOT_USER, groupId);
-
-        mockMvc.perform(get("/api/v1/challengeGroupStats/{groupId}", groupId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.continueCount").value(1))
-            .andExpect(jsonPath("$.totalCount").value(1));
-    }
 }
 

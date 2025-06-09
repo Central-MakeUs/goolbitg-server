@@ -35,5 +35,9 @@ public class ChallengeGroupStats {
     @Column(name = "saving", nullable = false)
     @Builder.Default
     private int saving = 0;
+
+    public void increaseSaving(int amount) {
+        saving += amount;
+    }
 }
 

@@ -2,6 +2,7 @@ package com.goolbitg.api.v1.service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.model.ChallengeGroupDto;
 import com.goolbitg.api.model.ChallengeGroupRankDto;
+import com.goolbitg.api.model.ChallengeGroupRankDtoRankInner;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
 import com.goolbitg.api.model.ChallengeGroupStatDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
@@ -23,7 +25,10 @@ import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupEnrollment;
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupEnrollmentId;
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecord;
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecordId;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupStats;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupStatsId;
 import com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus;
+import com.goolbitg.api.v1.entity.user.User;
 import com.goolbitg.api.v1.exception.ChallengeException;
 import com.goolbitg.api.v1.exception.UserException;
 import com.goolbitg.api.v1.repository.ChallengeGroupEnrollmentRepository;
@@ -53,9 +58,10 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional
     public ChallengeGroupRecordDto checkChallengeGroup(String userId, Long groupId) throws Exception {
         validateUser(userId);
-        getOrThrowChallengeGroup(groupId);
+        ChallengeGroup group = getOrThrowChallengeGroup(groupId);
         ChallengeGroupRecordId id = new ChallengeGroupRecordId(groupId, userId, LocalDate.now());
 
         Optional<ChallengeGroupRecord> result = challengeGroupRecordRepository.findById(id);
@@ -72,6 +78,10 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
                     .build();
             challengeGroupRecordRepository.save(record);
         }
+        ChallengeGroupStatsId statsId = new ChallengeGroupStatsId(groupId, userId);
+        ChallengeGroupStats stats = challengeGroupStatsRepository.findById(statsId)
+                .orElseThrow(() -> ChallengeException.notEnrolled(groupId));
+        stats.increaseSaving(group.getReward());
 
         return getChallengeGroupRecordDto(record);
     }
@@ -148,6 +158,11 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
                     .userId(userId)
                     .status(EnrollmentStatus.ENROLL)
                     .build();
+            ChallengeGroupStats stats = ChallengeGroupStats.builder()
+                    .userId(userId)
+                    .groupId(group.getId())
+                    .build();
+            challengeGroupStatsRepository.save(stats);
         }
         
         ChallengeGroupEnrollmentRepository.save(enrollment);
@@ -155,10 +170,21 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
 
     @Override
     public ChallengeGroupRankDto getChallengeGroup(Long groupId) throws Exception {
-        ChallengeGroup group = challengeGroupRepository.findById(groupId)
-                .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
+        ChallengeGroup group = getOrThrowChallengeGroup(groupId);
+        List<ChallengeGroupStats> result = challengeGroupStatsRepository.findByGroupIdOrderBySavingDesc(groupId);
 
-        return null;
+        ChallengeGroupRankDto dto = new ChallengeGroupRankDto();
+        dto.setGroup(getChallengeGroupDto(group));
+        dto.setRank(result.stream().map(stats -> {
+            ChallengeGroupRankDtoRankInner rankInner = new ChallengeGroupRankDtoRankInner();
+            User user = userRepository.findById(stats.getUserId()).get();
+            rankInner.setName(user.getNickname());
+            rankInner.setSaving(stats.getSaving());
+            rankInner.setProfileUrl(user.getSpendingType().getProfileUrl());
+            return rankInner;
+        }).toList());
+
+        return dto;
     }
 
     private void validateUser(String userId) {
