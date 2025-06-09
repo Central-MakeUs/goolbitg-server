@@ -54,9 +54,11 @@ public class JwtManager {
     }
 
     public String create(String principal, List<GrantedAuthority> authorities) {
-        return create(User.withUsername(principal)
+        UserDetails user = User.withUsername(principal)
+            .password("")
             .authorities(authorities)
-            .build());
+            .build();
+        return create(user);
     }
 
     public String createPermanent(String principal) {
@@ -68,5 +70,16 @@ public class JwtManager {
             .withExpiresAt(new Date(now + 999_999_999_999L))
             .withClaim("scp", List.of("ROLE_USER"))
             .sign(Algorithm.RSA256(publicKey, privateKey));
+    }
+
+    public String createExpired(String principal) {
+        final long now = System.currentTimeMillis();
+        return JWT.create()
+                .withIssuer("Goolbitg API")
+                .withSubject(principal)
+                .withIssuedAt(new Date(now - 100_000))
+                .withExpiresAt(new Date(now))
+                .sign(Algorithm.RSA256(publicKey, privateKey));
+
     }
 }

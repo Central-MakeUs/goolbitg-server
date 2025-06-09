@@ -2200,6 +2200,7 @@ components:
       enum:
         - KAKAO
         - APPLE
+        - TEST
       description: 로그인 타입 (카카오 또는 애플)
     AuthRequestDto:
       type: object

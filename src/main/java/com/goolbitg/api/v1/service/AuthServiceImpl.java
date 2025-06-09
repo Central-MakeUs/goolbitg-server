@@ -59,20 +59,27 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private TimeService timeService;
 
-
+    private final String TEST_ID = "idtest";
+    private final String TEST_ID_TOKEN = "TEST";
 
     /* ------------ API Implements ------------ */
 
     @Override
     @Transactional
     public AuthResponseDto login(AuthRequestDto request) {
-        Jwt jwt = extractToken(request);
-        Optional<User> result = findUser(jwt, request);
+        User user;
+        if (request.getType() == LoginType.TEST) {
+            user = userRepository.findById(TEST_ID)
+                    .orElseThrow(() -> UserException.userNotExist(TEST_ID));
+        } else {
+            Jwt jwt = extractToken(request);
+            Optional<User> result = findUser(jwt, request);
 
-        if (result.isEmpty()) {
-            throw UserException.userNotExist(jwt.getSubject());
+            if (result.isEmpty()) {
+                throw UserException.userNotExist(jwt.getSubject());
+            }
+            user = result.get();
         }
-        User user = result.get();
 
         String accessToken = jwtManager.create(user.getId(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
         String refreshToken = createRefreshToken(user.getId());
@@ -87,21 +94,30 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(AuthRequestDto request) {
-        Jwt jwt = extractToken(request);
-        Optional<User> result = findUser(jwt, request);
-
-        if (result.isPresent()) {
-            throw UserException.alreadyRegistered(result.get().getId());
-        }
-
-        String userId = generateUserId();
-
+        String userId;
         String kakaoId = null;
         String appleId = null;
-        if (request.getType() == LoginType.KAKAO) {
-            kakaoId = jwt.getSubject();
+        Optional<User> result;
+
+        if (request.getType() == LoginType.TEST) {
+            userId = TEST_ID;
+            if (userRepository.existsById(TEST_ID)) {
+                throw UserException.alreadyRegistered(TEST_ID);
+            }
         } else {
-            appleId = jwt.getSubject();
+            Jwt jwt = extractToken(request);
+            result = findUser(jwt, request);
+
+            if (result.isPresent()) {
+                throw UserException.alreadyRegistered(result.get().getId());
+            }
+
+            userId = generateUserId();
+            if (request.getType() == LoginType.KAKAO) {
+                kakaoId = jwt.getSubject();
+            } else if (request.getType() == LoginType.APPLE) {
+                appleId = jwt.getSubject();
+            }
         }
 
         User user = User.builder()
@@ -205,8 +221,10 @@ public class AuthServiceImpl implements AuthService {
         Optional<User> result;
         if (request.getType() == LoginType.KAKAO) {
             result = userRepository.findByKakaoId(id);
-        } else {
+        } else if (request.getType() == LoginType.APPLE) {
             result = userRepository.findByAppleId(id);
+        } else {
+            throw new IllegalArgumentException("Invalid LoginType");
         }
         return result;
     }
