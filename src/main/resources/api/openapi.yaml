@@ -2519,18 +2519,17 @@ components:
         registerComplete: false
     ChallengeGroup_Form_Normal:
       value:
-        ownerId: id0001
         title: 배달음식 안시켜먹기
         hashtags: [ "배달", "음식" ]
+        reward: 5000
         maxSize: 6
-        imageUrl: "http://localhost/images/ch01"
+        isHidden: false
     ChallengeGroup_Form_Hidden:
       value:
-        ownerId: id0001
         title: 택시 안타기
         hashtags: [ "교통" ]
+        reward: 5000
         maxSize: 6
-        imageUrl: "http://localhost/images/ch01"
         isHidden: true
         password: 1234
     ChallengeGroup_Form_Modify:
