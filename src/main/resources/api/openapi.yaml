@@ -2529,7 +2529,7 @@ components:
       value:
         title: 택시 안타기
         hashtags: [ "교통" ]
-        reward: 5000
+        reward: 3000
         maxSize: 6
         isHidden: true
         password: 1234

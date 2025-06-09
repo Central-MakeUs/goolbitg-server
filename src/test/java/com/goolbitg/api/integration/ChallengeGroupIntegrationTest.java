@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +104,15 @@ public class ChallengeGroupIntegrationTest {
         mockMvc.perform(post("/api/v1/challengeGroups")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.title").value(group1.getTitle()))
+                .andExpect(jsonPath("$.reward").value(group1.getReward()))
+                .andExpect(jsonPath("$.hashtags", Matchers.containsInAnyOrder(group1.getHashtags().toArray())))
+                .andExpect(jsonPath("$.maxSize").value(group1.getMaxSize()))
+                .andExpect(jsonPath("$.isHidden").value(group1.getIsHidden()))
+                .andExpect(jsonPath("$.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.maxAchieveDays").value(0));
     }
 
     @Test
@@ -114,7 +123,15 @@ public class ChallengeGroupIntegrationTest {
         mockMvc.perform(post("/api/v1/challengeGroups")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.title").value(group2.getTitle()))
+                .andExpect(jsonPath("$.reward").value(group2.getReward()))
+                .andExpect(jsonPath("$.hashtags", Matchers.containsInAnyOrder(group2.getHashtags().toArray())))
+                .andExpect(jsonPath("$.maxSize").value(group2.getMaxSize()))
+                .andExpect(jsonPath("$.isHidden").value(group2.getIsHidden()))
+                .andExpect(jsonPath("$.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.maxAchieveDays").value(0));
     }
 
     @Test
@@ -124,7 +141,15 @@ public class ChallengeGroupIntegrationTest {
 
         mockMvc.perform(get("/api/v1/challengeGroups/{groupId}", create.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.group.id").value(create.getId()));
+                .andExpect(jsonPath("$.group.id").value(create.getId()))
+                .andExpect(jsonPath("$.group.title").value(group1.getTitle()))
+                .andExpect(jsonPath("$.group.reward").value(group1.getReward()))
+                .andExpect(jsonPath("$.group.hashtags", Matchers.containsInAnyOrder(group1.getHashtags().toArray())))
+                .andExpect(jsonPath("$.group.maxSize").value(group1.getMaxSize()))
+                .andExpect(jsonPath("$.group.isHidden").value(group1.getIsHidden()))
+                .andExpect(jsonPath("$.group.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.group.maxAchieveDays").value(0))
+                .andExpect(jsonPath("$.rank").isArray());
     }
 
     @Test
@@ -155,7 +180,13 @@ public class ChallengeGroupIntegrationTest {
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Title"));
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.reward").value(group1.getReward()))
+                .andExpect(jsonPath("$.hashtags", Matchers.containsInAnyOrder(group1.getHashtags().toArray())))
+                .andExpect(jsonPath("$.maxSize").value(group1.getMaxSize()))
+                .andExpect(jsonPath("$.isHidden").value(group1.getIsHidden()))
+                .andExpect(jsonPath("$.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.maxAchieveDays").value(0));
     }
 
     @Test

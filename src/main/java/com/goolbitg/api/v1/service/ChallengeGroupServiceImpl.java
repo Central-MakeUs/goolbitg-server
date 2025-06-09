@@ -121,6 +121,8 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         result.setTitle(create.getTitle());
         result.setOwnerId(create.getOwnerId());
         result.setHashtags(Arrays.asList(create.getHashtags().split(",")));
+        result.setReward(create.getReward());
+        result.setMaxSize(create.getMaxSize());
         result.setIsHidden(create.isHidden());
         result.setPeopleCount(create.getPeopleCount());
         result.setAvgAchieveRatio(create.getAvgAchieveRatio());
