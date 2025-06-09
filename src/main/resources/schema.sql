@@ -184,9 +184,7 @@ CREATE TABLE challenge_group_records (
 CREATE TABLE challenge_group_stats (
   group_id BIGINT,
   user_id VARCHAR(50),
-  continue_count INT DEFAULT 0,
   total_count INT DEFAULT 0,
-  enroll_count INT DEFAULT 0,
   PRIMARY KEY (group_id, user_id),
   FOREIGN KEY (group_id) REFERENCES challenge_groups(id),
   FOREIGN KEY (user_id) REFERENCES users(id)

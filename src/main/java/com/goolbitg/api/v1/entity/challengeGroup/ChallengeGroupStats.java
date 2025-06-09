@@ -28,16 +28,12 @@ public class ChallengeGroupStats {
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "continue_count", nullable = false)
-    @Builder.Default
-    private int continueCount = 0;
-
     @Column(name = "total_count", nullable = false)
     @Builder.Default
     private int totalCount = 0;
 
-    @Column(name = "enroll_count", nullable = false)
+    @Column(name = "saving", nullable = false)
     @Builder.Default
-    private int enrollCount = 0;
+    private int saving = 0;
 }
 

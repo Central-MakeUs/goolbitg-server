@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goolbitg.api.model.ChallengeGroupDto;
+import com.goolbitg.api.model.ChallengeGroupRankDto;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
 import com.goolbitg.api.model.ChallengeGroupStatDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
@@ -153,11 +154,11 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
-    public ChallengeGroupDto getChallengeGroup(Long groupId) throws Exception {
+    public ChallengeGroupRankDto getChallengeGroup(Long groupId) throws Exception {
         ChallengeGroup group = challengeGroupRepository.findById(groupId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
 
-        return getChallengeGroupDto(group);
+        return null;
     }
 
     private void validateUser(String userId) {

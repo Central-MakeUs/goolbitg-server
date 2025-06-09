@@ -1,6 +1,5 @@
 package com.goolbitg.api.v1.controller;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
@@ -13,11 +12,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.ChallengeGroupApi;
 import com.goolbitg.api.model.ChallengeGroupDto;
+import com.goolbitg.api.model.ChallengeGroupRankDto;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
-import com.goolbitg.api.model.ChallengeGroupStatDto;
-import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.PaginatedChallengeGroupDto;
-import com.goolbitg.api.model.PaginatedChallengeGroupRecordDto;
 import com.goolbitg.api.v1.security.AuthUtil;
 import com.goolbitg.api.v1.service.ChallengeGroupService;
 
@@ -60,34 +57,8 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
-    public ResponseEntity<ChallengeGroupDto> getChallengeGroup(Long groupId) throws Exception {
-        ChallengeGroupDto result = challengeGroupService.getChallengeGroup(groupId);
-        return ResponseEntity.ok(result);
-    }
-
-    @Override
-    public ResponseEntity<ChallengeGroupRecordDto> getChallengeGroupRecord(Long groupId, @Valid LocalDate date)
-    throws Exception {
-        String userId = AuthUtil.getLoginUserId();
-        ChallengeGroupRecordDto result = challengeGroupService.getChallengeGroupRecord(userId, groupId, date);
-        return ResponseEntity.ok(result);
-    }
-
-    @Override
-    public ResponseEntity<PaginatedChallengeGroupRecordDto> getChallengeGroupRecords(@Valid Integer page,
-        @Valid Integer size, @Valid LocalDate date, @Valid ChallengeRecordStatus status, @Valid Boolean created)
-    throws Exception {
-        String userId = AuthUtil.getLoginUserId();
-        if (page == null) page = 0;
-        if (size == null) size = 10;
-        PaginatedChallengeGroupRecordDto result = challengeGroupService.getChallengeGroupRecords(userId, page, size, date, status, created);
-        return ResponseEntity.ok(result);
-    }
-
-    @Override
-    public ResponseEntity<ChallengeGroupStatDto> getChallengeGroupStat(Long groupId) throws Exception {
-        String userId = AuthUtil.getLoginUserId();
-        ChallengeGroupStatDto result = challengeGroupService.getChallengeGroupStat(userId, groupId);
+    public ResponseEntity<ChallengeGroupRankDto> getChallengeGroup(Long groupId) throws Exception {
+        ChallengeGroupRankDto result = challengeGroupService.getChallengeGroup(groupId);
         return ResponseEntity.ok(result);
     }
 
