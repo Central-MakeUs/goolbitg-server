@@ -15,7 +15,7 @@ CREATE TABLE users (
   nickname VARCHAR(10) UNIQUE,
   register_date DATE NOT NULL,
   birthday DATE,
-  gender VARCHAR(6) CHECK (gender IN ('MALE', 'FEMALE')),
+  gender ENUM('MALE', 'FEMALE'),
   spending_type_id BIGINT,
   allow_push_notification BOOLEAN,
   agreement1 BOOLEAN,
@@ -79,7 +79,7 @@ CREATE TABLE challenge_records (
   challenge_id BIGINT,
   user_id VARCHAR(50),
   date DATE NOT NULL,
-  status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
+  status ENUM('WAIT', 'SUCCESS', 'FAIL') DEFAULT 'WAIT',
   location INT,
   PRIMARY KEY (challenge_id, user_id, date),
   FOREIGN KEY (challenge_id) REFERENCES challenges(id) ON DELETE CASCADE,
@@ -115,7 +115,7 @@ CREATE TABLE buyornots (
 CREATE TABLE buyornot_votes (
   post_id BIGINT NOT NULL,
   voter_id VARCHAR(50) NOT NULL,
-  vote VARCHAR(4) DEFAULT 'GOOD' CHECK (vote IN ('GOOD', 'BAD')),
+  vote ENUM('GOOD', 'BAD') DEFAULT 'GOOD',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (post_id, voter_id),
@@ -140,7 +140,7 @@ CREATE TABLE challenge_groups (
   reward INT NOT NULL,
   max_size INT NOT NULL,
   people_count INT DEFAULT 1,
-  is_hidden TINYINT DEFAULT 0,
+  is_hidden BOOLEAN DEFAULT 0,
   password VARCHAR(4),
   participant_count INT DEFAULT 0,
   avg_achieve_ratio FLOAT DEFAULT 0.0,
@@ -151,13 +151,22 @@ CREATE TABLE challenge_groups (
   FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
+CREATE TABLE challenge_group_enrollments (
+  group_id BIGINT NOT NULL,
+  user_id VARCHAR(50) NOT NULL,
+  status ENUM('ENROLL', 'UNENROLL'),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (group_id, user_id)
+);
+
 CREATE TABLE notices (
   id BIGINT AUTO_INCREMENT,
   receiver_id VARCHAR(50) NOT NULL,
   message VARCHAR(100) NOT NULL,
   published_at DATETIME NOT NULL,
-  type VARCHAR(9) DEFAULT 'CHALLENGE' CHECK (type IN ('CHALLENGE', 'VOTE', 'CHAT')),
-  is_read TINYINT DEFAULT 0,
+  type ENUM('CHALLENGE', 'VOTE', 'CHAT') DEFAULT 'CHALLENGE',
+  is_read BOOLEAN DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
@@ -166,7 +175,7 @@ CREATE TABLE challenge_group_records (
   group_id BIGINT,
   user_id VARCHAR(50),
   date DATE NOT NULL,
-  status VARCHAR(7) DEFAULT 'WAIT' CHECK (status IN ('WAIT', 'SUCCESS', 'FAIL')),
+  status ENUM('WAIT', 'SUCCESS', 'FAIL') DEFAULT 'WAIT',
   PRIMARY KEY (group_id, user_id, date),
   FOREIGN KEY (group_id) REFERENCES challenge_groups(id),
   FOREIGN KEY (user_id) REFERENCES users(id)

@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.goolbitg.api.v1.entity.Challenge;
-import com.goolbitg.api.v1.entity.SpendingType;
+import com.goolbitg.api.v1.entity.challenge.Challenge;
+import com.goolbitg.api.v1.entity.user.SpendingType;
 
 /**
  * ChallengeRepository

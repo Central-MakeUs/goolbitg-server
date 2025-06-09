@@ -160,7 +160,7 @@ public class ChallengeGroupIntegrationTest {
         ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
 
         mockMvc.perform(post("/api/v1/challengeGroups/{groupId}/enroll", create.getId()))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -168,9 +168,11 @@ public class ChallengeGroupIntegrationTest {
     void check_challenge_group_record() throws Exception {
         ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
 
-        mockMvc.perform(get("/api/v1/challengeGroups/{groupId}/records", create.getId()))
+        mockMvc.perform(post("/api/v1/challengeGroupRecords/{groupId}/check", create.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.challengeGroupId").value(create.getId()));
+            .andExpect(jsonPath("$.challengeGroupId").value(create.getId()))
+            .andExpect(jsonPath("$.userId").value(ROOT_USER))
+            .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
 
     @Test
@@ -183,14 +185,14 @@ public class ChallengeGroupIntegrationTest {
         mockMvc.perform(get("/api/v1/challengeGroupRecords/{groupId}", create.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.challengeGroupId").value(create.getId()))
+            .andExpect(jsonPath("$.userId").value(ROOT_USER))
             .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
 
     @Test
     @WithMockUser(ROOT_USER)
-    void get_challenge_group_records_for_today() throws Exception {
-        challengeGroupService.createChallengeGroup(ROOT_USER, group1);
-        challengeGroupService.createChallengeGroup(ROOT_USER, group2);
+    void get_challenge_group_records() throws Exception {
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
 
         mockMvc.perform(get("/api/v1/challengeGroupRecords"))
             .andExpect(status().isOk())
@@ -225,3 +227,4 @@ public class ChallengeGroupIntegrationTest {
             .andExpect(jsonPath("$.totalCount").value(1));
     }
 }
+

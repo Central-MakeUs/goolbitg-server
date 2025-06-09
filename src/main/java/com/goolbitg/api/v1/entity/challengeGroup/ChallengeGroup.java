@@ -1,4 +1,4 @@
-package com.goolbitg.api.v1.entity;
+package com.goolbitg.api.v1.entity.challengeGroup;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import com.goolbitg.api.v1.entity.BaseEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,7 +67,7 @@ public class ChallengeGroup extends BaseEntity {
     }
 
     public void setHashtags(String hashtags) {
-        this.setHashtags(hashtags);
+        this.hashtags = hashtags;
     }
 
     public void setMaxSize(int maxSize) {

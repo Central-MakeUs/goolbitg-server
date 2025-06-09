@@ -23,12 +23,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goolbitg.api.v1.entity.BuyOrNot;
-import com.goolbitg.api.v1.entity.BuyOrNotReport;
-import com.goolbitg.api.v1.entity.BuyOrNotReportId;
-import com.goolbitg.api.v1.entity.BuyOrNotVote;
-import com.goolbitg.api.v1.entity.BuyOrNotVoteId;
-import com.goolbitg.api.v1.entity.User;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNot;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNotReport;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNotReportId;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNotVote;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNotVoteId;
+import com.goolbitg.api.v1.entity.user.User;
 import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;

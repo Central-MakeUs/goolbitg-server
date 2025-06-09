@@ -1,4 +1,4 @@
-package com.goolbitg.api.v1.entity;
+package com.goolbitg.api.v1.entity.challengeGroup;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -56,5 +56,9 @@ public class ChallengeGroupRecord {
     @Override
     public int hashCode() {
         return Objects.hash(groupId, userId, date);
+    }
+
+    public void setStatus(ChallengeRecordStatus status) {
+        this.status = status;
     }
 }

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.goolbitg.api.v1.entity.AdminUser;
+import com.goolbitg.api.v1.entity.user.AdminUser;
 
 /**
  * AdminUserRepository

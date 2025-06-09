@@ -1,4 +1,4 @@
-package com.goolbitg.api.v1.entity;
+package com.goolbitg.api.v1.entity.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.goolbitg.api.v1.entity.ChallengeRecord;
-import com.goolbitg.api.v1.entity.ChallengeRecordId;
+import com.goolbitg.api.v1.entity.challenge.ChallengeRecord;
+import com.goolbitg.api.v1.entity.challenge.ChallengeRecordId;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 
 /**

@@ -2,6 +2,7 @@ package com.goolbitg.api.v1.service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,9 +17,15 @@ import com.goolbitg.api.model.ChallengeGroupStatDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.PaginatedChallengeGroupDto;
 import com.goolbitg.api.model.PaginatedChallengeGroupRecordDto;
-import com.goolbitg.api.v1.entity.ChallengeGroup;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroup;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupEnrollment;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupEnrollmentId;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecord;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecordId;
+import com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus;
 import com.goolbitg.api.v1.exception.ChallengeException;
 import com.goolbitg.api.v1.exception.UserException;
+import com.goolbitg.api.v1.repository.ChallengeGroupEnrollmentRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupStatsRepository;
@@ -40,12 +47,41 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     @Autowired
     private ChallengeGroupStatsRepository challengeGroupStatsRepository;
     @Autowired
+    private ChallengeGroupEnrollmentRepository ChallengeGroupEnrollmentRepository;
+    @Autowired
     private UserRepository userRepository;
 
     @Override
     public ChallengeGroupRecordDto checkChallengeGroup(String userId, Long groupId) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'checkChallengeGroup'");
+        validateUser(userId);
+        getOrThrowChallengeGroup(groupId);
+        ChallengeGroupRecordId id = new ChallengeGroupRecordId(groupId, userId, LocalDate.now());
+
+        Optional<ChallengeGroupRecord> result = challengeGroupRecordRepository.findById(id);
+        ChallengeGroupRecord record;
+        if (result.isPresent()) {
+            record = result.get();
+            record.setStatus(ChallengeRecordStatus.SUCCESS);
+        } else {
+            record = ChallengeGroupRecord.builder()
+                    .userId(userId)
+                    .groupId(groupId)
+                    .date(LocalDate.now())
+                    .status(ChallengeRecordStatus.SUCCESS)
+                    .build();
+            challengeGroupRecordRepository.save(record);
+        }
+
+        return getChallengeGroupRecordDto(record);
+    }
+
+    private ChallengeGroupRecordDto getChallengeGroupRecordDto(ChallengeGroupRecord record) {
+        ChallengeGroupRecordDto dto = new ChallengeGroupRecordDto();
+        dto.setUserId(record.getUserId());
+        dto.setChallengeGroupId(record.getGroupId());
+        dto.setDate(record.getDate());
+        dto.setStatus(record.getStatus());
+        return dto;
     }
 
     @Override
@@ -82,15 +118,38 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
+    @Transactional
     public void deleteChallengeGroup(String userId, Long groupId) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteChallengeGroup'");
+        validateUser(userId);
+        ChallengeGroup group = getOrThrowChallengeGroup(groupId);
+        if (group.getOwnerId().equals(userId))
+            challengeGroupRepository.delete(group);
     }
 
     @Override
+    @Transactional
     public void enrollChallengeGroup(String userId, Long groupId) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'enrollChallengeGroup'");
+        validateUser(userId);
+        ChallengeGroup group = getOrThrowChallengeGroup(groupId);
+        ChallengeGroupEnrollmentId id = new ChallengeGroupEnrollmentId(group.getId(), userId);
+        Optional<ChallengeGroupEnrollment> result = ChallengeGroupEnrollmentRepository.findById(id);
+
+        ChallengeGroupEnrollment enrollment;
+        if (result.isPresent()) {
+            if (result.get().getStatus().equals(EnrollmentStatus.ENROLL))
+                throw ChallengeException.alreadyEnrolled(group.getId());
+
+            enrollment = result.get();
+            enrollment.setStatus(EnrollmentStatus.ENROLL);
+        } else {
+            enrollment = ChallengeGroupEnrollment.builder()
+                    .groupId(group.getId())
+                    .userId(userId)
+                    .status(EnrollmentStatus.ENROLL)
+                    .build();
+        }
+        
+        ChallengeGroupEnrollmentRepository.save(enrollment);
     }
 
     @Override
@@ -109,8 +168,30 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     @Override
     public ChallengeGroupRecordDto getChallengeGroupRecord(String userId, Long groupId, LocalDate date)
             throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getChallengeGroupRecord'");
+        validateUser(userId);
+        getOrThrowChallengeGroup(groupId);
+        ChallengeGroupRecordId id = new ChallengeGroupRecordId(groupId, userId, date);
+        ChallengeGroupRecord record = getOrCreateChallengeGroupRecord(id);
+
+        return getChallengeGroupRecordDto(record);
+    }
+
+    private ChallengeGroupRecord getOrCreateChallengeGroupRecord(ChallengeGroupRecordId id) {
+        Optional<ChallengeGroupRecord> result = challengeGroupRecordRepository.findById(id);
+        ChallengeGroupRecord record;
+        if (result.isPresent()) {
+            record = result.get();
+            record.setStatus(ChallengeRecordStatus.SUCCESS);
+        } else {
+            record = ChallengeGroupRecord.builder()
+                    .userId(id.userId())
+                    .groupId(id.groupId())
+                    .date(LocalDate.now())
+                    .status(ChallengeRecordStatus.SUCCESS)
+                    .build();
+            challengeGroupRecordRepository.save(record);
+        }
+        return record;
     }
 
     @Override
@@ -168,15 +249,20 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
             throws Exception {
         validateUser(userId);
 
-        ChallengeGroup group = challengeGroupRepository.findById(groupId)
-                .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
+        ChallengeGroup group = getOrThrowChallengeGroup(groupId);
 
-        updateChallengGroup(challengeGroupDto, group);
+        updateChallengGroupInner(challengeGroupDto, group);
 
         return getChallengeGroupDto(group);
     }
 
-    private void updateChallengGroup(ChallengeGroupDto challengeGroupDto, ChallengeGroup group) {
+    private ChallengeGroup getOrThrowChallengeGroup(Long groupId) {
+        ChallengeGroup group = challengeGroupRepository.findById(groupId)
+                .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
+        return group;
+    }
+
+    private void updateChallengGroupInner(ChallengeGroupDto challengeGroupDto, ChallengeGroup group) {
         Integer maxSize = challengeGroupDto.getMaxSize();
         if (maxSize != null && maxSize >= group.getPeopleCount())
             group.setMaxSize(challengeGroupDto.getMaxSize());

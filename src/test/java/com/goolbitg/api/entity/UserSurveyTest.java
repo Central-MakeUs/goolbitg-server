@@ -2,7 +2,7 @@ package com.goolbitg.api.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.goolbitg.api.v1.entity.UserSurvey;
+import com.goolbitg.api.v1.entity.user.UserSurvey;
 import org.junit.jupiter.api.Test;
 
 /**

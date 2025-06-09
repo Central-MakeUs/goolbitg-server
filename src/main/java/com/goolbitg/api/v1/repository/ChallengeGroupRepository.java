@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.goolbitg.api.v1.entity.ChallengeGroup;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroup;
 
 /**
  * ChallengeGroupRepository

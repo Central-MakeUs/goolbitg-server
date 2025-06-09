@@ -17,8 +17,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goolbitg.api.v1.entity.UnregisterHistory;
-import com.goolbitg.api.v1.entity.User;
+import com.goolbitg.api.v1.entity.user.UnregisterHistory;
+import com.goolbitg.api.v1.entity.user.User;
 import com.goolbitg.api.model.AuthRequestDto;
 import com.goolbitg.api.model.AuthResponseDto;
 import com.goolbitg.api.model.LoginType;
