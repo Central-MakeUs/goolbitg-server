@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.goolbitg.api.v1.entity.User;
+import com.goolbitg.api.v1.entity.user.User;
 
 /**
  * UserRepository

@@ -3,7 +3,6 @@ package com.goolbitg.api.v1.service;
 import com.goolbitg.api.model.NoticeDto;
 import com.goolbitg.api.model.NoticeType;
 import com.goolbitg.api.model.PaginatedNoticeDto;
-import com.goolbitg.api.v1.entity.Notice;
 
 /**
  * NoticeService

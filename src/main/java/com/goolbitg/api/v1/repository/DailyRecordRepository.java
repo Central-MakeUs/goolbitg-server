@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.goolbitg.api.v1.entity.DailyRecord;
-import com.goolbitg.api.v1.entity.DailyRecordId;
+import com.goolbitg.api.v1.entity.user.DailyRecord;
+import com.goolbitg.api.v1.entity.user.DailyRecordId;
 
 /**
  * DailyRecordRepository

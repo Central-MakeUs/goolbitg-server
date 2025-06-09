@@ -1,5 +1,6 @@
-package com.goolbitg.api.v1.entity;
+package com.goolbitg.api.v1.entity.buyOrNot;
 
+import com.goolbitg.api.v1.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

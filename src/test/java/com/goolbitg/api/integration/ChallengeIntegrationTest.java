@@ -127,7 +127,7 @@ public class ChallengeIntegrationTest {
         Long challengeId = 9999L;
 
         mockMvc.perform(get("/api/v1/challengeRecords/{challengeId}", challengeId))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("4004"));
     }
 

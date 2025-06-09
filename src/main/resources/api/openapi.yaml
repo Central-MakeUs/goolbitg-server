@@ -872,7 +872,7 @@ paths:
     get:
       summary: 특정 챌린지 그룹 정보 가져오기
       operationId: getChallengeGroup
-      description: 특정 챌린지 그룹의 정보를 가져옵니다.
+      description: 특정 챌린지 그룹의 정보와 현재 순위를 가져옵니다.
       tags:
         - ChallengeGroup
       parameters:
@@ -883,7 +883,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChallengeGroupDto'
+                $ref: '#/components/schemas/ChallengeGroupRankDto'
         '422':
           description: 챌린지 그룹 정보 확인 실패
           content:
@@ -982,64 +982,7 @@ paths:
                   $ref: '#/components/examples/Error_AlreadyEnrolled'
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
-  /api/v1/challengeGroupRecords:
-    get:
-      summary: 참여중인 챌린지 그룹 기록 가져오기
-      operationId: getChallengeGroupRecords
-      description: 참여중인 챌린지 그룹의 특정 날짜의 기록들을 가져옵니다.
-      tags:
-        - ChallengeGroup
-      parameters:
-        - $ref: '#/components/parameters/pageParam'
-        - $ref: '#/components/parameters/sizeParam'
-        - $ref: '#/components/parameters/dateParam'
-        - name: status
-          description: 필터링할 챌린지 상태입니다. 제공되지 않으면 모든 상태를 가져옵니다.
-          in: query
-          schema:
-            $ref: '#/components/schemas/ChallengeRecordStatus'
-        - name: created
-          description: 내가 생성한 챌린지인지 여부입니다.
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: 챌린지 그룹 기록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChallengeGroupRecordDto'
-  /api/v1/challengeGroupRecords/{groupId}:
-    get:
-      summary: 특정 챌린지 그룹의 기록을 확인
-      operationId: getChallengeGroupRecord
-      description: 내가 참여중인 챌린지 그룹의 특정 날짜의 기록을 가져옵니다.
-      tags:
-        - ChallengeGroup
-      parameters:
-        - $ref: '#/components/parameters/groupIdParam'
-        - $ref: '#/components/parameters/dateParam'
-      responses:
-        '200':
-          description: 챌린지 그룹 기록 반환
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChallengeGroupRecordDto'
-        '422':
-          description: 챌린지 그룹 기록 확인 실패
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorDto'
-              examples:
-                참여중이지 않은 챌린지:
-                  $ref: '#/components/examples/Error_NotEnrolled'
-                존재하지 않는 챌린지:
-                  $ref: '#/components/examples/Error_ChallengeNotExist'
-  /api/v1/challengeGroupRecords/{groupId}/check:
+  /api/v1/challengeGroups/{groupId}/check:
     post:
       summary: 챌린지 그룹 기록 체크
       operationId: checkChallengeGroup
@@ -1068,31 +1011,117 @@ paths:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
                 이미 완료한 챌린지:
                   $ref: '#/components/examples/Error_ChallengeAlreadyChecked'
-  /api/v1/challengeGroupStat/{groupId}:
+  /api/v1/challengeGroups/{groupId}/Tripple:
     get:
-      summary: 특정 챌린지 그룹 참여 통계 확인
-      operationId: getChallengeGroupStat
-      description: 특정 챌린지 그룹에 대한 내 참여 통계를 확인합니다.
+      summary: 챌린지 그룹 3일 기록
+      operationId: getChallengeGroupTripple
+      description: 챌린지 그룹의 3일치 기록을 가져옵니다.
       tags:
         - ChallengeGroup
       parameters:
         - $ref: '#/components/parameters/groupIdParam'
       responses:
         '200':
-          description: 챌린지 통계 반환 성공.
+          description: 기록을 가져옵니다.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChallengeGroupStatDto'
+                $ref: '#/components/schemas/ChallengeGroupTrippleDto'
         '422':
-          description: 챌린지 그룹 통계 반환 실패.
+          description: 챌린지 그룹 기록 확인 실패
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorDto'
               examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
                 존재하지 않는 챌린지:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
+
+  # NOTE: 일단은 필요 없는 API
+  # /api/v1/challengeGroupRecords:
+  #   get:
+  #     summary: 참여중인 챌린지 그룹 기록 가져오기
+  #     operationId: getChallengeGroupRecords
+  #     description: 참여중인 챌린지 그룹의 특정 날짜의 기록들을 가져옵니다.
+  #     tags:
+  #       - ChallengeGroup
+  #     parameters:
+  #       - $ref: '#/components/parameters/pageParam'
+  #       - $ref: '#/components/parameters/sizeParam'
+  #       - $ref: '#/components/parameters/dateParam'
+  #       - name: status
+  #         description: 필터링할 챌린지 상태입니다. 제공되지 않으면 모든 상태를 가져옵니다.
+  #         in: query
+  #         schema:
+  #           $ref: '#/components/schemas/ChallengeRecordStatus'
+  #       - name: created
+  #         description: 내가 생성한 챌린지인지 여부입니다.
+  #         in: query
+  #         schema:
+  #           type: boolean
+  #           default: false
+  #     responses:
+  #       '200':
+  #         description: 챌린지 그룹 기록 반환
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/PaginatedChallengeGroupRecordDto'
+  # /api/v1/challengeGroupRecords/{groupId}:
+  #   get:
+  #     summary: 특정 챌린지 그룹의 기록을 확인
+  #     operationId: getChallengeGroupRecord
+  #     description: 내가 참여중인 챌린지 그룹의 특정 날짜의 기록을 가져옵니다.
+  #     tags:
+  #       - ChallengeGroup
+  #     parameters:
+  #       - $ref: '#/components/parameters/groupIdParam'
+  #       - $ref: '#/components/parameters/dateParam'
+  #     responses:
+  #       '200':
+  #         description: 챌린지 그룹 기록 반환
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ChallengeGroupRecordDto'
+  #       '422':
+  #         description: 챌린지 그룹 기록 확인 실패
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ErrorDto'
+  #             examples:
+  #               참여중이지 않은 챌린지:
+  #                 $ref: '#/components/examples/Error_NotEnrolled'
+  #               존재하지 않는 챌린지:
+  #                 $ref: '#/components/examples/Error_ChallengeNotExist'
+  # /api/v1/challengeGroupStat/{groupId}:
+  #   get:
+  #     summary: 특정 챌린지 그룹 참여 통계 확인
+  #     operationId: getChallengeGroupStat
+  #     description: 특정 챌린지 그룹에 대한 내 참여 통계를 확인합니다.
+  #     tags:
+  #       - ChallengeGroup
+  #     parameters:
+  #       - $ref: '#/components/parameters/groupIdParam'
+  #     responses:
+  #       '200':
+  #         description: 챌린지 통계 반환 성공.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ChallengeGroupStatDto'
+  #       '422':
+  #         description: 챌린지 그룹 통계 반환 실패.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ErrorDto'
+  #             examples:
+  #               존재하지 않는 챌린지:
+  #                 $ref: '#/components/examples/Error_ChallengeNotExist'
 
   /api/v1/buyOrNots:
     get:
@@ -1703,6 +1732,9 @@ components:
         title:
           type: string
           description: 챌린지 제목
+        reward:
+          type: integer
+          description: 챌린지 금액
         hashtags:
           type: array
           items:
@@ -1716,10 +1748,6 @@ components:
         peopleCount:
           type: integer
           description: 참여 인원수
-        imageUrl:
-          type: string
-          format: uri
-          description: 그룹 대표 이미지 URL
         isHidden:
           type: boolean
           description: 비밀방 여부
@@ -1729,14 +1757,67 @@ components:
           minimum: 4
           maximum: 4
           description: 비밀번호
+        avgAchieveRatio:
+          type: number
+          format: float
+          description: 평균 달성 비율
+        maxAchieveDays:
+          type: integer
+          description: 최대 달성일
       example:
         id: 0
         ownerId: id0001
         title: 배달음식 안시켜먹기
         hashtags: [ "배달", "음식" ]
+        reward: 5000
         maxSize: 6
         peopleCount: 1
-        imageUrl: "http://localhost/images/ch01"
+        avgAchieveRatio: 4.5
+        maxAchieveDays: 9
+        isHidden: false
+    ChallengeGroupRankDto:
+      type: object
+      properties:
+        group:
+          $ref: '#/components/schemas/ChallengeGroupDto'
+        rank:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: 사용자 이름
+                example: 왕굴비
+              profileUrl:
+                type: string
+                description: 프로필 이미지 url
+                example: http://example.url/profile
+              saving:
+                type: integer
+                description: 절약 금액
+                example: 25000
+    ChallengeGroupTrippleDto:
+      type: object
+      properties:
+        duration:
+          type: integer
+          example: 7
+          description: 오늘이 몇 번째 연속 도전중일인지 나타내는 수
+        check1:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        check2:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        check3:
+          $ref: '#/components/schemas/ChallengeRecordStatus'
+        location:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: 오늘 날짜가 몇 번째인지 나타내는 수 (1~3)
+        canceled:
+          type: boolean
+          description: 취소된 챌린지 여부
     ChallengeRecordDto:
       type: object
       properties:

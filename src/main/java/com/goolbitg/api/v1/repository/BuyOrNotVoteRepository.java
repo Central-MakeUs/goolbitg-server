@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.goolbitg.api.v1.entity.BuyOrNotVote;
-import com.goolbitg.api.v1.entity.BuyOrNotVoteId;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNotVote;
+import com.goolbitg.api.v1.entity.buyOrNot.BuyOrNotVoteId;
 import com.goolbitg.api.model.BuyOrNotVoteType;
 
 /**

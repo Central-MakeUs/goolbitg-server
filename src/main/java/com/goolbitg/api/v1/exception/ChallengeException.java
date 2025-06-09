@@ -26,7 +26,7 @@ public abstract class ChallengeException {
         return new CommonException(
             4004,
             "챌린지가 존재하지 않습니다.  (" + id + ")",
-            HttpStatus.UNPROCESSABLE_ENTITY);
+            HttpStatus.NOT_FOUND);
     }
     public static CommonException alreadyComplete(Long id) {
         return new CommonException(

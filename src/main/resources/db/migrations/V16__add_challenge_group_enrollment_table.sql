@@ -1,0 +1,8 @@
+CREATE TABLE challenge_group_enrollments (
+  group_id BIGINT NOT NULL,
+  user_id VARCHAR(50) NOT NULL,
+  status ENUM('ENROLL', 'UNENROLL'),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (group_id, user_id)
+);
