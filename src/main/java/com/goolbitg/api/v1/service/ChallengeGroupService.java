@@ -6,6 +6,7 @@ import com.goolbitg.api.model.ChallengeGroupDto;
 import com.goolbitg.api.model.ChallengeGroupRankDto;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
 import com.goolbitg.api.model.ChallengeGroupStatDto;
+import com.goolbitg.api.model.ChallengeGroupTrippleDto;
 import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.PaginatedChallengeGroupDto;
 import com.goolbitg.api.model.PaginatedChallengeGroupRecordDto;
@@ -23,7 +24,10 @@ public interface ChallengeGroupService {
     ChallengeGroupRecordDto getChallengeGroupRecord(String userId, Long groupId, LocalDate date) throws Exception;
     PaginatedChallengeGroupRecordDto getChallengeGroupRecords(String userId, int page, int size, LocalDate date, ChallengeRecordStatus status, Boolean created) throws Exception;
     ChallengeGroupStatDto getChallengeGroupStat(String userId, Long groupId) throws Exception;
-    PaginatedChallengeGroupDto getChallengeGroups(String userId, int page, int size, String search, Boolean created) throws Exception;
+    PaginatedChallengeGroupDto getChallengeGroups(String userId, int page, int size, String search, Boolean created, Boolean participating) throws Exception;
     ChallengeGroupDto updateChallengeGroup(String userId, Long groupId, ChallengeGroupDto challengeGroupDto) throws Exception;
+    ChallengeGroupTrippleDto getTripple(String userId, long groupId) throws Exception;
+    void failChallenge(String userId, Long groupId, LocalDate date);
+    void calculateAllChallengeStat(LocalDate date);
 
 }

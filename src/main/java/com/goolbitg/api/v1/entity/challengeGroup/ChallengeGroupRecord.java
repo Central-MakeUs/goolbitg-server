@@ -43,6 +43,9 @@ public class ChallengeGroupRecord {
     @Enumerated(EnumType.STRING)
     private ChallengeRecordStatus status;
 
+    @Column(name = "location")
+    private Integer location;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,5 +63,17 @@ public class ChallengeGroupRecord {
 
     public void setStatus(ChallengeRecordStatus status) {
         this.status = status;
+    }
+
+    public void success() {
+        if (status != ChallengeRecordStatus.WAIT)
+            throw new IllegalStateException("challenge status is not wait");
+        status = ChallengeRecordStatus.SUCCESS;
+    }
+
+    public void fail() {
+        if (status != ChallengeRecordStatus.WAIT)
+            throw new IllegalStateException("challenge status is not wait");
+        status = ChallengeRecordStatus.FAIL;
     }
 }

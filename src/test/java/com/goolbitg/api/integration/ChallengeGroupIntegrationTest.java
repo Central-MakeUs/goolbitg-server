@@ -18,7 +18,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goolbitg.api.TestTimeService;
 import com.goolbitg.api.model.ChallengeGroupDto;
+import com.goolbitg.api.v1.data.CronJobExecutor;
 import com.goolbitg.api.v1.service.ChallengeGroupService;
 import com.goolbitg.api.v1.service.TimeService;
 
@@ -34,6 +36,8 @@ public class ChallengeGroupIntegrationTest {
     private TimeService timeService;
     @Autowired
     private ChallengeGroupService challengeGroupService;
+    @Autowired
+    private CronJobExecutor cronJobExecutor;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -95,6 +99,19 @@ public class ChallengeGroupIntegrationTest {
                 .andExpect(jsonPath("$.totalSize").value(1));
     }
 
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_groups_i_participating() throws Exception {
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.createChallengeGroup(ROOT_USER, group2);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+
+        mockMvc.perform(get("/api/v1/challengeGroups")
+            .param("participating", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSize").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(create.getId()));
+    }
 
     @Test
     @WithMockUser(ROOT_USER)
@@ -223,5 +240,44 @@ public class ChallengeGroupIntegrationTest {
             .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
 
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_group_tripple() throws Exception {
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+        challengeGroupService.checkChallengeGroup(ROOT_USER, create.getId());
+
+        mockMvc.perform(get("/api/v1/challengeGroups/{groupId}/tripple", create.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.duration").value(1))
+            .andExpect(jsonPath("$.check1").value("SUCCESS"))
+            .andExpect(jsonPath("$.check2").value("WAIT"))
+            .andExpect(jsonPath("$.check3").value("WAIT"))
+            .andExpect(jsonPath("$.location").value(1));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_group_tripple_after_a_day_without_checking() throws Exception {
+        TestTimeService testTimeService = (TestTimeService) timeService;
+
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+        challengeGroupService.checkChallengeGroup(ROOT_USER, create.getId());
+
+        testTimeService.increaseDay();
+        cronJobExecutor.finishTheDay();
+
+        mockMvc.perform(get("/api/v1/challengeGroups/{groupId}/tripple", create.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.duration").value(2))
+            .andExpect(jsonPath("$.check1").value("SUCCESS"))
+            .andExpect(jsonPath("$.check2").value("WAIT"))
+            .andExpect(jsonPath("$.check3").value("WAIT"))
+            .andExpect(jsonPath("$.location").value(2));
+
+        // NOTE: MUST RESET!!!
+        testTimeService.reset();
+    }
 }
 

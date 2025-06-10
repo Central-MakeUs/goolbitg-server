@@ -28,16 +28,32 @@ public class ChallengeGroupStats {
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "total_count", nullable = false)
+    @Column(name = "total_count")
     @Builder.Default
     private int totalCount = 0;
 
-    @Column(name = "saving", nullable = false)
+    @Column(name = "saving")
     @Builder.Default
     private int saving = 0;
 
+    @Column(name = "duration")
+    @Builder.Default
+    private int duration = 1;
+
     public void increaseSaving(int amount) {
         saving += amount;
+    }
+
+    public void increaseCount() {
+        totalCount += 1;
+    }
+
+    public void increaseDuration() {
+        duration += 1;
+    }
+
+    public void fail() {
+        duration = 0;
     }
 }
 
