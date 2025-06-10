@@ -827,6 +827,12 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: participating
+          description: 참여중인 챌린지 그룹만 가져올지 여부입니다.
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: 챌린지 그룹 목록
@@ -1011,7 +1017,7 @@ paths:
                   $ref: '#/components/examples/Error_ChallengeNotExist'
                 이미 완료한 챌린지:
                   $ref: '#/components/examples/Error_ChallengeAlreadyChecked'
-  /api/v1/challengeGroups/{groupId}/Tripple:
+  /api/v1/challengeGroups/{groupId}/tripple:
     get:
       summary: 챌린지 그룹 3일 기록
       operationId: getChallengeGroupTripple
@@ -2520,18 +2526,17 @@ components:
         registerComplete: false
     ChallengeGroup_Form_Normal:
       value:
-        ownerId: id0001
         title: 배달음식 안시켜먹기
         hashtags: [ "배달", "음식" ]
+        reward: 5000
         maxSize: 6
-        imageUrl: "http://localhost/images/ch01"
+        isHidden: false
     ChallengeGroup_Form_Hidden:
       value:
-        ownerId: id0001
         title: 택시 안타기
         hashtags: [ "교통" ]
+        reward: 3000
         maxSize: 6
-        imageUrl: "http://localhost/images/ch01"
         isHidden: true
         password: 1234
     ChallengeGroup_Form_Modify:

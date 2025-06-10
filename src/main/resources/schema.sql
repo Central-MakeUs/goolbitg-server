@@ -176,6 +176,7 @@ CREATE TABLE challenge_group_records (
   user_id VARCHAR(50),
   date DATE NOT NULL,
   status ENUM('WAIT', 'SUCCESS', 'FAIL') DEFAULT 'WAIT',
+  location INT,
   PRIMARY KEY (group_id, user_id, date),
   FOREIGN KEY (group_id) REFERENCES challenge_groups(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
@@ -186,6 +187,7 @@ CREATE TABLE challenge_group_stats (
   user_id VARCHAR(50),
   total_count INT DEFAULT 0,
   saving INT DEFAULT 0,
+  duration INT DEFAULT 1,
   PRIMARY KEY (group_id, user_id),
   FOREIGN KEY (group_id) REFERENCES challenge_groups(id),
   FOREIGN KEY (user_id) REFERENCES users(id)

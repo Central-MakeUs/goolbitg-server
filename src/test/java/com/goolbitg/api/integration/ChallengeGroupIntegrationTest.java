@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goolbitg.api.TestTimeService;
 import com.goolbitg.api.model.ChallengeGroupDto;
+import com.goolbitg.api.v1.data.CronJobExecutor;
 import com.goolbitg.api.v1.service.ChallengeGroupService;
 import com.goolbitg.api.v1.service.TimeService;
 
@@ -33,6 +36,8 @@ public class ChallengeGroupIntegrationTest {
     private TimeService timeService;
     @Autowired
     private ChallengeGroupService challengeGroupService;
+    @Autowired
+    private CronJobExecutor cronJobExecutor;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -94,6 +99,19 @@ public class ChallengeGroupIntegrationTest {
                 .andExpect(jsonPath("$.totalSize").value(1));
     }
 
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_groups_i_participating() throws Exception {
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.createChallengeGroup(ROOT_USER, group2);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+
+        mockMvc.perform(get("/api/v1/challengeGroups")
+            .param("participating", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSize").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(create.getId()));
+    }
 
     @Test
     @WithMockUser(ROOT_USER)
@@ -103,7 +121,15 @@ public class ChallengeGroupIntegrationTest {
         mockMvc.perform(post("/api/v1/challengeGroups")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.title").value(group1.getTitle()))
+                .andExpect(jsonPath("$.reward").value(group1.getReward()))
+                .andExpect(jsonPath("$.hashtags", Matchers.containsInAnyOrder(group1.getHashtags().toArray())))
+                .andExpect(jsonPath("$.maxSize").value(group1.getMaxSize()))
+                .andExpect(jsonPath("$.isHidden").value(group1.getIsHidden()))
+                .andExpect(jsonPath("$.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.maxAchieveDays").value(0));
     }
 
     @Test
@@ -114,7 +140,15 @@ public class ChallengeGroupIntegrationTest {
         mockMvc.perform(post("/api/v1/challengeGroups")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.title").value(group2.getTitle()))
+                .andExpect(jsonPath("$.reward").value(group2.getReward()))
+                .andExpect(jsonPath("$.hashtags", Matchers.containsInAnyOrder(group2.getHashtags().toArray())))
+                .andExpect(jsonPath("$.maxSize").value(group2.getMaxSize()))
+                .andExpect(jsonPath("$.isHidden").value(group2.getIsHidden()))
+                .andExpect(jsonPath("$.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.maxAchieveDays").value(0));
     }
 
     @Test
@@ -124,7 +158,15 @@ public class ChallengeGroupIntegrationTest {
 
         mockMvc.perform(get("/api/v1/challengeGroups/{groupId}", create.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.group.id").value(create.getId()));
+                .andExpect(jsonPath("$.group.id").value(create.getId()))
+                .andExpect(jsonPath("$.group.title").value(group1.getTitle()))
+                .andExpect(jsonPath("$.group.reward").value(group1.getReward()))
+                .andExpect(jsonPath("$.group.hashtags", Matchers.containsInAnyOrder(group1.getHashtags().toArray())))
+                .andExpect(jsonPath("$.group.maxSize").value(group1.getMaxSize()))
+                .andExpect(jsonPath("$.group.isHidden").value(group1.getIsHidden()))
+                .andExpect(jsonPath("$.group.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.group.maxAchieveDays").value(0))
+                .andExpect(jsonPath("$.rank").isArray());
     }
 
     @Test
@@ -155,7 +197,13 @@ public class ChallengeGroupIntegrationTest {
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Title"));
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.reward").value(group1.getReward()))
+                .andExpect(jsonPath("$.hashtags", Matchers.containsInAnyOrder(group1.getHashtags().toArray())))
+                .andExpect(jsonPath("$.maxSize").value(group1.getMaxSize()))
+                .andExpect(jsonPath("$.isHidden").value(group1.getIsHidden()))
+                .andExpect(jsonPath("$.avgAchieveRatio").value(0))
+                .andExpect(jsonPath("$.maxAchieveDays").value(0));
     }
 
     @Test
@@ -192,5 +240,44 @@ public class ChallengeGroupIntegrationTest {
             .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
 
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_group_tripple() throws Exception {
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+        challengeGroupService.checkChallengeGroup(ROOT_USER, create.getId());
+
+        mockMvc.perform(get("/api/v1/challengeGroups/{groupId}/tripple", create.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.duration").value(1))
+            .andExpect(jsonPath("$.check1").value("SUCCESS"))
+            .andExpect(jsonPath("$.check2").value("WAIT"))
+            .andExpect(jsonPath("$.check3").value("WAIT"))
+            .andExpect(jsonPath("$.location").value(1));
+    }
+
+    @Test
+    @WithMockUser(ROOT_USER)
+    void get_challenge_group_tripple_after_a_day_without_checking() throws Exception {
+        TestTimeService testTimeService = (TestTimeService) timeService;
+
+        ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        challengeGroupService.enrollChallengeGroup(ROOT_USER, create.getId());
+        challengeGroupService.checkChallengeGroup(ROOT_USER, create.getId());
+
+        testTimeService.increaseDay();
+        cronJobExecutor.finishTheDay();
+
+        mockMvc.perform(get("/api/v1/challengeGroups/{groupId}/tripple", create.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.duration").value(2))
+            .andExpect(jsonPath("$.check1").value("SUCCESS"))
+            .andExpect(jsonPath("$.check2").value("WAIT"))
+            .andExpect(jsonPath("$.check3").value("WAIT"))
+            .andExpect(jsonPath("$.location").value(2));
+
+        // NOTE: MUST RESET!!!
+        testTimeService.reset();
+    }
 }
 

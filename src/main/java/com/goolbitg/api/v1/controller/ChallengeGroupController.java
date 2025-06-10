@@ -14,6 +14,7 @@ import com.goolbitg.api.ChallengeGroupApi;
 import com.goolbitg.api.model.ChallengeGroupDto;
 import com.goolbitg.api.model.ChallengeGroupRankDto;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
+import com.goolbitg.api.model.ChallengeGroupTrippleDto;
 import com.goolbitg.api.model.PaginatedChallengeGroupDto;
 import com.goolbitg.api.v1.security.AuthUtil;
 import com.goolbitg.api.v1.service.ChallengeGroupService;
@@ -63,12 +64,18 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
+    public ResponseEntity<ChallengeGroupTrippleDto> getChallengeGroupTripple(Long groupId) throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+        return ResponseEntity.ok(challengeGroupService.getTripple(userId, groupId));
+    }
+
+    @Override
     public ResponseEntity<PaginatedChallengeGroupDto> getChallengeGroups(@Valid Integer page, @Valid Integer size,
-        @Valid String search, @Valid Boolean created) throws Exception {
+        @Valid String search, @Valid Boolean created, @Valid Boolean participating) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         if (page == null) page = 0;
         if (size == null) size = 10;
-        PaginatedChallengeGroupDto result = challengeGroupService.getChallengeGroups(userId, page, size, search, created);
+        PaginatedChallengeGroupDto result = challengeGroupService.getChallengeGroups(userId, page, size, search, created, participating);
         return ResponseEntity.ok(result);
     }
 

@@ -13,13 +13,16 @@ import com.goolbitg.api.model.ChallengeRecordStatus;
 import com.goolbitg.api.model.NoticeType;
 import com.goolbitg.api.v1.entity.challenge.Challenge;
 import com.goolbitg.api.v1.entity.challenge.ChallengeRecord;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecord;
 import com.goolbitg.api.v1.entity.user.DailyRecord;
 import com.goolbitg.api.v1.entity.user.User;
+import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRepository;
 import com.goolbitg.api.v1.repository.DailyRecordRepository;
 import com.goolbitg.api.v1.repository.UserRepository;
 import com.goolbitg.api.v1.service.BuyOrNotService;
+import com.goolbitg.api.v1.service.ChallengeGroupService;
 import com.goolbitg.api.v1.service.ChallengeService;
 import com.goolbitg.api.v1.service.NoticeService;
 import com.goolbitg.api.v1.service.TimeService;
@@ -43,6 +46,8 @@ public class CronJobExecutor {
     @Autowired
     private ChallengeRecordRepository challengeRecordRepository;
     @Autowired
+    private ChallengeGroupRecordRepository challengeGroupRecordRepository;
+    @Autowired
     private ChallengeService challengeService;
     @Autowired
     private UserService userService;
@@ -52,6 +57,8 @@ public class CronJobExecutor {
     private ChallengeRepository challengeRepository;
     @Autowired
     private BuyOrNotService buyOrNotService;
+    @Autowired 
+    private ChallengeGroupService challengeGroupService;
 
 
     @Transactional
@@ -80,8 +87,16 @@ public class CronJobExecutor {
                 log.error("Canceling challenge failed: ", e);
             }
         }
+        for (ChallengeGroupRecord record : challengeGroupRecordRepository.findAllByDateAndStatus(yesterday, ChallengeRecordStatus.WAIT)) {
+            try {
+                challengeGroupService.failChallenge(record.getUserId(), record.getGroupId(), yesterday);
+            } catch (Exception e) {
+                log.error("Canceling challenge failed: ", e);
+            }
+        }
         // 3. Re-calculate challenge stats
         challengeService.calculateAllChallengeStat(today);
+        challengeGroupService.calculateAllChallengeStat(today);
         // 4. Update user stats
         for (User user : userRepository.findAll()) {
             try {
