@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goolbitg.api.TestTimeService;
 import com.goolbitg.api.model.ChallengeGroupDto;
+import com.goolbitg.api.model.ChallengeGroupEnrollmentDto;
 import com.goolbitg.api.v1.data.CronJobExecutor;
 import com.goolbitg.api.v1.service.ChallengeGroupService;
 import com.goolbitg.api.v1.service.TimeService;
@@ -222,8 +223,13 @@ public class ChallengeGroupIntegrationTest {
     @WithMockUser(NORMAL_USER)
     void enroll_in_a_challenge_group() throws Exception {
         ChallengeGroupDto create = challengeGroupService.createChallengeGroup(ROOT_USER, group1);
+        ChallengeGroupEnrollmentDto request = new ChallengeGroupEnrollmentDto();
+        request.setPassword(null);
 
-        mockMvc.perform(post("/api/v1/challengeGroups/{groupId}/enroll", create.getId()))
+        String body = objectMapper.writeValueAsString(request);
+        mockMvc.perform(post("/api/v1/challengeGroups/{groupId}/enroll", create.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
             .andExpect(status().isNoContent());
     }
 
