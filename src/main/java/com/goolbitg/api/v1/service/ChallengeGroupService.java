@@ -19,7 +19,7 @@ public interface ChallengeGroupService {
     ChallengeGroupRecordDto checkChallengeGroup(String userId, Long groupId) throws Exception;
     ChallengeGroupDto createChallengeGroup(String userId, ChallengeGroupDto challengeGroupDto) throws Exception;
     void deleteChallengeGroup(String userId, Long groupId) throws Exception;
-    void enrollChallengeGroup(String userId, Long groupId) throws Exception;
+    void enrollChallengeGroup(String userId, Long groupId, String password) throws Exception;
     ChallengeGroupRankDto getChallengeGroup(Long groupId) throws Exception;
     ChallengeGroupRecordDto getChallengeGroupRecord(String userId, Long groupId, LocalDate date) throws Exception;
     PaginatedChallengeGroupRecordDto getChallengeGroupRecords(String userId, int page, int size, LocalDate date, ChallengeRecordStatus status, Boolean created) throws Exception;

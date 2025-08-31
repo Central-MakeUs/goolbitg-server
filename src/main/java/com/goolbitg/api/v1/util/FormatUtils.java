@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * FormatUtil
  */
-public class FormatUtil {
+public class FormatUtils {
 
     public static LocalTime parseTime(String src) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");

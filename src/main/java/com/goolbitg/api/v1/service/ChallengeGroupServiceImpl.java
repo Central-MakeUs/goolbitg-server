@@ -35,6 +35,7 @@ import com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus;
 import com.goolbitg.api.v1.entity.user.User;
 import com.goolbitg.api.v1.exception.ChallengeException;
 import com.goolbitg.api.v1.exception.UserException;
+import com.goolbitg.api.v1.repository.ChallengeGroupCustomRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupEnrollmentRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeGroupRepository;
@@ -58,6 +59,8 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     private ChallengeGroupStatsRepository challengeGroupStatsRepository;
     @Autowired
     private ChallengeGroupEnrollmentRepository challengeGroupEnrollmentRepository;
+    @Autowired
+    private ChallengeGroupCustomRepository challengeGroupCustomRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -136,9 +139,14 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
 
     @Override
     @Transactional
-    public void enrollChallengeGroup(String userId, Long groupId) throws Exception {
+    public void enrollChallengeGroup(String userId, Long groupId, String password) throws Exception {
         validateUser(userId);
         ChallengeGroup group = getOrThrowChallengeGroup(groupId);
+
+        if (group.getPassword() != null && !group.getPassword().equals(password)) {
+            throw ChallengeException.wrongPassword(group.getId());
+        }
+
         ChallengeGroupEnrollmentId id = new ChallengeGroupEnrollmentId(group.getId(), userId);
         Optional<ChallengeGroupEnrollment> result = challengeGroupEnrollmentRepository.findById(id);
 
@@ -218,20 +226,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
             Boolean created, Boolean participating) throws Exception {
         Pageable pageReq = PageRequest.of(page, size);
 
-        Page<ChallengeGroup> result;
-        if (search == null || search.isBlank()) {
-            if (created) {
-                result = challengeGroupRepository.findByOwnerId(userId, pageReq);
-            } else {
-                result = challengeGroupRepository.findAll(pageReq);
-            }
-        } else {
-            if (created) {
-                result = challengeGroupRepository.findByTitleContainingOrHashtagsContainingAndOwnerId(search, search, userId, pageReq);
-            } else {
-                result = challengeGroupRepository.findByTitleContainingOrHashtagsContaining(search, search, pageReq);
-            }
-        }
+        Page<ChallengeGroup> result = challengeGroupCustomRepository.search(search, userId, pageReq);
 
         if (participating) {
             result = new PageImpl<>(result.filter(group -> {

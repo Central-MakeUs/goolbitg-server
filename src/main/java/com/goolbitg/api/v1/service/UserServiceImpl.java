@@ -38,7 +38,7 @@ import com.goolbitg.api.model.UserInfoDto;
 import com.goolbitg.api.model.UserPatternDto;
 import com.goolbitg.api.model.UserRegisterStatusDto;
 import com.goolbitg.api.model.UserWeeklyStatusDto;
-import com.goolbitg.api.v1.util.FormatUtil;
+import com.goolbitg.api.v1.util.FormatUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
 
         survey.updatePattern(
             request.getPrimeUseDay(),
-            FormatUtil.parseTime(request.getPrimeUseTime())
+            FormatUtils.parseTime(request.getPrimeUseTime())
         );
         userRepository.save(user);
     }
@@ -294,7 +294,7 @@ public class UserServiceImpl implements UserService {
 
         if (survey.getPrimeUseDay() != null)
             dto.setPrimeUseDay(survey.getPrimeUseDay().getValue());
-        dto.setPrimeUseTime(FormatUtil.formatTime(survey.getPrimeUseTime()));
+        dto.setPrimeUseTime(FormatUtils.formatTime(survey.getPrimeUseTime()));
 
         return dto;
     }

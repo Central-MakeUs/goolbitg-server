@@ -12,6 +12,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import com.goolbitg.api.ChallengeGroupApi;
 import com.goolbitg.api.model.ChallengeGroupDto;
+import com.goolbitg.api.model.ChallengeGroupEnrollmentDto;
 import com.goolbitg.api.model.ChallengeGroupRankDto;
 import com.goolbitg.api.model.ChallengeGroupRecordDto;
 import com.goolbitg.api.model.ChallengeGroupTrippleDto;
@@ -51,9 +52,10 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
-    public ResponseEntity<Void> enrollChallengeGroup(Long groupId) throws Exception {
+    public ResponseEntity<Void> enrollChallengeGroup(Long groupId, @Valid ChallengeGroupEnrollmentDto enrollment) throws Exception {
         String userId = AuthUtil.getLoginUserId();
-        challengeGroupService.enrollChallengeGroup(userId, groupId);
+        String password = enrollment.getPassword();
+        challengeGroupService.enrollChallengeGroup(userId, groupId, password);
         return ResponseEntity.noContent().build();
     }
 
