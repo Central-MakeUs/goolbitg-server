@@ -138,6 +138,11 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
+    public void enrollChallengeGroup(String userId, Long groupId) throws Exception {
+        this.enrollChallengeGroup(userId, groupId, null);
+    }
+
+    @Override
     @Transactional
     public void enrollChallengeGroup(String userId, Long groupId, String password) throws Exception {
         validateUser(userId);
