@@ -375,4 +375,5 @@ public class ChallengeServiceImpl implements ChallengeService {
             return stat.getContinueCount();
 
     }
+
 }

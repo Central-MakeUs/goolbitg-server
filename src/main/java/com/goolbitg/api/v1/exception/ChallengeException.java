@@ -40,5 +40,11 @@ public abstract class ChallengeException {
             "챌린지 기록이 존재하지 않습니다. (" + id + ")",
             HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    public static CommonException wrongPassword(Long id) {
+        return new CommonException(
+            4007,
+            "잘못된 패스워드입니다." + id + ")",
+            HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
 }

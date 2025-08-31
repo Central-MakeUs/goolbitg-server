@@ -974,6 +974,11 @@ paths:
         - ChallengeGroup
       parameters:
         - $ref: '#/components/parameters/groupIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeGroupEnrollmentDto'
       responses:
         '201':
           description: 챌린지 그룹 기록 생성 성공
@@ -1803,6 +1808,12 @@ components:
                 type: integer
                 description: 절약 금액
                 example: 25000
+    ChallengeGroupEnrollmentDto:
+      type: object
+      properties:
+        password:
+          type: string
+          example: '1234'
     ChallengeGroupTrippleDto:
       type: object
       properties:
