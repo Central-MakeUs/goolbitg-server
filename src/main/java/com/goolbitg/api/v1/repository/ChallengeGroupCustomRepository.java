@@ -1,6 +1,7 @@
 package com.goolbitg.api.v1.repository;
 
 import static com.goolbitg.api.v1.entity.challengeGroup.QChallengeGroup.challengeGroup;
+import static com.goolbitg.api.v1.entity.challengeGroup.QChallengeGroupEnrollment.challengeGroupEnrollment;
 
 import java.util.List;
 
@@ -23,7 +24,12 @@ public class ChallengeGroupCustomRepository {
 
     private final JPAQueryFactory query;
 
-    public Page<ChallengeGroup> search(String search, String ownerId, Pageable page) {
+    public Page<ChallengeGroup> search(
+        String search,
+        String ownerId,
+        String participatingUserId,
+        Pageable page
+    ) {
         JPAQuery<ChallengeGroup> challengeQuery = query.selectFrom(challengeGroup);
 
         if (!StringUtils.isNullOrBlank(search)) {
@@ -35,6 +41,13 @@ public class ChallengeGroupCustomRepository {
         if (!StringUtils.isNullOrBlank(ownerId)) {
             challengeQuery = challengeQuery
                 .where(challengeGroup.ownerId.eq(ownerId));
+        }
+
+        if (!StringUtils.isNullOrBlank(participatingUserId)) {
+            challengeQuery = challengeQuery
+                .innerJoin(challengeGroupEnrollment)
+                .on(challengeGroup.id.eq(challengeGroupEnrollment.groupId)).fetchJoin()
+                .where(challengeGroupEnrollment.userId.eq(participatingUserId));
         }
 
         // Apply pagination
