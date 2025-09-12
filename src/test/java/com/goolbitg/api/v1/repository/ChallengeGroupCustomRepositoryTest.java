@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroup;
+import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupEnrollment;
+import com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus;
 import com.goolbitg.api.v1.config.QueryDslConfig;
 
 @Disabled
@@ -63,9 +65,19 @@ class ChallengeGroupCustomRepositoryTest {
             .isHidden(false)
             .build();
 
-        entityManager.persistAndFlush(challengeGroup1);
-        entityManager.persistAndFlush(challengeGroup2);
-        entityManager.persistAndFlush(challengeGroup3);
+        ChallengeGroupEnrollment enrollment1 = ChallengeGroupEnrollment.builder()
+            .userId("owner1")
+            .groupId(challengeGroup2.getId())
+            .status(EnrollmentStatus.ENROLL)
+            .build();
+
+        entityManager.persist(challengeGroup1);
+        entityManager.persist(challengeGroup2);
+        entityManager.persist(challengeGroup3);
+
+        entityManager.persist(enrollment1);
+
+        entityManager.flush();
     }
 
     @Test
@@ -74,7 +86,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(null, null, pageable);
+        Page<ChallengeGroup> result = repository.search(null, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -95,7 +107,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
-        Page<ChallengeGroup> result = repository.search("", "   ", pageable);
+        Page<ChallengeGroup> result = repository.search("", "   ", null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -110,7 +122,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(searchTerm, null, pageable);
+        Page<ChallengeGroup> result = repository.search(searchTerm, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -126,7 +138,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(searchTerm, null, pageable);
+        Page<ChallengeGroup> result = repository.search(searchTerm, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -142,7 +154,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(null, ownerId, pageable);
+        Page<ChallengeGroup> result = repository.search(null, ownerId, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -165,7 +177,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(searchTerm, ownerId, pageable);
+        Page<ChallengeGroup> result = repository.search(searchTerm, ownerId, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -181,7 +193,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(1, 2); // Page 1, size 2, so offset should be 2
 
         // When
-        Page<ChallengeGroup> result = repository.search(null, null, pageable);
+        Page<ChallengeGroup> result = repository.search(null, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -199,7 +211,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(searchTerm, null, pageable);
+        Page<ChallengeGroup> result = repository.search(searchTerm, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -215,7 +227,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(null, ownerId, pageable);
+        Page<ChallengeGroup> result = repository.search(null, ownerId, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -230,7 +242,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 2);
 
         // When
-        Page<ChallengeGroup> result = repository.search(null, null, pageable);
+        Page<ChallengeGroup> result = repository.search(null, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -247,7 +259,7 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(1, 2); // Last page
 
         // When
-        Page<ChallengeGroup> result = repository.search(null, null, pageable);
+        Page<ChallengeGroup> result = repository.search(null, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
@@ -266,9 +278,9 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> resultLower = repository.search(searchTermLower, null, pageable);
-        Page<ChallengeGroup> resultUpper = repository.search(searchTermUpper, null, pageable);
-        Page<ChallengeGroup> resultMixed = repository.search(searchTermMixed, null, pageable);
+        Page<ChallengeGroup> resultLower = repository.search(searchTermLower, null, null, pageable);
+        Page<ChallengeGroup> resultUpper = repository.search(searchTermUpper, null, null, pageable);
+        Page<ChallengeGroup> resultMixed = repository.search(searchTermMixed, null, null, pageable);
 
         // Then
         assertThat(resultLower.getContent()).hasSize(1);
@@ -289,12 +301,27 @@ class ChallengeGroupCustomRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<ChallengeGroup> result = repository.search(searchTerm, null, pageable);
+        Page<ChallengeGroup> result = repository.search(searchTerm, null, null, pageable);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("Python Data Science");
         assertThat(result.getContent().get(0).getHashtags()).contains("datascience");
+    }
+
+    @Test
+    void search_searchParticipating_shouldMatchCorrectly() {
+        // Given
+        String userId = "owner1";
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        Page<ChallengeGroup> result = repository.search(null, null, userId, pageable);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(challengeGroup2);
     }
 }

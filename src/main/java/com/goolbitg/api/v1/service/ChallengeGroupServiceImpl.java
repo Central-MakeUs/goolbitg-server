@@ -227,18 +227,22 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     @Override
-    public PaginatedChallengeGroupDto getChallengeGroups(String userId, int page, int size, String search,
-            Boolean created, Boolean participating) throws Exception {
+    public PaginatedChallengeGroupDto getChallengeGroups(
+        String userId,
+        int page,
+        int size,
+        String search,
+        Boolean created,
+        Boolean participating
+    ) throws Exception {
         Pageable pageReq = PageRequest.of(page, size);
 
-        Page<ChallengeGroup> result = challengeGroupCustomRepository.search(search, userId, pageReq);
-
-        if (participating) {
-            result = new PageImpl<>(result.filter(group -> {
-                ChallengeGroupEnrollmentId id = new ChallengeGroupEnrollmentId(group.getId(), userId);
-                return challengeGroupEnrollmentRepository.findById(id).isPresent();
-            }).toList(), pageReq, result.getTotalElements());
-        }
+        Page<ChallengeGroup> result = challengeGroupCustomRepository.search(
+            search,
+            created ? userId : null,
+            participating ? userId : null,
+            pageReq
+        );
 
         PaginatedChallengeGroupDto dto = getDto(result);
         return dto;
