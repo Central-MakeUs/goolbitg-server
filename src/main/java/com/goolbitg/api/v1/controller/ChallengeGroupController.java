@@ -90,6 +90,13 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
+    public ResponseEntity<Void> exitChallengeGroup(Long groupId) throws Exception {
+        String userId = AuthUtil.getLoginUserId();
+        challengeGroupService.exitChallengeGroup(userId, groupId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     public Optional<NativeWebRequest> getRequest() {
         return ControllerUtils.getRequest();
     }

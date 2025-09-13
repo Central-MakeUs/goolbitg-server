@@ -30,5 +30,6 @@ public interface ChallengeGroupService {
     ChallengeGroupTrippleDto getTripple(String userId, long groupId) throws Exception;
     void failChallenge(String userId, Long groupId, LocalDate date);
     void calculateAllChallengeStat(LocalDate date);
+    void exitChallengeGroup(String userId, Long groupId);
 
 }

@@ -1,5 +1,7 @@
 package com.goolbitg.api.v1.service;
 
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus.UNENROLL;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,15 +54,15 @@ import lombok.extern.slf4j.Slf4j;
 public class ChallengeGroupServiceImpl implements ChallengeGroupService {
 
     @Autowired
-    private ChallengeGroupRepository challengeGroupRepository;
+    private ChallengeGroupRepository groupRepository;
     @Autowired
-    private ChallengeGroupRecordRepository challengeGroupRecordRepository;
+    private ChallengeGroupRecordRepository recordRepository;
     @Autowired
-    private ChallengeGroupStatsRepository challengeGroupStatsRepository;
+    private ChallengeGroupStatsRepository statsRepository;
     @Autowired
-    private ChallengeGroupEnrollmentRepository challengeGroupEnrollmentRepository;
+    private ChallengeGroupEnrollmentRepository enrollmentRepository;
     @Autowired
-    private ChallengeGroupCustomRepository challengeGroupCustomRepository;
+    private ChallengeGroupCustomRepository groupCustomRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -74,10 +76,10 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         ChallengeGroupRecordId id = new ChallengeGroupRecordId(groupId, userId, timeService.getToday());
         ChallengeGroupRecord record = getOrCreateChallengeGroupRecord(id);
         record.setStatus(ChallengeRecordStatus.SUCCESS);
-        challengeGroupRecordRepository.save(record);
+        recordRepository.save(record);
 
         ChallengeGroupStatsId statsId = new ChallengeGroupStatsId(groupId, userId);
-        ChallengeGroupStats stats = challengeGroupStatsRepository.findById(statsId)
+        ChallengeGroupStats stats = statsRepository.findById(statsId)
                 .orElseThrow(() -> ChallengeException.notEnrolled(groupId));
         stats.increaseSaving(group.getReward());
 
@@ -108,7 +110,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
                 .password(challengeGroupDto.getPassword())
                 .build();
 
-        ChallengeGroup create = challengeGroupRepository.save(group);
+        ChallengeGroup create = groupRepository.save(group);
 
         return getChallengeGroupDto(create);
     }
@@ -134,7 +136,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         validateUser(userId);
         ChallengeGroup group = getOrThrowChallengeGroup(groupId);
         if (group.getOwnerId().equals(userId))
-            challengeGroupRepository.delete(group);
+            groupRepository.delete(group);
     }
 
     @Override
@@ -153,7 +155,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         }
 
         ChallengeGroupEnrollmentId id = new ChallengeGroupEnrollmentId(group.getId(), userId);
-        Optional<ChallengeGroupEnrollment> result = challengeGroupEnrollmentRepository.findById(id);
+        Optional<ChallengeGroupEnrollment> result = enrollmentRepository.findById(id);
 
         ChallengeGroupEnrollment enrollment;
         if (result.isPresent()) {
@@ -172,16 +174,16 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
                     .userId(userId)
                     .groupId(group.getId())
                     .build();
-            challengeGroupStatsRepository.save(stats);
+            statsRepository.save(stats);
         }
         
-        challengeGroupEnrollmentRepository.save(enrollment);
+        enrollmentRepository.save(enrollment);
     }
 
     @Override
     public ChallengeGroupRankDto getChallengeGroup(Long groupId) throws Exception {
         ChallengeGroup group = getOrThrowChallengeGroup(groupId);
-        List<ChallengeGroupStats> result = challengeGroupStatsRepository.findByGroupIdOrderBySavingDesc(groupId);
+        List<ChallengeGroupStats> result = statsRepository.findByGroupIdOrderBySavingDesc(groupId);
 
         ChallengeGroupRankDto dto = new ChallengeGroupRankDto();
         dto.setGroup(getChallengeGroupDto(group));
@@ -237,7 +239,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     ) throws Exception {
         Pageable pageReq = PageRequest.of(page, size);
 
-        Page<ChallengeGroup> result = challengeGroupCustomRepository.search(
+        Page<ChallengeGroup> result = groupCustomRepository.search(
             search,
             created ? userId : null,
             participating ? userId : null,
@@ -274,7 +276,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     private ChallengeGroup getOrThrowChallengeGroup(Long groupId) {
-        ChallengeGroup group = challengeGroupRepository.findById(groupId)
+        ChallengeGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(groupId));
         return group;
     }
@@ -308,13 +310,13 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         for (int i = 0; i < 3; i++) {
             ChallengeGroupRecordId curId = new ChallengeGroupRecordId(groupId, userId, location);
             ChallengeGroupRecord curRecord = getOrCreateChallengeGroupRecord(curId);
-            challengeGroupRecordRepository.save(curRecord);
+            recordRepository.save(curRecord);
             location = location.plusDays(1);
             records.add(curRecord);
         }
 
         ChallengeGroupStatsId statsId = new ChallengeGroupStatsId(groupId, userId);
-        ChallengeGroupStats stats = challengeGroupStatsRepository.findById(statsId)
+        ChallengeGroupStats stats = statsRepository.findById(statsId)
                 .orElseThrow();
 
         ChallengeGroupTrippleDto dto = new ChallengeGroupTrippleDto();
@@ -328,11 +330,11 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     }
 
     private ChallengeGroupRecord getOrCreateChallengeGroupRecord(ChallengeGroupRecordId id) {
-        Optional<ChallengeGroupRecord> result = challengeGroupRecordRepository.findById(id);
+        Optional<ChallengeGroupRecord> result = recordRepository.findById(id);
         ChallengeGroupRecord record;
         if (result.isEmpty()) {
             ChallengeGroupRecordId prevId = new ChallengeGroupRecordId(id.groupId(), id.userId(), id.date().minusDays(1));
-            Optional<ChallengeGroupRecord> prevResult = challengeGroupRecordRepository.findById(prevId);
+            Optional<ChallengeGroupRecord> prevResult = recordRepository.findById(prevId);
             int nowLocation = 1;
             if (prevResult.isPresent()) {
                 nowLocation = (prevResult.get().getLocation() % 3) + 1;
@@ -355,9 +357,9 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     public void failChallenge(String userId, Long challengeGroupId, LocalDate date) {
         ChallengeGroupRecordId challengeGroupRecordId = new ChallengeGroupRecordId(challengeGroupId, userId, date);
         ChallengeGroupStatsId challengeGroupStatsId = new ChallengeGroupStatsId(challengeGroupId, userId);
-        ChallengeGroupRecord todayRecord = challengeGroupRecordRepository.findById(challengeGroupRecordId)
+        ChallengeGroupRecord todayRecord = recordRepository.findById(challengeGroupRecordId)
                 .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeGroupId));
-        ChallengeGroupStats challengeGroupStats = challengeGroupStatsRepository.findById(challengeGroupStatsId)
+        ChallengeGroupStats challengeGroupStats = statsRepository.findById(challengeGroupStatsId)
                 .orElseThrow(() -> ChallengeException.challengeNotExist(challengeGroupId));
         if (todayRecord.getStatus().equals(ChallengeRecordStatus.SUCCESS)) {
             throw ChallengeException.alreadyComplete(challengeGroupId);
@@ -365,7 +367,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         todayRecord.fail();
         for (int i = todayRecord.getLocation() + 1; i <= 3; i++) {
             challengeGroupRecordId = challengeGroupRecordId.next();
-            ChallengeGroupRecord challengeGroupRecord = challengeGroupRecordRepository.findById(challengeGroupRecordId)
+            ChallengeGroupRecord challengeGroupRecord = recordRepository.findById(challengeGroupRecordId)
                     .orElseThrow(() -> ChallengeException.challengeRecordNotExist(challengeGroupId));
             challengeGroupRecord.fail();
         }
@@ -375,12 +377,35 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
     @Override
     @Transactional
     public void calculateAllChallengeStat(LocalDate date) {
-        for (ChallengeGroupEnrollment enrollment : challengeGroupEnrollmentRepository.findAll()) {
-            if (enrollment.getStatus().equals(EnrollmentStatus.UNENROLL)) continue;
+        for (ChallengeGroupEnrollment enrollment : enrollmentRepository.findAll()) {
+            if (enrollment.getStatus().equals(UNENROLL)) continue;
             ChallengeGroupStatsId id = new ChallengeGroupStatsId(enrollment.getGroupId(), enrollment.getUserId());
-            ChallengeGroupStats stats = challengeGroupStatsRepository.findById(id).get();
+            ChallengeGroupStats stats = statsRepository.findById(id).get();
             stats.increaseDuration();
         }
+    }
+
+    @Override
+    public void exitChallengeGroup(String userId, Long groupId) {
+        if (!userRepository.existsById(userId)) {
+            throw UserException.userNotExist(userId);
+        }
+
+        if (!groupRepository.existsById(groupId)) {
+            throw ChallengeException.challengeNotExist(groupId);
+        }
+
+        ChallengeGroupEnrollmentId enrollmentId = new ChallengeGroupEnrollmentId(groupId, userId);
+        ChallengeGroupEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
+            .orElseThrow(() -> ChallengeException.notEnrolled(groupId));
+
+        if (UNENROLL.equals(enrollment.getStatus())) {
+            throw ChallengeException.notEnrolled(groupId);
+        }
+
+        enrollment.setStatus(UNENROLL);
+
+        enrollmentRepository.save(enrollment);
     }
 
 }
