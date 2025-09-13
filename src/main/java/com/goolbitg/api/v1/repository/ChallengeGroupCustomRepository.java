@@ -2,6 +2,7 @@ package com.goolbitg.api.v1.repository;
 
 import static com.goolbitg.api.v1.entity.challengeGroup.QChallengeGroup.challengeGroup;
 import static com.goolbitg.api.v1.entity.challengeGroup.QChallengeGroupEnrollment.challengeGroupEnrollment;
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus.ENROLL;
 
 import java.util.List;
 
@@ -47,7 +48,8 @@ public class ChallengeGroupCustomRepository {
             challengeQuery = challengeQuery
                 .innerJoin(challengeGroupEnrollment)
                 .on(challengeGroup.id.eq(challengeGroupEnrollment.groupId)).fetchJoin()
-                .where(challengeGroupEnrollment.userId.eq(participatingUserId));
+                .where(challengeGroupEnrollment.userId.eq(participatingUserId)
+                    .and(challengeGroupEnrollment.status.eq(ENROLL)));
         }
 
         // Apply pagination

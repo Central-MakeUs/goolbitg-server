@@ -1133,6 +1133,29 @@ paths:
   #             examples:
   #               존재하지 않는 챌린지:
   #                 $ref: '#/components/examples/Error_ChallengeNotExist'
+  /api/v1/challengeGroups/{groupId}/exit:
+    post:
+      summary: 챌린지 그룹 나가기
+      operationId: exitChallengeGroup
+      description: 챌린지 그룹에서 나갑니다.
+      tags:
+        - ChallengeGroup
+      parameters:
+        - $ref: '#/components/parameters/groupIdParam'
+      responses:
+        '200':
+          description: 나가기에 성공했습니다.
+        '422':
+          description: 챌린지 그룹 나가기 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+              examples:
+                참여중이지 않은 챌린지:
+                  $ref: '#/components/examples/Error_NotEnrolled'
+                존재하지 않는 챌린지:
+                  $ref: '#/components/examples/Error_ChallengeNotExist'
 
   /api/v1/buyOrNots:
     get:
