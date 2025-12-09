@@ -8,7 +8,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.goolbitg.api.v1.component.RequestLogginInterceptor;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
@@ -21,6 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         if (loggerEnabled) {
+            log.info("Http request logger is enabled");
             registry.addInterceptor(requestLogginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/health");
