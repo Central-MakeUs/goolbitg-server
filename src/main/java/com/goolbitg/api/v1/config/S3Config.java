@@ -10,8 +10,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 /**
  * S3Config
  */
-@Configuration
-@Profile({"dev", "prod"})
+// @Configuration
+@Deprecated
 public class S3Config {
 
     @Bean
