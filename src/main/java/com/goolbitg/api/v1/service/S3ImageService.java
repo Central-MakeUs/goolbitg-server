@@ -24,7 +24,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 /**
  * ImageServiceImpl
  */
-@Service
+// @Service
+@Deprecated
 @RequiredArgsConstructor
 @Profile({"dev", "prod"})
 public class S3ImageService implements ImageService {
