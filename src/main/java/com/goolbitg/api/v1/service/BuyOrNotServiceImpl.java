@@ -208,7 +208,7 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
         LocalDateTime now = timeService.getNow();
         List<BuyOrNotDto> result = new ArrayList<>();
 
-        while (timerCache.peek().getCreatedAt().isBefore(now.minusHours(24))) {
+        while (!timerCache.isEmpty() && timerCache.peek().getCreatedAt().isBefore(now.minusHours(24))) {
             BuyOrNot post = timerCache.remove();
             if (canceledTimerIdSet.contains(post.getId())) {
                 canceledTimerIdSet.remove(post.getId());
