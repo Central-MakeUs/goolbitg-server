@@ -50,7 +50,7 @@ public class JwtManager {
     }
 
     public String create(String principal) {
-        return create(User.withUsername(principal).build());
+        return create(User.withUsername(principal).password("").build());
     }
 
     public String create(String principal, List<GrantedAuthority> authorities) {
