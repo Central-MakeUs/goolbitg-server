@@ -2,6 +2,7 @@ package com.goolbitg.api.v1.component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+
+import javax.swing.text.AbstractDocument;
 
 @Slf4j
 @Component
@@ -32,22 +36,22 @@ public class RequestLogginInterceptor implements HandlerInterceptor {
             }
             headerBuilder.append("], ");
         }
+        // TODO: This Interceptor has bug that absorb all request body 
+        // before pass to the controller. Should be handled later.
 
-        var bodyInputStream = request.getInputStream();
-        String body = new String(bodyInputStream.readNBytes(BODY_LENGTH_LIMIT), StandardCharsets.UTF_8);
-        if (!bodyInputStream.isFinished()) {
-            body = String.format("Body exceeds %d bytes", BODY_LENGTH_LIMIT);
-        }
-
-        log.info(
-            "Incoming request: method=({}), uri=({}), ip=({}), headers=({}), body=({})",
-            request.getMethod(),
-            request.getRequestURI(),
-            request.getRemoteAddr(),
-            headerBuilder.toString(),
-            body
-        );
-
+//        request.getInputStream().
+//        ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(request);
+//        String body = wrapper.getReader().lines().collect(Collectors.joining());
+//
+//        log.info(
+//            "Incoming request: method=({}), uri=({}), ip=({}), headers=({}), body=({})",
+//            request.getMethod(),
+//            request.getRequestURI(),
+//            request.getRemoteAddr(),
+//            headerBuilder,
+//            body
+//        );
+//
         return true;
     }
 
