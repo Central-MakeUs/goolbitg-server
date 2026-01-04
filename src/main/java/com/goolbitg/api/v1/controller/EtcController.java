@@ -3,8 +3,6 @@ package com.goolbitg.api.v1.controller;
 import java.util.Optional;
 
 import com.goolbitg.api.v1.repository.UserTokenRepository;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +57,7 @@ public class EtcController implements EtcApi {
     }
 
     @Override
-    public ResponseEntity<Void> sendChallengeNotice(@NotNull @Valid String password) throws Exception {
+    public ResponseEntity<Void> sendChallengeNotice(String password) throws Exception {
         adminService.authenticateAdmin(password);
         cronJobExecutor.sendChallengeAlarm();
         return ResponseEntity.ok().build();

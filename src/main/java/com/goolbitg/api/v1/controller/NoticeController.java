@@ -1,7 +1,5 @@
 package com.goolbitg.api.v1.controller;
 
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +23,7 @@ public class NoticeController implements NoticeApi {
     private final NoticeService noticeService;
 
     @Override
-    public ResponseEntity<PaginatedNoticeDto> getNotices(@Valid Integer page, @Valid Integer size,
-            @Valid NoticeType type) throws Exception {
+    public ResponseEntity<PaginatedNoticeDto> getNotices(Integer page, Integer size, NoticeType type) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         PaginatedNoticeDto result = noticeService.getNotices(page, size, userId, type);

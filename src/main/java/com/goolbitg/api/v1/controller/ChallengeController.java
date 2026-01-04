@@ -3,8 +3,6 @@ package com.goolbitg.api.v1.controller;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,7 +78,7 @@ public class ChallengeController implements ChallengeApi {
     }
 
     @Override
-    public ResponseEntity<ChallengeRecordDto> getChallengeRecord(Long challengeId, @Valid LocalDate date)
+    public ResponseEntity<ChallengeRecordDto> getChallengeRecord(Long challengeId, LocalDate date)
             throws Exception {
         String userId = AuthUtil.getLoginUserId();
         if (date == null) date = timeService.getToday();
@@ -90,8 +88,8 @@ public class ChallengeController implements ChallengeApi {
     }
 
     @Override
-    public ResponseEntity<PaginatedChallengeRecordDto> getChallengeRecords(@Valid Integer page, @Valid Integer size,
-            @Valid LocalDate date, @Valid ChallengeRecordStatus status) throws Exception {
+    public ResponseEntity<PaginatedChallengeRecordDto> getChallengeRecords(Integer page, Integer size,
+            LocalDate date, ChallengeRecordStatus status) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         if (date == null) date = timeService.getToday();
 
@@ -108,7 +106,7 @@ public class ChallengeController implements ChallengeApi {
     }
 
     @Override
-    public ResponseEntity<PaginatedChallengeDto> getChallenges(@Valid Integer page, @Valid Integer size) throws Exception {
+    public ResponseEntity<PaginatedChallengeDto> getChallenges(Integer page, Integer size) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         PaginatedChallengeDto result = challengeService.getChallenges(page, size, userId);
         return ResponseEntity.ok(result);

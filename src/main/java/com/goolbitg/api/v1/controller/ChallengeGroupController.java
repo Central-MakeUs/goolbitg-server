@@ -2,8 +2,6 @@ package com.goolbitg.api.v1.controller;
 
 import java.util.Optional;
 
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +35,7 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
-    public ResponseEntity<ChallengeGroupDto> createChallengeGroup(@Valid ChallengeGroupDto challengeGroupDto)
+    public ResponseEntity<ChallengeGroupDto> createChallengeGroup(ChallengeGroupDto challengeGroupDto)
     throws Exception {
         String userId = AuthUtil.getLoginUserId();
         ChallengeGroupDto result = challengeGroupService.createChallengeGroup(userId, challengeGroupDto);
@@ -52,7 +50,7 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
-    public ResponseEntity<Void> enrollChallengeGroup(Long groupId, @Valid ChallengeGroupEnrollmentDto enrollment) throws Exception {
+    public ResponseEntity<Void> enrollChallengeGroup(Long groupId, ChallengeGroupEnrollmentDto enrollment) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         String password = enrollment.getPassword();
         challengeGroupService.enrollChallengeGroup(userId, groupId, password);
@@ -72,8 +70,8 @@ public class ChallengeGroupController implements ChallengeGroupApi {
     }
 
     @Override
-    public ResponseEntity<PaginatedChallengeGroupDto> getChallengeGroups(@Valid Integer page, @Valid Integer size,
-        @Valid String search, @Valid Boolean created, @Valid Boolean participating) throws Exception {
+    public ResponseEntity<PaginatedChallengeGroupDto> getChallengeGroups(Integer page, Integer size,
+        String search, Boolean created, Boolean participating) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         if (page == null) page = 0;
         if (size == null) size = 10;
@@ -83,7 +81,7 @@ public class ChallengeGroupController implements ChallengeGroupApi {
 
     @Override
     public ResponseEntity<ChallengeGroupDto> updateChallengeGroup(Long groupId,
-        @Valid ChallengeGroupDto challengeGroupDto) throws Exception {
+        ChallengeGroupDto challengeGroupDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         ChallengeGroupDto result = challengeGroupService.updateChallengeGroup(userId, groupId, challengeGroupDto);
         return ResponseEntity.ok(result);

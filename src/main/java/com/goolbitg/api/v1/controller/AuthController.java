@@ -3,8 +3,6 @@ package com.goolbitg.api.v1.controller;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,13 +38,13 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<AuthResponseDto> login(@Valid AuthRequestDto authRequestDto) throws Exception {
+    public ResponseEntity<AuthResponseDto> login(AuthRequestDto authRequestDto) throws Exception {
         AuthResponseDto login = authService.login(authRequestDto);
         return ResponseEntity.ok(login);
     }
 
     @Override
-    public ResponseEntity<Void> register(@Valid AuthRequestDto authRequestDto) throws Exception {
+    public ResponseEntity<Void> register(AuthRequestDto authRequestDto) throws Exception {
         authService.register(authRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -59,7 +57,7 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<AuthResponseDto> refresh(@Valid TokenRefreshRequestDto tokenRefreshRequestDto)
+    public ResponseEntity<AuthResponseDto> refresh(TokenRefreshRequestDto tokenRefreshRequestDto)
             throws Exception {
         AuthResponseDto response = authService.getAccessToken(tokenRefreshRequestDto);
         log.info("AuthResponse: " + response);
@@ -67,7 +65,7 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<Void> unregister(@Valid UnregisterDto unregisterDto) throws Exception {
+    public ResponseEntity<Void> unregister(UnregisterDto unregisterDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         LocalDate date = timeService.getToday();
 

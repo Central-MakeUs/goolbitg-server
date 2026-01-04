@@ -1,8 +1,9 @@
 package com.goolbitg.api.v1.controller;
 
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -11,9 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
-    @GetMapping("/test")
-    public ResponseEntity<String> getTest() {
+    @PostMapping("/test")
+    public ResponseEntity<String> getTest(TestRequest body) {
+        System.out.println(body);
         return new ResponseEntity<>("Test OK", HttpStatus.OK);
+    }
+
+    @Data
+    public static class TestRequest {
+        private String message;
     }
 
 }

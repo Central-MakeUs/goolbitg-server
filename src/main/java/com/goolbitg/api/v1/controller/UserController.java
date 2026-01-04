@@ -57,13 +57,13 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<NicknameCheckResponseDto> checkNickname(
-            @Valid NicknameCheckRequestDto nicknameCheckRequestDto) throws Exception {
+            NicknameCheckRequestDto nicknameCheckRequestDto) throws Exception {
         NicknameCheckResponseDto response = userService.isNicknameExist(nicknameCheckRequestDto);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<Void> postRegistrationToken(@Valid RegistrationTokenRegisterDto registrationTokenRegisterDto)
+    public ResponseEntity<Void> postRegistrationToken(RegistrationTokenRegisterDto registrationTokenRegisterDto)
             throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
@@ -72,7 +72,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> postChecklistInfo(@Valid @RequestBody UserChecklistDto userChecklistDto) throws Exception {
+    public ResponseEntity<Void> postChecklistInfo(UserChecklistDto userChecklistDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         userService.updateChecklistInfo(userId, userChecklistDto);
@@ -80,7 +80,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> postHabitInfo(@Valid UserHabitDto userHabitDto) throws Exception {
+    public ResponseEntity<Void> postHabitInfo(UserHabitDto userHabitDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         userService.updateHabitinfo(userId, userHabitDto);
@@ -88,7 +88,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> postPatternInfo(@Valid UserPatternDto userPatternDto) throws Exception {
+    public ResponseEntity<Void> postPatternInfo(UserPatternDto userPatternDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         userService.updatePatternInfo(userId, userPatternDto);
@@ -96,7 +96,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> postUserInfo(@Valid UserInfoDto userInfoDto) throws Exception {
+    public ResponseEntity<Void> postUserInfo(UserInfoDto userInfoDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         userService.updateUserInfo(userId, userInfoDto);
@@ -120,7 +120,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> postUserAgreement(@Valid UserAgreementDto userAgreementDto) throws Exception {
+    public ResponseEntity<Void> postUserAgreement(UserAgreementDto userAgreementDto) throws Exception {
         String userId = AuthUtil.getLoginUserId();
 
         userService.updateAgreementInfo(userId, userAgreementDto);
@@ -128,7 +128,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<UserWeeklyStatusDto> getWeeklyStatus(@Valid LocalDate date) throws Exception {
+    public ResponseEntity<UserWeeklyStatusDto> getWeeklyStatus(LocalDate date) throws Exception {
         String userId = AuthUtil.getLoginUserId();
         if (date == null)
             date = timeService.getToday();
