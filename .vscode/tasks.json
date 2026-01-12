@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "./gradlew build -x test",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Swagger Watcher",
+      "type": "shell",
+      "command": "swagger-ui-watcher",
+      "args": ["src/main/resources/api/openapi.yaml"]
+    }
+  ]
+}

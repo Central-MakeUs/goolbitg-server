@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/mfussenegger/dapconfig-schema/master/dapconfig-schema.json",
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Run Java [local profile]",
+      "args": "--spring.profiles.active=local"
+    }
+  ]
+}
