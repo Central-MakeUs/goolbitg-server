@@ -34,4 +34,18 @@ public interface ChallengeRecordRepository extends JpaRepository<ChallengeRecord
     List<ChallengeRecord> findAllIncompletedRecords(@Param("userId") String userId, @Param("date") LocalDate date);
     int countByUserIdAndDate(String userId, LocalDate date);
     void deleteByUserId(String userId);
+
+    @Query("""
+        select count(cr)
+        from ChallengeRecord cr
+        where cr.userId = :userId
+        and cr.status = :status
+        and cr.date between :startDate and :endDate
+        """)
+    int countByUserAndStatusAndDateRange(
+        @Param("userId") String userId,
+        @Param("status") ChallengeRecordStatus status,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
+    );
 }
