@@ -2424,11 +2424,11 @@ components:
             message:
               type: string
             prev:
-              type: number
+              type: integer
             current:
-              type: number
+              type: integer
             recommandation:
-              type: number
+              type: integer
         categoryAnalysis:
           type: object
           properties:
@@ -2442,27 +2442,27 @@ components:
                   catName:
                     type: string
                   total:
-                    type: number
+                    type: integer
                   success:
-                    type: number
+                    type: integer
         indvGroupAnalysis:
           type: object
           properties:
             message:
               type: string
             indvScore:
-              type: number
+              type: integer
             gropuScore:
-              type: number
+              type: integer
         buyOrNotAnalysis:
           type: object
           properties:
             message:
               type: string
             buyScore:
-              type: number
+              type: integer
             notScore:
-              type: number
+              type: integer
 
   examples:
     PrivateChallenge:
