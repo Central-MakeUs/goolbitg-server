@@ -6,6 +6,7 @@
       "type": "java",
       "request": "launch",
       "name": "Run Java [local profile]",
+      "mainClass": "com.goolbitg.api.ApiApplication",
       "args": "--spring.profiles.active=local"
     }
   ]
