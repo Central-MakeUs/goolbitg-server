@@ -4,6 +4,7 @@ import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,10 +28,12 @@ public class MybatisConfig {
         return factoryBean.getObject();
     }
 
-    @Bean
-    public MapperFactoryBean<ChallengeRecordCustomMapper> challengeRecordCustomMapper(SqlSessionFactory sqlSessionFactory) {
-        var factoryBean = new MapperFactoryBean<>(ChallengeRecordCustomMapper.class);
-        factoryBean.setSqlSessionFactory(sqlSessionFactory);
-        return factoryBean;
+    @Bean SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) throws Exception {
+        return new SqlSessionTemplate(sqlSessionFactory);
     }
+
+    @Bean ChallengeRecordCustomMapper challengeRecordCustomMapper(SqlSessionTemplate sqlSessionTemplate) throws Exception {
+        return sqlSessionTemplate.getMapper(ChallengeRecordCustomMapper.class);
+    }
+
 }
