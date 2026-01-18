@@ -2,7 +2,6 @@ package com.goolbitg.api.v1.service;
 
 import static com.goolbitg.api.model.ChallengeRecordStatus.SUCCESS;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
