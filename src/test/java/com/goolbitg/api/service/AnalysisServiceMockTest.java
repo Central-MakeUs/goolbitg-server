@@ -1,10 +1,18 @@
 package com.goolbitg.api.service;
 
+import static com.goolbitg.api.model.ChallengeRecordStatus.FAIL;
 import static com.goolbitg.api.model.ChallengeRecordStatus.SUCCESS;
+import static com.goolbitg.api.model.ChallengeRecordStatus.WAIT;
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category.FOOD;
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category.LIVING;
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category.SHOPING;
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category.TRAFFIC;
+import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category.ETC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +21,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.goolbitg.api.model.AnalysisReportDtoCategoryAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
+import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
+import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
 import com.goolbitg.api.v1.service.AnalysisService;
 import com.goolbitg.api.v1.service.AnalysisServiceImpl;
 
@@ -25,19 +36,21 @@ public class AnalysisServiceMockTest {
     AnalysisService sut;
     @Mock ChallengeRecordRepository recordRepository;
     @Mock ChallengeGroupRecordRepository groupRecordRepository;
+    @Mock ChallengeRecordCustomMapper recordCustomMapper;
 
     @BeforeEach
     void setup() {
         sut = new AnalysisServiceImpl(
             recordRepository,
-            groupRecordRepository
+            groupRecordRepository,
+            recordCustomMapper
         );
     }
 
     @Test
     void getCompletionAnalysis_S() {
         // given
-        final LocalDate today = LocalDate.of(2026, 1, 15);
+        final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfThisWeek = LocalDate.of(2026, 1, 12);
         final LocalDate endOfThisWeek = LocalDate.of(2026, 1, 18);
         final LocalDate startOfPrevWeek = LocalDate.of(2026, 1, 5);
@@ -58,7 +71,7 @@ public class AnalysisServiceMockTest {
             .thenReturn(prevGRC);
 
         // when
-        AnalysisReportDtoCompletionAnalysis analysis = sut.getCompletionAnalysis(userId);
+        AnalysisReportDtoCompletionAnalysis analysis = sut.getCompletionAnalysis(userId, today);
 
         // then
         verify(recordRepository).countByUserAndStatusAndDateRange(userId, SUCCESS, startOfThisWeek, endOfThisWeek);
@@ -72,5 +85,49 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getPrev()).isEqualTo(prevTotal);
         assertThat(analysis.getCurrent()).isEqualTo(thisTotal);
         assertThat(analysis.getRecommandation()).isEqualTo(thisTotal + 2);
+    }
+
+    @Test
+    void getCategoryAnalysis_s() {
+        // given
+        final LocalDate today = LocalDate.of(2026, 1, 14);
+        final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final String userId = "test_id";
+        final List<ChallengeRecordCustom> records = List.of(
+            new ChallengeRecordCustom(FOOD, SUCCESS),
+            new ChallengeRecordCustom(FOOD, SUCCESS),
+            new ChallengeRecordCustom(FOOD, FAIL),
+            new ChallengeRecordCustom(TRAFFIC, WAIT),
+            new ChallengeRecordCustom(SHOPING, FAIL),
+            new ChallengeRecordCustom(LIVING, SUCCESS)
+        );
+
+        when(recordCustomMapper.findByUserIdAndDateBetween(userId, startOfWeek, endOfWeek))
+            .thenReturn(records);
+
+        // when
+        AnalysisReportDtoCategoryAnalysis analysis = sut.getCategoryAnalysis(userId, today);
+
+        // then
+        verify(recordCustomMapper).findByUserIdAndDateBetween(userId, startOfWeek, endOfWeek);
+        assertThat(analysis).isNotNull();
+        assertThat(analysis.getMessage()).contains("1개의 카테고리를 모두 성공했어요!");
+        assertThat(analysis.getScores()).hasSize(5);
+        assertThat(analysis.getScores().get(0).getCatName()).isEqualTo(FOOD.getKoName());
+        assertThat(analysis.getScores().get(0).getTotal()).isEqualTo(3);
+        assertThat(analysis.getScores().get(0).getSuccess()).isEqualTo(2);
+        assertThat(analysis.getScores().get(1).getCatName()).isEqualTo(TRAFFIC.getKoName());
+        assertThat(analysis.getScores().get(1).getTotal()).isEqualTo(1);
+        assertThat(analysis.getScores().get(1).getSuccess()).isEqualTo(0);
+        assertThat(analysis.getScores().get(2).getCatName()).isEqualTo(SHOPING.getKoName());
+        assertThat(analysis.getScores().get(2).getTotal()).isEqualTo(1);
+        assertThat(analysis.getScores().get(2).getSuccess()).isEqualTo(0);
+        assertThat(analysis.getScores().get(3).getCatName()).isEqualTo(LIVING.getKoName());
+        assertThat(analysis.getScores().get(3).getTotal()).isEqualTo(1);
+        assertThat(analysis.getScores().get(3).getSuccess()).isEqualTo(1);
+        assertThat(analysis.getScores().get(4).getCatName()).isEqualTo(ETC.getKoName());
+        assertThat(analysis.getScores().get(4).getTotal()).isEqualTo(0);
+        assertThat(analysis.getScores().get(4).getSuccess()).isEqualTo(0);
     }
 }

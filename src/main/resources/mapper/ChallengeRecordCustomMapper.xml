@@ -6,10 +6,18 @@
 <mapper namespace="com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper">
 
   <select id="findByUserIdAndDateBetween" resultType="ChallengeRecordCustom">
-    select chr.status as status, ch.category as category from challenge_records chr
-    join challenges ch on ch.id = chr.challenge_id
-    where chr.date between #{startDate} and #{endDate}
-    and chr.user_id = #{userId};
+    select s.status as status, s.category as category
+    from (
+      select chr.status as status, ch.category as category, chr.date as date, chr.user_id as user_id
+      from challenge_records chr
+      join challenges ch on chr.challenge_id = ch.id
+      union
+      select chr.status as status, ch.category as category, chr.date as date, chr.user_id as user_id
+      from challenge_group_records chr
+      join challenge_groups ch on chr.group_id = ch.id
+    ) s
+    where s.date between #{startDate} and #{endDate}
+    and s.user_id = #{userId};
   </select>
 
 </mapper>
