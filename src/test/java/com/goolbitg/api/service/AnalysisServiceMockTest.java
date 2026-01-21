@@ -88,7 +88,7 @@ public class AnalysisServiceMockTest {
     }
 
     @Test
-    void getCategoryAnalysis_s() {
+    void getCategoryAnalysis_S_normal() {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
@@ -120,12 +120,53 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getScores().get(1).getCatName()).isEqualTo(TRAFFIC.getKoName());
         assertThat(analysis.getScores().get(1).getTotal()).isEqualTo(1);
         assertThat(analysis.getScores().get(1).getSuccess()).isEqualTo(0);
-        assertThat(analysis.getScores().get(2).getCatName()).isEqualTo(SHOPING.getKoName());
+        assertThat(analysis.getScores().get(3).getCatName()).isEqualTo(SHOPING.getKoName());
         assertThat(analysis.getScores().get(2).getTotal()).isEqualTo(1);
         assertThat(analysis.getScores().get(2).getSuccess()).isEqualTo(0);
         assertThat(analysis.getScores().get(3).getCatName()).isEqualTo(LIVING.getKoName());
         assertThat(analysis.getScores().get(3).getTotal()).isEqualTo(1);
         assertThat(analysis.getScores().get(3).getSuccess()).isEqualTo(1);
+        assertThat(analysis.getScores().get(4).getCatName()).isEqualTo(ETC.getKoName());
+        assertThat(analysis.getScores().get(4).getTotal()).isEqualTo(0);
+        assertThat(analysis.getScores().get(4).getSuccess()).isEqualTo(0);
+    }
+
+
+    @Test
+    void getCategoryAnalysis_S_no_success() {
+        // given
+        final LocalDate today = LocalDate.of(2026, 1, 14);
+        final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final String userId = "test_id";
+        final List<ChallengeRecordCustom> records = List.of(
+            new ChallengeRecordCustom(FOOD, FAIL),
+            new ChallengeRecordCustom(TRAFFIC, WAIT)
+        );
+
+        when(recordCustomMapper.findByUserIdAndDateBetween(userId, startOfWeek, endOfWeek))
+            .thenReturn(records);
+
+        // when
+        AnalysisReportDtoCategoryAnalysis analysis = sut.getCategoryAnalysis(userId, today);
+
+        // then
+        verify(recordCustomMapper).findByUserIdAndDateBetween(userId, startOfWeek, endOfWeek);
+        assertThat(analysis).isNotNull();
+        assertThat(analysis.getMessage()).contains("성공한 카테고리가 없어요!");
+        assertThat(analysis.getScores()).hasSize(5);
+        assertThat(analysis.getScores().get(0).getCatName()).isEqualTo(FOOD.getKoName());
+        assertThat(analysis.getScores().get(0).getTotal()).isEqualTo(1);
+        assertThat(analysis.getScores().get(0).getSuccess()).isEqualTo(0);
+        assertThat(analysis.getScores().get(1).getCatName()).isEqualTo(TRAFFIC.getKoName());
+        assertThat(analysis.getScores().get(1).getTotal()).isEqualTo(1);
+        assertThat(analysis.getScores().get(1).getSuccess()).isEqualTo(0);
+        assertThat(analysis.getScores().get(2).getCatName()).isEqualTo(SHOPING.getKoName());
+        assertThat(analysis.getScores().get(2).getTotal()).isEqualTo(0);
+        assertThat(analysis.getScores().get(2).getSuccess()).isEqualTo(0);
+        assertThat(analysis.getScores().get(3).getCatName()).isEqualTo(LIVING.getKoName());
+        assertThat(analysis.getScores().get(3).getTotal()).isEqualTo(0);
+        assertThat(analysis.getScores().get(3).getSuccess()).isEqualTo(0);
         assertThat(analysis.getScores().get(4).getCatName()).isEqualTo(ETC.getKoName());
         assertThat(analysis.getScores().get(4).getTotal()).isEqualTo(0);
         assertThat(analysis.getScores().get(4).getSuccess()).isEqualTo(0);
