@@ -23,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.goolbitg.api.model.AnalysisReportDtoCategoryAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
+import com.goolbitg.api.model.AnalysisReportDtoIndvGroupAnalysis;
+import com.goolbitg.api.v1.entity.custom.ChallengeRecordAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
@@ -170,5 +172,32 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getScores().get(4).getCatName()).isEqualTo(ETC.getKoName());
         assertThat(analysis.getScores().get(4).getTotal()).isEqualTo(0);
         assertThat(analysis.getScores().get(4).getSuccess()).isEqualTo(0);
+    }
+
+    @Test
+    void getIndvGroupAnalysis_S() {
+        // given
+        final LocalDate today = LocalDate.of(2026, 1, 14);
+        final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final String userId = "test_id";
+        final ChallengeRecordAggregationCustom aggregation = new ChallengeRecordAggregationCustom();
+        aggregation.setIndvTotal(4);
+        aggregation.setIndvSuccess(2);
+        aggregation.setGroupTotal(5);
+        aggregation.setGroupSuccess(5);
+
+        when(recordCustomMapper.aggregateByUserIdAndDateBetween(userId, startOfWeek, endOfWeek))
+            .thenReturn(aggregation);
+
+        // when
+        AnalysisReportDtoIndvGroupAnalysis analysis = sut.getIndvGroupAnalysis(userId, today);
+
+        // then
+        verify(recordCustomMapper).aggregateByUserIdAndDateBetween(userId, startOfWeek, endOfWeek);
+        assertThat(analysis).isNotNull();
+        assertThat(analysis.getMessage()).contains("함께할 때 성공률이 50% 높아요!");
+        assertThat(analysis.getIndvScore()).isEqualTo(0.5f);
+        assertThat(analysis.getGroupScore()).isEqualTo(1.0f);
     }
 }

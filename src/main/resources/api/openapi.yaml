@@ -2451,9 +2451,11 @@ components:
             message:
               type: string
             indvScore:
-              type: integer
-            gropuScore:
-              type: integer
+              type: number
+              format: float
+            groupScore:
+              type: number
+              format: float
         buyOrNotAnalysis:
           type: object
           properties:

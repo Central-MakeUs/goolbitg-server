@@ -15,6 +15,7 @@ import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoIndvGroupAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoSummary;
 import com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category;
+import com.goolbitg.api.v1.entity.custom.ChallengeRecordAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
@@ -107,8 +108,28 @@ public class AnalysisServiceImpl implements AnalysisService {
 
     @Override
     public AnalysisReportDtoIndvGroupAnalysis getIndvGroupAnalysis(String userId, LocalDate date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getIndvGroupAnalysis'");
+        DateRange thisWeek = DateUtils.getWeekRangeOfDate(date);
+        ChallengeRecordAggregationCustom aggregation = 
+            recordCustomMapper.aggregateByUserIdAndDateBetween(
+                userId,
+                thisWeek.startDate(),
+                thisWeek.endDate()
+            );
+        float indvSuccessRatio = (float)aggregation.getIndvSuccess() / aggregation.getIndvTotal();
+        float groupSuccessRatio = (float)aggregation.getGroupSuccess() / aggregation.getGroupSuccess();
+
+        int diff = Math.abs((int)(indvSuccessRatio * 100 - groupSuccessRatio * 100));
+
+        String whenString = "혼자할";
+        if (groupSuccessRatio > indvSuccessRatio) {
+            whenString = "함께할";
+        }
+
+        var result = new AnalysisReportDtoIndvGroupAnalysis();
+        result.setMessage(String.format("%s 때 성공률이 %d%% 높아요!", whenString, diff));
+        result.setIndvScore(indvSuccessRatio);
+        result.setGroupScore(groupSuccessRatio);
+        return result;
     }
 
     @Override

@@ -24,6 +24,11 @@ public class MybatisConfig {
                 .getResources("classpath:/mapper/**/*.xml")
         );
         factoryBean.setTypeAliasesPackage("com.goolbitg.api.v1.entity.custom");
+
+        var configuration = new org.apache.ibatis.session.Configuration();
+        configuration.setMapUnderscoreToCamelCase(true);
+        factoryBean.setConfiguration(configuration);
+
         return factoryBean.getObject();
     }
 

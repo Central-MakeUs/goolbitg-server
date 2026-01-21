@@ -20,4 +20,21 @@
     and s.user_id = #{userId};
   </select>
 
+  <select id="aggregateByUserIdAndDateBetween" resultType="ChallengeRecordAggregationCustom">
+    select
+        count(case when s.is_group = 0 then 1 end) as indv_total,
+        count(case when s.is_group = 0 and s.status = 'SUCCESS' then 1 end) as indv_success,
+        count(case when s.is_group = 1 then 1 end) as group_total,
+        count(case when s.is_group = 1 and s.status = 'SUCCESS' then 1 end) as group_success
+    from (
+             select 0 as is_group, chr.status as status, chr.date as date, chr.user_id as user_id
+             from challenge_records chr
+             union
+             select 1 as is_group, chr.status as status, chr.date as date, chr.user_id as user_id
+             from challenge_group_records chr
+         ) s
+    where s.date between #{startDate} and #{endDate}
+    and s.user_id = #{userId};
+  </select>
+
 </mapper>
