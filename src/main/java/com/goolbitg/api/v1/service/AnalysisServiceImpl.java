@@ -115,18 +115,36 @@ public class AnalysisServiceImpl implements AnalysisService {
                 thisWeek.startDate(),
                 thisWeek.endDate()
             );
-        float indvSuccessRatio = (float)aggregation.getIndvSuccess() / aggregation.getIndvTotal();
-        float groupSuccessRatio = (float)aggregation.getGroupSuccess() / aggregation.getGroupSuccess();
+        float indvSuccessRatio;
+        float groupSuccessRatio;
+
+        if (aggregation.getIndvTotal() > 0) {
+            indvSuccessRatio = (float)aggregation.getIndvSuccess() / aggregation.getIndvTotal();
+        } else {
+            indvSuccessRatio = 0;
+        }
+
+        if (aggregation.getGroupTotal() > 0) {
+            groupSuccessRatio = (float)aggregation.getGroupSuccess() / aggregation.getGroupTotal();
+        } else {
+            groupSuccessRatio = 0;
+        }
 
         int diff = Math.abs((int)(indvSuccessRatio * 100 - groupSuccessRatio * 100));
 
-        String whenString = "혼자할";
-        if (groupSuccessRatio > indvSuccessRatio) {
-            whenString = "함께할";
+        var result = new AnalysisReportDtoIndvGroupAnalysis();
+        if (aggregation.getIndvTotal() == 0 && aggregation.getGroupTotal() == 0) {
+            result.setMessage("참여한 챌린지가 없어요!");
+        } else if (aggregation.getIndvSuccess() == 0 && aggregation.getGroupSuccess() == 0) {
+            result.setMessage("성공한 챌린지가 없어요!");
+        } else if (groupSuccessRatio == indvSuccessRatio) {
+            result.setMessage("성공률이 반반이에요!");
+        } else if (groupSuccessRatio > indvSuccessRatio) {
+            result.setMessage(String.format("함께할 때 성공률이 %d%% 높아요!", diff));
+        } else if (groupSuccessRatio < indvSuccessRatio) {
+            result.setMessage(String.format("혼자할 때 성공률이 %d%% 높아요!", diff));
         }
 
-        var result = new AnalysisReportDtoIndvGroupAnalysis();
-        result.setMessage(String.format("%s 때 성공률이 %d%% 높아요!", whenString, diff));
         result.setIndvScore(indvSuccessRatio);
         result.setGroupScore(groupSuccessRatio);
         return result;

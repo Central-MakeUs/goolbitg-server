@@ -18,6 +18,8 @@ import org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -174,18 +176,33 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getScores().get(4).getSuccess()).isEqualTo(0);
     }
 
-    @Test
-    void getIndvGroupAnalysis_S() {
+    @ParameterizedTest
+    @CsvSource({
+        "4, 2, 5, 5, 0.5 , 1.0, 함께할 때 성공률이 50% 높아요!",
+        "4, 3, 2, 0, 0.75, 0.0, 혼자할 때 성공률이 75% 높아요!",
+        "0, 0, 0, 0, 0.0 , 0.0, 참여한 챌린지가 없어요!"       ,
+        "1, 0, 1, 0, 0.0 , 0.0, 성공한 챌린지가 없어요!"       ,
+        "1, 1, 1, 1, 1.0 , 1.0, 성공률이 반반이에요!"          ,
+    })
+    void getIndvGroupAnalysis_S(
+        int indvTotal,
+        int indvSuccess,
+        int groupTotal,
+        int groupSuccess,
+        float indvScore,
+        float groupScore,
+        String message
+    ) {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
         final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
         final String userId = "test_id";
         final ChallengeRecordAggregationCustom aggregation = new ChallengeRecordAggregationCustom();
-        aggregation.setIndvTotal(4);
-        aggregation.setIndvSuccess(2);
-        aggregation.setGroupTotal(5);
-        aggregation.setGroupSuccess(5);
+        aggregation.setIndvTotal(indvTotal);
+        aggregation.setIndvSuccess(indvSuccess);
+        aggregation.setGroupTotal(groupTotal);
+        aggregation.setGroupSuccess(groupSuccess);
 
         when(recordCustomMapper.aggregateByUserIdAndDateBetween(userId, startOfWeek, endOfWeek))
             .thenReturn(aggregation);
@@ -196,8 +213,8 @@ public class AnalysisServiceMockTest {
         // then
         verify(recordCustomMapper).aggregateByUserIdAndDateBetween(userId, startOfWeek, endOfWeek);
         assertThat(analysis).isNotNull();
-        assertThat(analysis.getMessage()).contains("함께할 때 성공률이 50% 높아요!");
-        assertThat(analysis.getIndvScore()).isEqualTo(0.5f);
-        assertThat(analysis.getGroupScore()).isEqualTo(1.0f);
+        assertThat(analysis.getMessage()).contains(message);
+        assertThat(analysis.getIndvScore()).isEqualTo(indvScore);
+        assertThat(analysis.getGroupScore()).isEqualTo(groupScore);
     }
 }
