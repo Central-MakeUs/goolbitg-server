@@ -9,6 +9,7 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
 import com.goolbitg.api.model.BuyOrNotVoteType;
+import com.goolbitg.api.v1.entity.BaseEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +27,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-// TODO: extends base entity
-public class BuyOrNotVote {
+public class BuyOrNotVote extends BaseEntity {
 
     @Id
     @Column(name = "post_id")
@@ -42,6 +42,9 @@ public class BuyOrNotVote {
     @Enumerated(EnumType.STRING)
     private BuyOrNotVoteType vote;
 
+    @Column(name = "writer_id")
+    private String writerId;
+
 
     public static BuyOrNotVote getDefault(Long postId, String voterId) {
         return BuyOrNotVote.builder()
@@ -49,6 +52,5 @@ public class BuyOrNotVote {
                 .voterId(voterId)
                 .build();
     }
-
 
 }
