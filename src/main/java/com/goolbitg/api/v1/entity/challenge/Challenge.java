@@ -2,6 +2,7 @@ package com.goolbitg.api.v1.entity.challenge;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -56,7 +57,7 @@ public class Challenge {
     private Integer achievedRecords;
 
     @Column(name = "category")
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private Category category;
 
     public Float getAvgAchieveRatio() {

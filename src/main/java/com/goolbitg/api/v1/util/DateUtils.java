@@ -8,7 +8,7 @@ public class DateUtils {
 
     public static DateRange getWeekRangeOfDate(LocalDate date) {
         LocalDate startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate endOfWeek   = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        LocalDate endOfWeek   = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).plusDays(1);
         return new DateRange(startOfWeek, endOfWeek);
     }
 

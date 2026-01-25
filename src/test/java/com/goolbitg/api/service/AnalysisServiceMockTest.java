@@ -76,9 +76,9 @@ public class AnalysisServiceMockTest {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfThisWeek = LocalDate.of(2026, 1, 12);
-        final LocalDate endOfThisWeek = LocalDate.of(2026, 1, 18);
+        final LocalDate endOfThisWeek = LocalDate.of(2026, 1, 19);
         final LocalDate startOfPrevWeek = LocalDate.of(2026, 1, 5);
-        final LocalDate endOfPrevWeek = LocalDate.of(2026, 1, 11);
+        final LocalDate endOfPrevWeek = LocalDate.of(2026, 1, 12);
         final String userId = "test_id";
         final int thisRC = 3;
         final int thisGRC = 5;
@@ -116,7 +116,7 @@ public class AnalysisServiceMockTest {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
-        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 19);
         final String userId = "test_id";
         final List<ChallengeRecordCustom> records = List.of(
             new ChallengeRecordCustom(FOOD, SUCCESS),
@@ -144,7 +144,7 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getScores().get(1).getCatName()).isEqualTo(TRAFFIC.getKoName());
         assertThat(analysis.getScores().get(1).getTotal()).isEqualTo(1);
         assertThat(analysis.getScores().get(1).getSuccess()).isEqualTo(0);
-        assertThat(analysis.getScores().get(3).getCatName()).isEqualTo(SHOPING.getKoName());
+        assertThat(analysis.getScores().get(2).getCatName()).isEqualTo(SHOPING.getKoName());
         assertThat(analysis.getScores().get(2).getTotal()).isEqualTo(1);
         assertThat(analysis.getScores().get(2).getSuccess()).isEqualTo(0);
         assertThat(analysis.getScores().get(3).getCatName()).isEqualTo(LIVING.getKoName());
@@ -161,7 +161,7 @@ public class AnalysisServiceMockTest {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
-        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 19);
         final String userId = "test_id";
         final List<ChallengeRecordCustom> records = List.of(
             new ChallengeRecordCustom(FOOD, FAIL),
@@ -216,7 +216,7 @@ public class AnalysisServiceMockTest {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
-        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 19);
         final String userId = "test_id";
         final ChallengeRecordAggregationCustom aggregation = new ChallengeRecordAggregationCustom();
         aggregation.setIndvTotal(indvTotal);
@@ -249,7 +249,7 @@ public class AnalysisServiceMockTest {
         // given
         final LocalDate today = LocalDate.of(2026, 1, 14);
         final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
-        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 19);
         final String userId = "test_id";
         final BuyOrNotVoteAggregationCustom aggregation = new BuyOrNotVoteAggregationCustom();
         aggregation.setGoodCount(goodCount);

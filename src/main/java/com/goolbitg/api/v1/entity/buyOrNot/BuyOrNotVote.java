@@ -46,11 +46,13 @@ public class BuyOrNotVote extends BaseEntity {
     private String writerId;
 
 
-    public static BuyOrNotVote getDefault(Long postId, String voterId) {
+    public static BuyOrNotVote getDefault(Long postId, String voterId, String writerId) {
         return BuyOrNotVote.builder()
                 .postId(postId)
                 .voterId(voterId)
+                .writerId(writerId)
                 .build();
     }
+
 
 }

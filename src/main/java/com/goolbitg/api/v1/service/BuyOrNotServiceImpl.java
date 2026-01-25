@@ -162,11 +162,11 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     @Override
     @Transactional
     public BuyOrNotVoteChangeDto voteBuyOrNot(String userId, Long postId, BuyOrNotVoteDto request) {
-        if (buyOrNotRepository.existsById(postId) == false)
-            throw BuyOrNotException.postNotExist(postId);
+        BuyOrNot buyOrNot = buyOrNotRepository.findById(postId)
+            .orElseThrow(() -> BuyOrNotException.postNotExist(postId));
         BuyOrNotVoteId id = new BuyOrNotVoteId(postId, userId);
         BuyOrNotVote vote = buyOrNotVoteRepository.findById(id)
-                .orElseGet(() -> BuyOrNotVote.getDefault(postId, userId));
+                .orElseGet(() -> BuyOrNotVote.getDefault(postId, userId, buyOrNot.getWriterId()));
         vote.setVote(request.getVote());
         buyOrNotVoteRepository.save(vote);
 
