@@ -11,8 +11,10 @@ import static com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category.ETC
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,15 +30,23 @@ import com.goolbitg.api.model.AnalysisReportDtoBuyOrNotAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoCategoryAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoIndvGroupAnalysis;
+import com.goolbitg.api.model.AnalysisReportDtoSummary;
+import com.goolbitg.api.model.SpendingTypeDto;
+import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.v1.entity.custom.BuyOrNotVoteAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
+import com.goolbitg.api.v1.entity.user.SpendingType;
+import com.goolbitg.api.v1.entity.user.User;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
+import com.goolbitg.api.v1.repository.UserRepository;
 import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
+import com.goolbitg.api.v1.repository.mappers.UserStatCustomMapper;
 import com.goolbitg.api.v1.service.AnalysisService;
 import com.goolbitg.api.v1.service.AnalysisServiceImpl;
+import com.goolbitg.api.v1.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 public class AnalysisServiceMockTest {
@@ -46,6 +56,8 @@ public class AnalysisServiceMockTest {
     @Mock ChallengeGroupRecordRepository groupRecordRepository;
     @Mock ChallengeRecordCustomMapper recordCustomMapper;
     @Mock BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
+    @Mock UserStatCustomMapper userStatCustomMapper;
+    @Mock UserService userService;
 
     @BeforeEach
     void setup() {
@@ -53,7 +65,9 @@ public class AnalysisServiceMockTest {
             recordRepository,
             groupRecordRepository,
             recordCustomMapper,
-            buyOrNotVoteCustomMapper
+            buyOrNotVoteCustomMapper,
+            userStatCustomMapper,
+            userService
         );
     }
 
@@ -252,5 +266,40 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getBuyScore()).isEqualTo(goodCount);
         assertThat(analysis.getNotScore()).isEqualTo(badCount);
         assertThat(analysis.getMessage()).isEqualTo(message);
+    }
+
+    @Test
+    void getSummary_S() {
+        // given
+        final LocalDate today = LocalDate.of(2026, 1, 14);
+        final String userId = "test_id";
+        final Long spendingTypeId = 1L;
+        final SpendingTypeDto spendingType = new SpendingTypeDto();
+        spendingType.setId(spendingTypeId);
+        spendingType.setImageUrl(URI.create("http://testimageurl.com/1"));
+        spendingType.setTitle("test type");
+        final UserDto user = new UserDto();
+        user.setId(userId);
+        user.setNickname("testnickname");
+        user.setSpendingType(spendingType);
+
+        when(userService.getUser(userId)).thenReturn(user);
+        when(userStatCustomMapper.getTotalCountOfSpendingType(spendingTypeId))
+            .thenReturn(30);
+        when(userStatCustomMapper.getRankOfSpendingType(userId, spendingTypeId))
+            .thenReturn(3);
+
+        // when
+        AnalysisReportDtoSummary summary = sut.getSummary(userId, today);
+
+        // then
+        verify(userService).getUser(userId);
+        verify(userStatCustomMapper).getTotalCountOfSpendingType(spendingTypeId);
+        verify(userStatCustomMapper).getRankOfSpendingType(userId, spendingTypeId);
+        assertThat(summary).isNotNull();
+        assertThat(summary.getUsername()).isEqualTo(user.getNickname());
+        assertThat(summary.getPercantage()).isEqualTo(10);
+        assertThat(summary.getImageUrl()).isEqualTo(spendingType.getImageUrl().toString());
+        assertThat(summary.getSpendingType()).isEqualTo(spendingType.getTitle());
     }
 }

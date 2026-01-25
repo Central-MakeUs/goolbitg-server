@@ -2414,10 +2414,12 @@ components:
           properties:
             username:
               type: string
-            type:
+            imageUrl:
               type: string
             percantage:
-              type: number
+              type: integer
+            spendingType:
+              type: string
         completionAnalysis:
           type: object
           properties:

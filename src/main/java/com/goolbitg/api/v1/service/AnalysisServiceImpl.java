@@ -14,6 +14,7 @@ import com.goolbitg.api.model.AnalysisReportDtoCategoryAnalysisScoresInner;
 import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoIndvGroupAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoSummary;
+import com.goolbitg.api.model.UserDto;
 import com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category;
 import com.goolbitg.api.v1.entity.custom.BuyOrNotVoteAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordAggregationCustom;
@@ -22,6 +23,7 @@ import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
 import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
+import com.goolbitg.api.v1.repository.mappers.UserStatCustomMapper;
 import com.goolbitg.api.v1.util.DateUtils;
 import com.goolbitg.api.v1.util.DateUtils.DateRange;
 
@@ -35,11 +37,23 @@ public class AnalysisServiceImpl implements AnalysisService {
     private final ChallengeGroupRecordRepository groupRecordRepository;
     private final ChallengeRecordCustomMapper recordCustomMapper;
     private final BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
+    private final UserStatCustomMapper userStatCustomMapper;
+    private final UserService userService;
 
     @Override
     public AnalysisReportDtoSummary getSummary(String userId, LocalDate date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getSummary'");
+        UserDto user = userService.getUser(userId);
+        final Long spendingTypeId = user.getSpendingType().getId();
+        Integer totalCount = userStatCustomMapper.getTotalCountOfSpendingType(spendingTypeId);
+        Integer rank = userStatCustomMapper.getRankOfSpendingType(userId, spendingTypeId);
+
+        AnalysisReportDtoSummary summary = new AnalysisReportDtoSummary();
+        summary.setImageUrl(user.getSpendingType().getImageUrl().toString());
+        summary.setSpendingType(user.getSpendingType().getTitle());
+        summary.setUsername(user.getNickname());
+        summary.setPercantage((int)((float)rank / totalCount * 100));
+
+        return summary;
     }
 
     @Override

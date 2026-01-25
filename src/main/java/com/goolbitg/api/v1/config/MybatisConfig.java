@@ -11,6 +11,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
+import com.goolbitg.api.v1.repository.mappers.UserStatCustomMapper;
 
 @Configuration
 public class MybatisConfig {
@@ -43,6 +44,10 @@ public class MybatisConfig {
 
     @Bean BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper(SqlSessionTemplate sqlSessionTemplate) throws Exception {
         return sqlSessionTemplate.getMapper(BuyOrNotVoteCustomMapper.class);
+    }
+
+    @Bean UserStatCustomMapper userStatCustomMapper(SqlSessionTemplate sqlSessionTemplate) throws Exception {
+        return sqlSessionTemplate.getMapper(UserStatCustomMapper.class);
     }
 
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goolbitg.api.v1.repository.mappers.UserStatCustomMapper">
+
+  <select id="getRankOfSpendingType" resultType="Integer">
+        select 
+            s.ranking
+        FROM (
+            select
+                u.id as user_id,
+            ROW_NUMBER() over (ORDER BY us.achievement_guage DESC) as ranking
+            from user_stats us
+            join users u on u.id = us.user_id
+            where u.spending_type_id = ${spendingTypeId}
+        ) s
+        where user_id = #{userId};
+  </select>
+
+  <select id="getTotalCountOfSpendingType" resultType="Integer">
+        select
+            count(*) as total_count
+        from user_stats us
+        join users u on u.id = us.user_id
+        where u.spending_type_id = ${spendingTypeId};
+  </select>
+
+</mapper>

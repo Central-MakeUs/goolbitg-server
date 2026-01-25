@@ -15,6 +15,7 @@ import com.goolbitg.api.v1.entity.custom.BuyOrNotVoteAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
 import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
+import com.goolbitg.api.v1.repository.mappers.UserStatCustomMapper;
 
 /**
  * TestController
@@ -25,11 +26,13 @@ public class TestController {
 
     private final ChallengeRecordCustomMapper customMapper;
     private final BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
+    private final UserStatCustomMapper userStatCustomMapper;
 
     @PostMapping("/test")
-    public ResponseEntity<BuyOrNotVoteAggregationCustom> getTest(TestRequest body) {
-        BuyOrNotVoteAggregationCustom result = buyOrNotVoteCustomMapper.aggregateVote("id0001", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1));
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    public ResponseEntity<Integer> getTest(TestRequest body) {
+        // Integer rank = userStatCustomMapper.getRankOfSpendingType("id0005", 5);
+        Integer totalCount = userStatCustomMapper.getTotalCountOfSpendingType(5);
+        return new ResponseEntity<>(totalCount, HttpStatus.OK);
     }
 
     @Data
