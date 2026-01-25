@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper">
+
+  <select id="aggregateVote" resultType="BuyOrNotVoteAggregationCustom">
+    select
+        count(case when bv.vote = 'GOOD' then 1 end) as good_count,
+        count(case when bv.vote = 'BAD' then 1 end) as bad_count
+    from buyornot_votes bv
+    where bv.updated_at between #{startDate} and #{endDate}
+    and bv.writer_id = #{userId};
+  </select>
+
+</mapper>

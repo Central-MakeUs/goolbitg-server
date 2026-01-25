@@ -20,16 +20,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.platform.commons.annotation.Testable;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.goolbitg.api.model.AnalysisReportDtoBuyOrNotAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoCategoryAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoIndvGroupAnalysis;
+import com.goolbitg.api.v1.entity.custom.BuyOrNotVoteAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
+import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
 import com.goolbitg.api.v1.service.AnalysisService;
 import com.goolbitg.api.v1.service.AnalysisServiceImpl;
@@ -41,13 +45,15 @@ public class AnalysisServiceMockTest {
     @Mock ChallengeRecordRepository recordRepository;
     @Mock ChallengeGroupRecordRepository groupRecordRepository;
     @Mock ChallengeRecordCustomMapper recordCustomMapper;
+    @Mock BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
 
     @BeforeEach
     void setup() {
         sut = new AnalysisServiceImpl(
             recordRepository,
             groupRecordRepository,
-            recordCustomMapper
+            recordCustomMapper,
+            buyOrNotVoteCustomMapper
         );
     }
 
@@ -216,5 +222,35 @@ public class AnalysisServiceMockTest {
         assertThat(analysis.getMessage()).contains(message);
         assertThat(analysis.getIndvScore()).isEqualTo(indvScore);
         assertThat(analysis.getGroupScore()).isEqualTo(groupScore);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "3, 1, 살까가 50% 더 높아요!",
+        "0, 2, 말까가 100% 더 높아요!",
+        "2, 2, 의견이 반반이에요!",
+        "0, 0, 투표결과가 없어요!",
+    })
+    void getBuyOrNotAnalysis_S(int goodCount, int badCount, String message) {
+        // given
+        final LocalDate today = LocalDate.of(2026, 1, 14);
+        final LocalDate startOfWeek = LocalDate.of(2026, 1, 12);
+        final LocalDate endOfWeek = LocalDate.of(2026, 1, 18);
+        final String userId = "test_id";
+        final BuyOrNotVoteAggregationCustom aggregation = new BuyOrNotVoteAggregationCustom();
+        aggregation.setGoodCount(goodCount);
+        aggregation.setBadCount(badCount);
+
+        when(buyOrNotVoteCustomMapper.aggregateVote(userId, startOfWeek, endOfWeek))
+            .thenReturn(aggregation);
+
+        // when
+        AnalysisReportDtoBuyOrNotAnalysis analysis = sut.getBuyOrNotAnalysis(userId, today);
+
+        // then
+        verify(buyOrNotVoteCustomMapper).aggregateVote(userId, startOfWeek, endOfWeek);
+        assertThat(analysis.getBuyScore()).isEqualTo(goodCount);
+        assertThat(analysis.getNotScore()).isEqualTo(badCount);
+        assertThat(analysis.getMessage()).isEqualTo(message);
     }
 }

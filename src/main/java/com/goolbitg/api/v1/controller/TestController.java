@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.goolbitg.api.v1.entity.custom.BuyOrNotVoteAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
+import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
 
 /**
@@ -22,10 +24,11 @@ import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
 public class TestController {
 
     private final ChallengeRecordCustomMapper customMapper;
+    private final BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
 
     @PostMapping("/test")
-    public ResponseEntity<List<ChallengeRecordCustom>> getTest(TestRequest body) {
-        List<ChallengeRecordCustom> result = customMapper.findByUserIdAndDateBetween("id0001", LocalDate.of(2025, 12, 15), LocalDate.of(2025, 12, 18));
+    public ResponseEntity<BuyOrNotVoteAggregationCustom> getTest(TestRequest body) {
+        BuyOrNotVoteAggregationCustom result = buyOrNotVoteCustomMapper.aggregateVote("id0001", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

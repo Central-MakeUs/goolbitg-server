@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
 
 @Configuration
@@ -38,6 +39,10 @@ public class MybatisConfig {
 
     @Bean ChallengeRecordCustomMapper challengeRecordCustomMapper(SqlSessionTemplate sqlSessionTemplate) throws Exception {
         return sqlSessionTemplate.getMapper(ChallengeRecordCustomMapper.class);
+    }
+
+    @Bean BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper(SqlSessionTemplate sqlSessionTemplate) throws Exception {
+        return sqlSessionTemplate.getMapper(BuyOrNotVoteCustomMapper.class);
     }
 
 }

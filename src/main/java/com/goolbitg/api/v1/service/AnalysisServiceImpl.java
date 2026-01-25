@@ -15,10 +15,12 @@ import com.goolbitg.api.model.AnalysisReportDtoCompletionAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoIndvGroupAnalysis;
 import com.goolbitg.api.model.AnalysisReportDtoSummary;
 import com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category;
+import com.goolbitg.api.v1.entity.custom.BuyOrNotVoteAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordAggregationCustom;
 import com.goolbitg.api.v1.entity.custom.ChallengeRecordCustom;
 import com.goolbitg.api.v1.repository.ChallengeGroupRecordRepository;
 import com.goolbitg.api.v1.repository.ChallengeRecordRepository;
+import com.goolbitg.api.v1.repository.mappers.BuyOrNotVoteCustomMapper;
 import com.goolbitg.api.v1.repository.mappers.ChallengeRecordCustomMapper;
 import com.goolbitg.api.v1.util.DateUtils;
 import com.goolbitg.api.v1.util.DateUtils.DateRange;
@@ -32,6 +34,7 @@ public class AnalysisServiceImpl implements AnalysisService {
     private final ChallengeRecordRepository recordRepository;
     private final ChallengeGroupRecordRepository groupRecordRepository;
     private final ChallengeRecordCustomMapper recordCustomMapper;
+    private final BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
 
     @Override
     public AnalysisReportDtoSummary getSummary(String userId, LocalDate date) {
@@ -152,7 +155,30 @@ public class AnalysisServiceImpl implements AnalysisService {
 
     @Override
     public AnalysisReportDtoBuyOrNotAnalysis getBuyOrNotAnalysis(String userId, LocalDate date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBuyOrNotAnalysis'");
+        DateRange range = DateUtils.getWeekRangeOfDate(date);
+        BuyOrNotVoteAggregationCustom aggregation = buyOrNotVoteCustomMapper.aggregateVote(userId, range.startDate(), range.endDate());
+
+        var result = new AnalysisReportDtoBuyOrNotAnalysis();
+
+        final int goodCount = aggregation.getGoodCount();
+        final int badCount = aggregation.getBadCount();
+        final int total = goodCount + badCount;
+        final int diff = Math.abs(goodCount - badCount);
+        final int diffPercent = (int)(((float)diff / total) * 100);
+
+        if (goodCount == 0 && badCount == 0) {
+            result.setMessage("투표결과가 없어요!");
+        } else if (goodCount == badCount) {
+            result.setMessage("의견이 반반이에요!");
+        } else if (goodCount > badCount) {
+            result.setMessage(String.format("살까가 %d%% 더 높아요!", diffPercent));
+        } else if (goodCount < badCount) {
+            result.setMessage(String.format("말까가 %d%% 더 높아요!", diffPercent));
+        }
+
+        result.setBuyScore(goodCount);
+        result.setNotScore(badCount);
+
+        return result;
     }
 }
