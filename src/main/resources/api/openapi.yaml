@@ -1789,6 +1789,9 @@ components:
           items:
             type: string
           description: 해시태그 목록
+        category:
+          type: string
+          description: 카테고리
         maxSize:
           type: integer
           minimum: 2
@@ -1819,6 +1822,7 @@ components:
         title: 배달음식 안시켜먹기
         hashtags: [ "배달", "음식" ]
         reward: 5000
+        category: "식비"
         maxSize: 6
         peopleCount: 1
         avgAchieveRatio: 4.5
@@ -2640,6 +2644,7 @@ components:
         hashtags: [ "배달", "음식" ]
         reward: 5000
         maxSize: 6
+        category: 식비
         isHidden: false
     ChallengeGroup_Form_Hidden:
       value:
@@ -2647,6 +2652,7 @@ components:
         hashtags: [ "교통" ]
         reward: 3000
         maxSize: 6
+        category: 교통비
         isHidden: true
         password: 1234
     ChallengeGroup_Form_Modify:
