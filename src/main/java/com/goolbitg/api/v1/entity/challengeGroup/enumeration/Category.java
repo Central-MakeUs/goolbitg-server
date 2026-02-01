@@ -17,4 +17,13 @@ public enum Category {
         return this.koName;
     }
 
+    public static Category of(String koName) {
+        for (Category category: Category.values()) {
+            if (category.getKoName().equals(koName)) {
+                return category;
+            }
+        }
+        return null;
+    }
+
 }

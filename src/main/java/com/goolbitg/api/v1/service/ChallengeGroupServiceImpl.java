@@ -33,6 +33,7 @@ import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecord;
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupRecordId;
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupStats;
 import com.goolbitg.api.v1.entity.challengeGroup.ChallengeGroupStatsId;
+import com.goolbitg.api.v1.entity.challengeGroup.enumeration.Category;
 import com.goolbitg.api.v1.entity.challengeGroup.enumeration.EnrollmentStatus;
 import com.goolbitg.api.v1.entity.user.User;
 import com.goolbitg.api.v1.exception.ChallengeException;
@@ -107,6 +108,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
                 .maxSize(challengeGroupDto.getMaxSize())
                 .reward(challengeGroupDto.getReward())
                 .isHidden(challengeGroupDto.getIsHidden())
+                .category(Category.of(challengeGroupDto.getCategory()))
                 .password(challengeGroupDto.getPassword())
                 .build();
 
@@ -124,6 +126,7 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         result.setReward(create.getReward());
         result.setMaxSize(create.getMaxSize());
         result.setIsHidden(create.isHidden());
+        result.setCategory(create.getCategory().getKoName());
         result.setPeopleCount(create.getPeopleCount());
         result.setAvgAchieveRatio(create.getAvgAchieveRatio());
         result.setMaxAchieveDays(create.getMaxAchieveDays());
