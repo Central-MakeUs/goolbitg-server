@@ -126,7 +126,9 @@ public class ChallengeGroupServiceImpl implements ChallengeGroupService {
         result.setReward(create.getReward());
         result.setMaxSize(create.getMaxSize());
         result.setIsHidden(create.isHidden());
-        result.setCategory(create.getCategory().getKoName());
+        if (create.getCategory() != null) {
+            result.setCategory(create.getCategory().getKoName());
+        }
         result.setPeopleCount(create.getPeopleCount());
         result.setAvgAchieveRatio(create.getAvgAchieveRatio());
         result.setMaxAchieveDays(create.getMaxAchieveDays());

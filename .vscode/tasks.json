@@ -15,6 +15,16 @@
       "type": "shell",
       "command": "swagger-ui-watcher",
       "args": ["src/main/resources/api/openapi.yaml"]
+    },
+    {
+      "label": "Deploy [DEV]",
+      "type": "shell",
+      "command": "./deploy_dev.sh"
+    },
+    {
+      "label": "Deploy [PROD]",
+      "type": "shell",
+      "command": "./deploy_prod.sh"
     }
   ]
 }

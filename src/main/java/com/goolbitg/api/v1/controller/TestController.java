@@ -27,13 +27,13 @@ public class TestController {
     private final ChallengeRecordCustomMapper customMapper;
     private final BuyOrNotVoteCustomMapper buyOrNotVoteCustomMapper;
     private final UserStatCustomMapper userStatCustomMapper;
-
-    @PostMapping("/test")
-    public ResponseEntity<Integer> getTest(TestRequest body) {
-        // Integer rank = userStatCustomMapper.getRankOfSpendingType("id0005", 5);
-        Integer totalCount = userStatCustomMapper.getTotalCountOfSpendingType(5);
-        return new ResponseEntity<>(totalCount, HttpStatus.OK);
-    }
+    //
+    // @PostMapping("/test")
+    // public ResponseEntity<Integer> getTest(TestRequest body) {
+    //     // Integer rank = userStatCustomMapper.getRankOfSpendingType("id0005", 5);
+    //     // Integer totalCount = userStatCustomMapper.getTotalCountOfSpendingType(5);
+    //     return new ResponseEntity<>(totalCount, HttpStatus.OK);
+    // }
 
     @Data
     public static class TestRequest {
