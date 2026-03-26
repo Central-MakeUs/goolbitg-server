@@ -31,6 +31,9 @@ public class ChatMessages {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "buyornot_id")
+    private Long buyOrNotId;
+
     @Column(name = "user_id")
     private String userId;
 
