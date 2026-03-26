@@ -30,7 +30,7 @@ public class ChatService {
     }
 
     public List<ChatMessage> getMessageHistory(Long buyOrNotId, int lastId) {
-        return chatMessageRepository.findAllByIdGreaterThanOrderByIdAsc(buyOrNotId, lastId);
+        return chatMessageRepository.findHistory(buyOrNotId, lastId);
     }
 
 }
