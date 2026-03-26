@@ -6,8 +6,5 @@ CREATE TABLE chat_messages (
     sent_datetime DATETIME
 );
 
-CREATE INDEX chat_messages_idx_sent_datetime
-ON chat_messages (sent_datetime);
-
 CREATE INDEX chat_messages_idx_buyornot_id
 ON chat_messages (buyornot_id);
