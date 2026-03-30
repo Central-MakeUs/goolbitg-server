@@ -32,6 +32,9 @@ public class ChatMessage {
     @Column(name = "user_id")
     private String userId;
 
+    @Column(name = "username")
+    private String username;
+
     @Column(name = "content")
     private String content;
 
