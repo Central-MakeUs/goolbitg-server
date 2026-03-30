@@ -1,6 +1,14 @@
 package com.goolbitg.api.v1.controller;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +20,12 @@ import com.goolbitg.api.model.BuyOrNotDto;
 import com.goolbitg.api.model.BuyOrNotReportRequest;
 import com.goolbitg.api.model.BuyOrNotVoteChangeDto;
 import com.goolbitg.api.model.BuyOrNotVoteDto;
+import com.goolbitg.api.model.ChatMessageDto;
 import com.goolbitg.api.model.PaginatedBuyOrNotDto;
+import com.goolbitg.api.v1.entity.chat.ChatMessage;
 import com.goolbitg.api.v1.security.AuthUtil;
 import com.goolbitg.api.v1.service.BuyOrNotService;
+import com.goolbitg.api.v1.service.ChatService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class BuyOrNotController implements BuyOrNotApi {
 
     private final BuyOrNotService buyOrNotService;
+    private final ChatService chatService;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -84,5 +96,32 @@ public class BuyOrNotController implements BuyOrNotApi {
         buyOrNotService.reportBuyOrNot(userId, postId, buyOrNotReportRequest.getReason());
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    public ResponseEntity<List<ChatMessageDto>> chatHistory(Long postId, Long chatLastId) throws Exception {
+        List<ChatMessage> messageHistory = chatService.getMessageHistory(postId, chatLastId);
+        return ResponseEntity.ok(messageHistory.stream()
+            .map(x -> convert(x))
+            .collect(Collectors.toList()));
+    }
+
+    @Override
+    public ResponseEntity<PaginatedBuyOrNotDto> chatList(String userId, Integer page, Integer size)
+            throws Exception {
+        // TODO Auto-generated method stub
+        return BuyOrNotApi.super.chatList(userId, page, size);
+    }
+
+    private ChatMessageDto convert(ChatMessage chatMessage) {
+        ChatMessageDto dto = new ChatMessageDto();
+        dto.setId(chatMessage.getId().intValue());
+        dto.setUsername(chatMessage.getUsername());
+        dto.setContent(chatMessage.getContent());
+        ZoneOffset offset = ZonedDateTime.now(ZoneId.systemDefault()).getOffset();
+        dto.setSentDateTime(OffsetDateTime.of(chatMessage.getSentDateTime(), offset));
+
+        return dto;
+    }
+
 
 }

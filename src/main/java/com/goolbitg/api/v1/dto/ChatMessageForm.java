@@ -6,6 +6,7 @@ import lombok.Data;
 public class ChatMessageForm {
 
     private String userId;
+    private String username;
     private String content;
 
 

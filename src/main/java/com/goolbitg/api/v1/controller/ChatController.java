@@ -27,7 +27,7 @@ public class ChatController {
         buyOrNotService.getBuyOrNot(buyOrNotId);
 
         ChatMessage chatMessage = 
-            chatService.storeMessage(buyOrNotId, message.getUserId(), message.getContent());
+            chatService.storeMessage(buyOrNotId, message.getUserId(), message.getUsername(), message.getContent());
 
         simpMessagingTemplate.convertAndSend("/topic/chat/" + roomId, chatMessage);
     }

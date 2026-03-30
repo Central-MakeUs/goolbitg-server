@@ -16,10 +16,11 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
 
-    public ChatMessage storeMessage(Long buyOrNotId, String userId, String content) {
+    public ChatMessage storeMessage(Long buyOrNotId, String userId, String username, String content) {
         ChatMessage chatMessage = ChatMessage.builder()
             .buyOrNotId(buyOrNotId)
             .userId(userId)
+            .username(username)
             .content(content)
             .sentDateTime(LocalDateTime.now())
             .build();
@@ -29,7 +30,7 @@ public class ChatService {
         return chatMessage;
     }
 
-    public List<ChatMessage> getMessageHistory(Long buyOrNotId, int lastId) {
+    public List<ChatMessage> getMessageHistory(Long buyOrNotId, Long lastId) {
         return chatMessageRepository.findHistory(buyOrNotId, lastId);
     }
 
