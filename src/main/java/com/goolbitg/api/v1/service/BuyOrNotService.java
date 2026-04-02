@@ -20,5 +20,7 @@ public interface BuyOrNotService {
     BuyOrNotVoteChangeDto voteBuyOrNot(String userId, Long postId, BuyOrNotVoteDto request);
     void reportBuyOrNot(String userId, Long postId, String reason);
     List<BuyOrNotDto> getTimeCompletedBuyOrNots();
+    List<BuyOrNotDto> getChattingBuyOrNots(String userId, Integer page, Integer size);
+    int getTotalChattingBuyOrNots(String userId);
 
 }

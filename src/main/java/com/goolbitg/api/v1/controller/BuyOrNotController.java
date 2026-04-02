@@ -108,8 +108,16 @@ public class BuyOrNotController implements BuyOrNotApi {
     @Override
     public ResponseEntity<PaginatedBuyOrNotDto> chatList(String userId, Integer page, Integer size)
             throws Exception {
-        // TODO Auto-generated method stub
-        return BuyOrNotApi.super.chatList(userId, page, size);
+        List<BuyOrNotDto> chattingBuyOrNots = buyOrNotService.getChattingBuyOrNots(userId, page, size);
+        int totalSize = buyOrNotService.getTotalChattingBuyOrNots(userId);
+        PaginatedBuyOrNotDto paginatedBuyOrNotDto = new PaginatedBuyOrNotDto();
+        paginatedBuyOrNotDto.setPage(page);
+        paginatedBuyOrNotDto.setSize(size);
+        paginatedBuyOrNotDto.setItems(chattingBuyOrNots);
+        paginatedBuyOrNotDto.setTotalSize(totalSize);
+        paginatedBuyOrNotDto.setTotalPages((int)Math.ceil((double)totalSize / size));
+
+        return ResponseEntity.ok(paginatedBuyOrNotDto);
     }
 
     private ChatMessageDto convert(ChatMessage chatMessage) {

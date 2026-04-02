@@ -21,4 +21,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
         @Param("lastId") Long lastId
     );
 
+    @Query("SELECT DISTINCT c.buyOrNotId FROM ChatMessage c WHERE c.userId = :userId")
+    List<Long> findDistinctBuyornotIdByUserId(@Param("userId") String userId);
+
 }

@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.goolbitg.api.v1.exception.AuthException;
 import com.goolbitg.api.v1.exception.BuyOrNotException;
@@ -15,6 +16,7 @@ import com.goolbitg.api.v1.exception.UserException;
 import com.goolbitg.api.v1.repository.BuyOrNotReportRepository;
 import com.goolbitg.api.v1.repository.BuyOrNotRepository;
 import com.goolbitg.api.v1.repository.BuyOrNotVoteRepository;
+import com.goolbitg.api.v1.repository.ChatMessageRepository;
 import com.goolbitg.api.v1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -51,6 +53,8 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
     private UserRepository userRepository;
     @Autowired
     private TimeService timeService;
+    @Autowired
+    private ChatMessageRepository chatMessageRepository;
 
     private Queue<BuyOrNot> timerCache = new LinkedList<>();
     private Set<Long> canceledTimerIdSet = new HashSet<>();
@@ -218,6 +222,23 @@ public class BuyOrNotServiceImpl implements BuyOrNotService {
         }
 
         return result;
+    }
+
+    @Override
+    public List<BuyOrNotDto> getChattingBuyOrNots(String userId, Integer page, Integer size) {
+        List<Long> buyOrNotIds = chatMessageRepository.findDistinctBuyornotIdByUserId(userId);
+        int fromIndex = Math.min(page * size, buyOrNotIds.size());
+        int toIndex = Math.min((page + 1) * size, buyOrNotIds.size());
+        List<Long> pagedIds = buyOrNotIds.subList(fromIndex, toIndex);
+        List<BuyOrNot> buyOrNots = buyOrNotRepository.findAllById(pagedIds);
+        return buyOrNots.stream().map(x -> getBuyOrNotDto(x))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getTotalChattingBuyOrNots(String userId) {
+        List<Long> buyOrNotIds = chatMessageRepository.findDistinctBuyornotIdByUserId(userId);
+        return buyOrNotIds.size();
     }
 
 }
